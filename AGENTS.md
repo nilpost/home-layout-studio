@@ -9,3 +9,5 @@ Run `npm test` before commit/push. Use a private `SENSITIVE_MARKERS` environment
 Serve only the repository root on loopback for browser checks. No dependency installation is required. Test private imports by selecting files from an external private directory; never copy them into a served folder. Preserve original private masters and test undo, label protection and stale correction rejection.
 
 SVG geometry checks cover explicitly semantic linear elements and rectangular fixtures. Unsupported elements and incomplete calibration must remain visible. Never represent a software check as architectural, load-bearing or as-built certification. Hosted ChatGPT follow-up is conditional on a supported host bridge; no direct Project API or deployed backend exists.
+
+Before designing or extending features, read `docs/BACKLOG.md`. Its deployment gates must inform current architecture, especially site-native workflows, private asset references, project authorization and provider-neutral agent contracts. Keep owner-specific hosting requirements in private configuration.

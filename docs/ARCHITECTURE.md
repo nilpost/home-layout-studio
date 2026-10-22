@@ -32,3 +32,7 @@ Use Sign in with ChatGPT (OIDC + PKCE), or supported connector OAuth, to map a v
 No automatic read access to entire ChatGPT conversation backlog, no automatic project detection based solely on ChatGPT login, and no claim of a deployed or installed ChatGPT app.
 
 Host bridge reference: https://developers.openai.com/plugins/reference. Project context: https://learn.chatgpt.com/docs/projects. A bridge function detected in a standalone browser is not evidence of an installed or authorized integration. No MCP server or authentication service is deployed by this repository.
+
+## Development requirements and deployment gates
+
+[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-104 require site-native workflows, private vault-linked assets, an authenticated multi-project portal and Codex/Claude interoperability. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.

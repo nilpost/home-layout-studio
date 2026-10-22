@@ -85,3 +85,7 @@ The Layers controls independently show/hide photo references, comments, furnitur
 **Export JSON** includes embedded private photo copies and all camera/layer settings. Importing that backup restores images on another browser/device; a metadata-only copy without image data is rejected. Import accepts up to 80 MB and 200 photos. Export fails visibly if any image is missing. LocalStorage stores lightweight project metadata; IndexedDB stores photos. Neither is encrypted or a substitute for a private exported backup. Use a dedicated origin and retain original photographs separately. Private images and placement data never belong in this repository, screenshots, test fixtures or public issues.
 
 Correction handoffs include photo-reference metadata, not image bytes. Review the payload before copying/sending; attach selected images privately only when needed.
+
+## Development requirements
+
+See [the backlog and deployment gates](docs/BACKLOG.md) for site-native workflows, private vault-linked asset management, an authenticated project portal and Codex/Claude interoperability. These are planned requirements that must inform development; they are not implemented integrations.
