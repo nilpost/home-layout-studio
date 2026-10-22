@@ -73,3 +73,15 @@ For a correction round trip, review/copy the handoff into a private ChatGPT chat
 Run `npm test`. Set `SENSITIVE_MARKERS` to comma-separated household names, addresses and project identifiers in your private shell when running the checks; never commit that marker list. `tests/history-privacy.mjs` scans reachable history and tracked working files, including old versions. Human review is still required for factual provenance of demo geometry and novel sensitive data. CI checks run after a push, so use the local pre-push hook too: `git config core.hooksPath .githooks`.
 
 The development server must serve this repository folder only. Private resources must be kept outside it. The app has no analytics or application network requests; static hosting still receives ordinary page requests. There is no automatic private backend, ChatGPT login or Project API connection.
+
+## Private photo references
+
+Use **Add reference photos** to import JPEG, PNG or WebP images from your device. Images are resized to a maximum 1600 pixels, re-encoded as JPEG to strip file metadata, and stored in browser IndexedDB. Original files are untouched. Camera points start unassigned; no location or direction is inferred from the image.
+
+Select a thumbnail, choose **Place / aim on plan**, then drag from the camera location towards the view. In Select mode, drag the purple point to move it, or its direction handle to rotate it. Set camera coordinates, direction (clockwise from plan-right), view width and view reach, then use **Apply view changes**. View cones are visual references in SVG units; they are not calibrated optical camera models. **Unplace** preserves the image; **Remove photo** removes its reference and can be undone in the current session.
+
+The Layers controls independently show/hide photo references, comments, furniture, markups and the architectural base. Expand **Architectural layers** for individual imported SVG groups, including initially hidden review archives. Visibility is saved without altering the source master or its geometry checks. On narrow screens, switch between **Photos & comments** and **Tools & layers** while the plan stays visible above.
+
+**Export JSON** includes embedded private photo copies and all camera/layer settings. Importing that backup restores images on another browser/device; a metadata-only copy without image data is rejected. Import accepts up to 80 MB and 200 photos. Export fails visibly if any image is missing. LocalStorage stores lightweight project metadata; IndexedDB stores photos. Neither is encrypted or a substitute for a private exported backup. Use a dedicated origin and retain original photographs separately. Private images and placement data never belong in this repository, screenshots, test fixtures or public issues.
+
+Correction handoffs include photo-reference metadata, not image bytes. Review the payload before copying/sending; attach selected images privately only when needed.

@@ -20,3 +20,5 @@ This is a non-survey editor. Automated checks cover semantic linear centreline c
 SVG is sanitized using a browser DOM parser and a passive element allowlist with removal of event handlers and external URLs, including root attributes. This is a prototype safeguard, not a security certification. The imported SVG is embedded as an image rather than executed as application code.
 
 A restrictive CSP disables connections, external resources, objects and form submission in the standalone app. A future hosted widget may require a separately reviewed CSP. Local storage is readable by other scripts on the same origin: use a dedicated local origin and export private backups.
+
+Photo references are stored in private browser IndexedDB and embedded only in user-requested private JSON exports. Imported raster images are re-encoded to remove metadata; original photos stay external. IndexedDB is same-origin storage, not encryption. Browser resets can lose it. Public privacy gates reject long raster data-URL embeddings as well as image files.
