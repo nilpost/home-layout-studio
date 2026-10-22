@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home Layout Studio</title>
+  <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
+  <link rel="stylesheet" href="src/styles.css" />
+  <script src="src/app.js" defer></script>
+</head>
+<body>
+<div class="shell">
+  <header class="header">
+    <div class="brand"><span class="brand-symbol">▦</span><div><strong>Home Layout Studio</strong><small>Private-first architectural workspace</small></div></div>
+    <div class="header-actions"><span class="chip" id="save-status">Stored locally</span><button class="button ghost" id="new-project">Reset demo</button><button class="button ghost" id="load-project">Import JSON</button><button class="button primary" id="save-project">Export JSON</button></div>
+  </header>
+  <div class="workarea">
+    <aside class="sidebar">
+      <div class="section-label">PROJECT</div>
+      <label for="project-name" class="form-label">Project title</label><input id="project-name" value="Untitled home" maxlength="120" />
+      <div class="muted fine">All changes stay on this device unless you explicitly export or send them.</div>
+      <div class="separator"></div>
+      <div class="section-label">TOOLS</div>
+      <div class="tools" id="tools">
+        <button class="tool active" data-tool="select" title="Select / move annotation"><b>↖</b> Select</button>
+        <button class="tool" data-tool="comment" title="Pin a comment"><b>✎</b> Comment</button>
+        <button class="tool" data-tool="arrow" title="Draw an arrow"><b>↗</b> Arrow</button>
+        <button class="tool" data-tool="rect" title="Highlight an area"><b>▭</b> Markup</button>
+        <button class="tool" data-tool="furniture" title="Add a furniture placeholder"><b>▣</b> Furniture</button>
+      </div>
+      <div class="separator"></div>
+      <div class="section-label">LAYERS</div>
+      <label class="toggle"><input type="checkbox" checked id="show-base" /> Architectural base <span class="locked">LOCKED</span></label>
+      <label class="toggle"><input type="checkbox" checked id="show-furniture" /> Furniture</label>
+      <label class="toggle"><input type="checkbox" checked id="show-markup" /> Markups</label>
+      <label class="toggle"><input type="checkbox" checked id="show-comments" /> Comments</label>
+      <div class="separator"></div>
+      <div class="section-label">SOURCE PLAN</div>
+      <button class="button full" id="load-svg">Import architectural SVG</button>
+      <div class="muted fine">Upload your own local SVG. The public project ships only with an anonymous demonstration plan.</div>
+      <div class="separator"></div>
+      <div class="section-label">SELECTION</div>
+      <div id="selection-props" class="muted fine">Select a markup or furniture item to edit its coordinates.</div>
+    </aside>
+    <main class="main">
+      <div class="main-bar"><div><strong id="document-title">Untitled home</strong><span class="muted"> · <span id="revision-label">v0</span></span></div><div class="bar-actions"><button class="button mini" id="undo" title="Undo">↶</button><button class="button mini" id="redo" title="Redo">↷</button><button class="button mini" id="zoom-out">−</button><span id="zoom-level">100%</span><button class="button mini" id="zoom-in">+</button><button class="button mini" id="fit">Fit</button></div></div>
+      <div id="drawing-shell" class="drawing-shell"><svg id="drawing" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editable floor plan" viewBox="0 0 1000 700"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6" fill="none" stroke="#e55f39" stroke-width="1.5" /></marker></defs><g id="plan-layer"></g><g id="furniture-layer"></g><g id="markup-layer"></g><g id="comment-layer"></g><g id="preview-layer"></g></svg></div>
+      <div class="footer-bar"><span id="tool-status">Select an item or choose a drawing tool.</span><span>Fixed source · Editable overlays · Exportable JSON / SVG</span></div>
+    </main>
+    <aside class="inspector">
+      <div class="inspector-top"><div class="section-label">REVIEW</div><h2>Comments <span id="comment-count">0</span></h2><p class="muted fine">Place a comment pin on the plan. Use an arrow to clarify placement.</p></div>
+      <div id="comment-list" class="comment-list"></div>
+      <div class="send-area"><label class="form-label" for="revision-note">Revision instructions</label><textarea id="revision-note" rows="3" placeholder="Describe what needs to change…"></textarea><button class="button primary full" id="handoff">Send / copy corrections</button><p class="muted fine">In a ChatGPT-hosted app, follow-up can go directly to the conversation. In this standalone editor, the revision text is copied for pasting.</p><div class="two-cols"><button class="button" id="export-svg">Export SVG</button><button class="button" id="validate">Check layout</button></div><div id="message" role="status" aria-live="polite" class="muted fine"></div></div>
+    </aside>
+  </div>
+</div>
+<input type="file" id="project-file" accept=".json,application/json" hidden />
+<input type="file" id="svg-file" accept=".svg,image/svg+xml" hidden />
+<dialog id="comment-dialog"><form method="dialog" class="dialog-content"><h3>Add location comment</h3><label class="form-label" for="comment-text">Correction or observation</label><textarea id="comment-text" rows="4" required maxlength="1500" placeholder="e.g. This should be a sliding door."></textarea><div class="dialog-actions"><button value="cancel" class="button">Cancel</button><button value="save" class="button primary">Save comment</button></div></form></dialog>
+</body>
+</html>

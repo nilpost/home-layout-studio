@@ -1,0 +1,27 @@
+# Explicitly private user information and project materials
+private/
+data/
+user-data/
+backups/
+photos/
+exports/
+*.private.*
+*.secrets.*
+.env
+.env.*
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.heic
+*.svg
+*.json
+!package.json
+# Developer/tool state
+.DS_Store
+node_modules/
+dist/
+coverage/
+*.log

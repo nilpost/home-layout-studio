@@ -1,0 +1,1 @@
+{"name":"home-layout-studio","private":false,"version":"0.1.0","type":"module","description":"Generic local-first SVG layout editor with annotations","scripts":{"test":"node tests/static-check.mjs","serve":"python3 -m http.server 8080"},"license":"MIT"}
