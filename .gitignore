@@ -25,3 +25,12 @@ node_modules/
 dist/
 coverage/
 *.log
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.sqlite
+*.db
+*.key
+*.pem
