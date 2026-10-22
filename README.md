@@ -12,15 +12,15 @@ The initial plan is anonymous demonstration geometry. Use **Import architectural
 
 ## Features
 
-- Locked source SVG and separate editable overlay layers
+- Editable architectural SVG with reviewed revisions and separate overlay layers
 - Furniture placeholders: create, drag, resize through numerical inspector, label, delete
 - Markup arrows and highlighted rectangles
 - Numbered location comments
 - Zoom, undo/redo, project name, revision counter
 - Export SVG for review and a JSON project to preserve state
 - Browser-local autosaving
-- **Send / copy corrections**: in a supported ChatGPT app surface uses `window.openai.sendFollowUpMessage`; standalone copies a structured request to paste in ChatGPT
-- Basic overlay validation; *no claim of survey-grade geometric or structural validation*
+- **Review corrections handoff**: previews exact payload before copying or sending through a supported ChatGPT host bridge; optional source inclusion
+- Schematic geometry checks for semantic linear walls: open ends, duplicate spans, crossings, window/opening joins and fixture intersections; explicit scale calibration. Unsupported geometry is reported.
 
 ## Deployment
 
@@ -56,4 +56,20 @@ Read [SECURITY.md](SECURITY.md). `localStorage` is used for convenience only and
 
 ## Version
 
-Prototype 0.1.0. Public application starter; not deployed or linked to an authenticated ChatGPT project.
+Prototype 0.2.0. Public application starter; not deployed or linked to an authenticated ChatGPT project.
+
+## Architectural corrections
+
+Choose a wall/window segment, edit its start/end coordinates and select **Review coordinate change**, or use **Edit architectural SVG** to revise the fixed source, check the proposal and apply it as an undoable revision. Original dimension labels in `#dimensions` or `.dtext` must be retained. SVG is rendered as a passive image and sanitized on every import/revision.
+
+Walls use `class="wall"` or `class="partition"`; windows use `class="glass"`; door **opening spans** use `data-kind="opening"`. Door leaf/swing artwork is not an opening span. Rectangular fixed fixtures use `class="fixed"`, `class="kitchen"` or `data-kind="fixture"`. Supported geometry: linear M/L/H/V/Z paths, lines, polylines, polygons and rectangles. Curves and transformed semantic elements are reported as unsupported. Checks use a 0.01 SVG-unit tolerance; an open end can be intentional. The engine checks the supplied semantic elements, not every visible feature. Door-swing and wall-thickness clearance need further modeling.
+
+Record one verified source span in SVG units and its measured length in millimetres. Scale is metadata; recording it does not move walls or prove the plan is accurate.
+
+For a correction round trip, review/copy the handoff into a private ChatGPT chat and attach the private JSON export, or opt in to including the source. Ask for `{baseRevision,baseSourceHash,newBaseSvg}` as JSON. **Review ChatGPT correction** rejects a stale revision/source and opens the candidate for checking before application. The source hash is a change detector, not a cryptographic authentication guarantee. No incoming correction is automatically applied.
+
+## Verify before publishing
+
+Run `npm test`. Set `SENSITIVE_MARKERS` to comma-separated household names, addresses and project identifiers in your private shell when running the checks; never commit that marker list. `tests/history-privacy.mjs` scans reachable history and tracked working files, including old versions. Human review is still required for factual provenance of demo geometry and novel sensitive data. CI checks run after a push, so use the local pre-push hook too: `git config core.hooksPath .githooks`.
+
+The development server must serve this repository folder only. Private resources must be kept outside it. The app has no analytics or application network requests; static hosting still receives ordinary page requests. There is no automatic private backend, ChatGPT login or Project API connection.

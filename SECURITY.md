@@ -15,6 +15,8 @@ This codebase is public. Do **not** commit or upload personal residence plans, i
 
 ## MVP limitations
 
-This is a non-survey editor. Automated checks cover overlay bounds and basic dimensions only; connected-wall topology and door-swing clashes need a proper geometry engine before those checks can be trusted.
+This is a non-survey editor. Automated checks cover semantic linear centreline connectivity, duplicate/intersecting walls, window/opening junctions, rectangular fixture intersections and overlay bounds. Curves, transforms, wall thickness and door swings are not certified. An uncalibrated drawing is flagged; scale metadata alone does not verify as-built measurements.
 
-SVG is sanitized using a browser DOM parser and an allowlist-oriented removal of active content/URLs. This is a prototype safeguard, not a security certification. The imported SVG is embedded as an image rather than executed as application code.
+SVG is sanitized using a browser DOM parser and a passive element allowlist with removal of event handlers and external URLs, including root attributes. This is a prototype safeguard, not a security certification. The imported SVG is embedded as an image rather than executed as application code.
+
+A restrictive CSP disables connections, external resources, objects and form submission in the standalone app. A future hosted widget may require a separately reviewed CSP. Local storage is readable by other scripts on the same origin: use a dedicated local origin and export private backups.

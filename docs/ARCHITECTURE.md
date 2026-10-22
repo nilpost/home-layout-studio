@@ -23,10 +23,12 @@ Use Sign in with ChatGPT (OIDC + PKCE), or supported connector OAuth, to map a v
 ## 5. Roadmap
 
 - Phase 0 (in archive): generic static frontend, local private import/export, annotation and manual handoff.
-- Phase 1: precision geometry engine and coordinate scale metadata; collision and wall topology checks with tests.
+- Phase 1 (implemented): schematic linear geometry engine and scale metadata; topology, intersections and rectangular fixture checks with regression tests. Source editing and revision-bound correction imports require explicit review.
 - Phase 2: authenticated private object storage, revision history, encrypted backups.
 - Phase 3: ChatGPT plugin/MCP integration, explicit user-initiated state handoff; verified project mapping via app-owned authorization.
 
 ## 6. Non-goals
 
 No automatic read access to entire ChatGPT conversation backlog, no automatic project detection based solely on ChatGPT login, and no claim of a deployed or installed ChatGPT app.
+
+Host bridge reference: https://developers.openai.com/plugins/reference. Project context: https://learn.chatgpt.com/docs/projects. A bridge function detected in a standalone browser is not evidence of an installed or authorized integration. No MCP server or authentication service is deployed by this repository.
