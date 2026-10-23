@@ -39,7 +39,8 @@ selectedRefs,instructions,payload})` creates a detached JSON object containing:
 
 The optional `payload` copies only `project`, `comments`, `changeLog`, `items`,
 `objectSettings`, `originalReference`, `photoReferences`, `notes`, `calibration`,
-`checks`, `consistencyReports`, `baseSvg` and `assets`. Source/media references retain
+`checks`, `consistencyReports`, `baseSvg`, `assets`, `measurementAnchors` and
+`measurementTolerancePercent`. Source/media references retain
 their supplied stable IDs and metadata; the contract does not invent asset identities
 or promise a complete asset schema. The local version 1 asset format is documented in [ASSET_RECORDS.md](ASSET_RECORDS.md); remote attachment access is not included. Private content belongs outside public repositories,
 logs, builds and fabricated test fixtures.
@@ -84,3 +85,8 @@ Fabricated Codex-labelled and Claude-labelled fixtures verify equivalent local p
 rejection and metadata preservation. This is a manual contract compatibility test;
 reciprocal authenticated live agent execution, complete asset schemas and end-to-end
 provider integration remain unverified HLS-104 deployment gates.
+
+
+Measurement bindings follow [MEASUREMENT_ANCHORS.md](MEASUREMENT_ANCHORS.md). They are
+project-scoped evidence associations, not authority to move walls or verify units. A source
+replacement retains them as unknown until explicitly reviewed against the new source.

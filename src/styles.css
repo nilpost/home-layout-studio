@@ -27,3 +27,5 @@
 .sidebar,#layer-item-list{overflow-anchor:none}
 
 #assets-dialog label{display:block;font-size:12px;margin-block:8px}#asset-select{width:100%;padding:9px;border:1px solid var(--stroke);border-radius:7px}.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}#assets-dialog pre{overflow-wrap:anywhere;white-space:pre-wrap}#asset-import-preview[hidden]{display:none}@media(max-width:600px){.asset-grid{grid-template-columns:1fr}}
+
+#measurement-dialog label{display:block;font-size:12px;margin:12px 0 5px}#measurement-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#measurement-preview{white-space:pre-wrap;overflow-wrap:anywhere}

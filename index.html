@@ -5,18 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
-  <link rel="stylesheet" href="src/styles.css?v=0.10.1" />
+  <link rel="stylesheet" href="src/styles.css?v=0.11.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
-  <script src="src/geometry.js?v=0.10.1" defer></script>
-  <script src="src/review-history.js?v=0.10.1" defer></script>
-  <script src="src/original-overlay.js?v=0.10.1" defer></script>
-  <script src="src/layer-items.js?v=0.10.1" defer></script>
-  <script src="src/consistency-review.js?v=0.10.1" defer></script>
-  <script src="src/correction-contract.js?v=0.10.1" defer></script>
-  <script src="src/item-adjustments.js?v=0.10.1" defer></script>
-  <script src="src/geometry-coverage.js?v=0.10.1" defer></script>
-  <script src="src/asset-records.js?v=0.10.1" defer></script>
-  <script src="src/app.js?v=0.10.1" defer></script>
+  <script src="src/geometry.js?v=0.11.0" defer></script>
+  <script src="src/review-history.js?v=0.11.0" defer></script>
+  <script src="src/original-overlay.js?v=0.11.0" defer></script>
+  <script src="src/layer-items.js?v=0.11.0" defer></script>
+  <script src="src/consistency-review.js?v=0.11.0" defer></script>
+  <script src="src/correction-contract.js?v=0.11.0" defer></script>
+  <script src="src/item-adjustments.js?v=0.11.0" defer></script>
+  <script src="src/geometry-coverage.js?v=0.11.0" defer></script>
+  <script src="src/asset-records.js?v=0.11.0" defer></script>
+  <script src="src/measurement-anchors.js?v=0.11.0" defer></script>
+  <script src="src/app.js?v=0.11.0" defer></script>
 </head>
 <body>
 <div class="shell" data-panel="photos">
@@ -56,7 +57,7 @@
       <div class="muted fine">Upload your own local SVG. The public project ships only with an anonymous demonstration plan.</div>
       <div class="separator"></div>
       <label for="architecture-segment">Wall / window segment</label><select id="architecture-segment"></select><div class="prop-grid"><label>Start X<input type="number" step="any" id="segment-ax" /></label><label>Start Y<input type="number" step="any" id="segment-ay" /></label><label>End X<input type="number" step="any" id="segment-bx" /></label><label>End Y<input type="number" step="any" id="segment-by" /></label></div><button class="button full" id="propose-segment">Review coordinate change</button><button class="button full" id="edit-source">Edit architectural SVG</button><button class="button full" id="load-correction">Review agent correction</button>
-      <div class="section-label">SCALE CALIBRATION</div><label>Known span (SVG units)<input type="number" id="scale-units" min="0.001" step="any" /></label><label>Measured length (mm)<input type="number" id="scale-mm" min="0.001" step="any" /></label><button class="button full" id="save-calibration">Record scale</button><p id="scale-details" class="fine muted">Record a known span from the source plan. No scale is assumed.</p>
+      <button class="button full" id="measure-source-spans">Measure source spans</button><p class="fine muted">Bind source dimensions to explicit segment endpoints. No automatic geometry correction.</p><div class="section-label">SCALE CALIBRATION</div><label>Known span (SVG units)<input type="number" id="scale-units" min="0.001" step="any" /></label><label>Measured length (mm)<input type="number" id="scale-mm" min="0.001" step="any" /></label><button class="button full" id="save-calibration">Record scale</button><p id="scale-details" class="fine muted">Record a known span from the source plan. No scale is assumed.</p>
       <div class="section-label">SELECTION</div>
       <div id="selection-props" class="muted fine">Select a markup or furniture item to edit its coordinates.</div>
     </aside>
@@ -87,5 +88,6 @@
 <dialog id="change-log-dialog" class="wide-dialog"><h2>Project change history</h2><div id="change-log-list"></div><button class="button" id="close-change-log">Close</button></dialog>
 <input type="file" id="asset-import-file" accept=".json,application/json" hidden />
 <dialog id="assets-dialog" class="wide-dialog"><h2>Private project assets</h2><p class="fine muted">Local records only. Knowledge references are read-only metadata; no vault access, source fetching or write-back is connected.</p><label for="asset-select">Saved assets</label><select id="asset-select"></select><div class="dialog-actions"><button class="button" id="asset-new">New asset</button><button class="button" id="asset-import">Import private asset JSON</button><button class="button" id="asset-export">Export private asset JSON</button></div><div id="asset-form"><div class="asset-grid"><label>Asset name<input type="text" id="asset-name" maxlength="160" /></label><label>Room / zone label<input type="text" id="asset-room" maxlength="160" /></label><label>Manufacturer<input type="text" id="asset-manufacturer" maxlength="240" /></label><label>Model<input type="text" id="asset-model" maxlength="240" /></label></div><label>Owner notes<textarea id="asset-notes" rows="3" maxlength="6000"></textarea></label><p id="asset-linked" class="fine"></p><div class="dialog-actions"><button class="button" id="asset-link-selection">Add selected layout items</button><button class="button" id="asset-clear-links">Clear draft links</button></div><details><summary>Field provenance and read-only references</summary><pre id="asset-provenance"></pre></details><div class="dialog-actions"><button class="button" id="asset-delete">Delete asset</button><button class="button" id="asset-cancel">Cancel draft</button><button class="button primary" id="asset-save">Save asset</button></div></div><section id="asset-import-preview" hidden><h3>Review asset import</h3><p id="asset-import-summary"></p><pre id="asset-import-findings"></pre><div class="dialog-actions"><button class="button" id="asset-import-cancel">Cancel import</button><button class="button primary" id="asset-import-apply">Apply reviewed asset import</button></div></section><p id="asset-message" role="status" aria-live="polite"></p><div class="dialog-actions"><button class="button" id="assets-close">Close</button></div></dialog>
+<dialog id="measurement-dialog" class="wide-dialog"><h2>Source-anchored measurements</h2><p class="fine muted">Select a declared source dimension and two exact segment endpoints. This user-declared association does not verify source units, calibration, room boundaries or physical construction. Source edits require re-confirming bindings.</p><label for="measurement-binding">Saved bindings</label><select id="measurement-binding"></select><label for="measurement-dimension">Source dimension</label><select id="measurement-dimension"></select><label for="measurement-start">Start endpoint</label><select id="measurement-start"></select><label for="measurement-end">End endpoint</label><select id="measurement-end"></select><label for="measurement-tolerance">Project review tolerance (%)</label><input type="number" id="measurement-tolerance" min="0" max="100" step="any" /><p class="fine muted">A review threshold chosen for this project, not a construction allowance. No default is assumed.</p><pre id="measurement-preview">Preview before saving. Coordinates and relationships remain unchanged.</pre><p id="measurement-message" role="status"></p><div class="dialog-actions"><button class="button" id="measurement-remove">Remove binding</button><button class="button" id="measurement-cancel">Cancel preview</button><button class="button" id="measurement-propose">Preview anchored span</button><button class="button primary" id="measurement-save" disabled>Save reviewed binding</button><button class="button" id="measurement-close">Close</button></div></dialog>
 </body>
 </html>

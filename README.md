@@ -193,3 +193,15 @@ reviews now stop cleanly when browser metadata storage fails. Prior state and hi
 remain intact for retry; an unsaved indicator stays visible for lightweight view-setting
 writes until storage succeeds. A display refresh error after a successful save cannot
 roll in-memory state behind the saved project. Export remains available for recovery.
+
+
+## Version 0.11.0
+
+Measure source spans lets you associate a declared source dimension with two explicit
+segment endpoints, preview the measured/expected difference and save a project-specific
+review threshold. The association is reversible, survives private backups and manual
+handoffs, and becomes unknown after source changes until reviewed again. Provisional
+units/calibration never produce a verified pass. This checks selected endpoint spans,
+not dimension chains, rooms, door relationships or construction. See
+[measurement bindings](docs/MEASUREMENT_ANCHORS.md). Original geometry and labels are
+unchanged. Checker 1.2 retains older saved reports.

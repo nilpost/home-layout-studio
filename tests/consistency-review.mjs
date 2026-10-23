@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import '../src/geometry.js';
 import '../src/consistency-review.js';
+import '../src/measurement-anchors.js';
 const R=globalThis.ConsistencyReview,G=globalThis.LayoutGeometry;
 const square=[[[0,0],[100,0]],[[100,0],[100,100]],[[100,100],[0,100]],[[0,100],[0,0]]].map(([a,b],i)=>({id:'wall-'+i,kind:'wall',a,b}));
 const dimension={id:'dimension-1',a:[0,0],b:[100,0],value:100,unit:'mm',unitStatus:'verified'};
@@ -53,7 +54,7 @@ for(const mutate of [
  r=>r.extra='untrusted',r=>r.projectId='',r=>r.findings[0].extra='untrusted',r=>r.findings[0].id='forged',
  r=>r.findings[0].measured=Infinity,r=>r.findings[0].evidence=['x'.repeat(2001)],r=>r.findings.push(r.findings[0]),
  r=>r.coverage[2].status='pass',r=>r.coverage[0].detail='certified',r=>r.status='pass',r=>r.findings[0].severity='error',
- r=>r.findings[0].affectedIds=['x'.repeat(201)],r=>r.stateToken={},r=>r.revision='x'.repeat(201)
+ r=>r.findings[0].affectedIds=['x'.repeat(301)],r=>r.stateToken={},r=>r.revision='x'.repeat(201)
 ]){const bad=structuredClone(first);mutate(bad);assert.throws(()=>R.validateReports([bad]));}
 assert.throws(()=>R.validateReports(Array(51).fill(first)));
 assert.throws(()=>R.createReport({...options,geometryReport:{}}));
@@ -92,5 +93,42 @@ assert.equal(shortened.findings.find(f=>f.code.startsWith('unsupported:')).evide
 assert.equal(shortened.findings.some(f=>f.code==='review-incomplete'),true);
 assert.equal(shortened.coverage[0].status,'unknown');assert.equal(shortened.coverage[1].status,'unknown');
 const invalidComplete=structuredClone(large);invalidComplete.coverage[1].status='pass';assert.throws(()=>R.validateReports([invalidComplete]));
-const previousVersion=structuredClone(first);previousVersion.checkerVersion='schematic-1.0.0';assert.deepEqual(R.validateReports([previousVersion]),[previousVersion]);
-console.log('PASS: bounded saved reviews, strict imports, honest coverage, measurement evidence, stable comparisons and revision/source/state staleness.');
+const previousVersion=structuredClone(first);previousVersion.checkerVersion='schematic-1.0.0';previousVersion.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';assert.deepEqual(R.validateReports([previousVersion]),[previousVersion]);
+const A=globalThis.MeasurementAnchors;
+const binding=A.createBinding({id:'synthetic-anchor',projectId:options.projectId,dimensionId:dimension.id,start:{segmentId:square[0].id,endpoint:'a'},end:{segmentId:square[0].id,endpoint:'b'},sourceHash:options.sourceHash});
+const anchoredInput={anchors:[binding],projectId:options.projectId,segments:square,dimensions:[dimension],calibration:{drawingUnits:1,realMillimetres:1,status:'verified'},tolerancePercent:1,sourceHash:options.sourceHash};
+const anchoredRaw=A.review(anchoredInput),anchored=R.createReport({...options,anchoredReview:anchoredRaw});
+assert.equal(anchored.checkerVersion,'schematic-1.2.0');
+assert.deepEqual(anchored.anchoredReview,{checked:1,total:1,status:'pass'});
+assert.equal(anchored.coverage[2].status,'pass');assert.match(anchored.coverage[2].detail,/endpoint spans only/);assert.match(anchored.coverage[2].detail,/chains.*not modeled/);
+assert.equal(anchored.status,'unknown','Passing endpoint spans do not certify the full project');
+const anchorFinding=anchored.findings.find(f=>f.code==='anchor:synthetic-anchor');
+assert.equal(anchorFinding.measured,100);assert.equal(anchorFinding.expected,100);assert.ok(anchorFinding.affectedIds.includes(dimension.id));
+assert.equal(JSON.parse(anchorFinding.evidence[1]).bindingSourceHash,options.sourceHash);
+const mismatch=R.createReport({...options,anchoredReview:A.review({...anchoredInput,dimensions:[{...dimension,value:80}]})});
+assert.equal(mismatch.coverage[2].status,'fail');assert.equal(mismatch.findings.find(f=>f.id===anchorFinding.id).status,'fail','Anchor identity survives original checker code/status changes');
+assert.ok(R.compareReports(anchored,mismatch).changed.includes(anchorFinding.id));
+for(const patch of [{segments:[]},{sourceHash:'fabricated-new-source'},{tolerancePercent:undefined},{calibration:{drawingUnits:1,realMillimetres:1,status:'manual'}},{dimensions:[{...dimension,unit:null}]}]){
+ const report=R.createReport({...options,anchoredReview:A.review({...anchoredInput,...patch})});assert.equal(report.coverage[2].status,'unknown');assert.equal(report.findings.find(f=>f.code==='anchor:synthetic-anchor').status,'unknown');assert.equal(report.anchoredReview.checked,0);assert.deepEqual(R.validateReports([report]),[report]);
+}
+const unusualUnit=R.createReport({...options,anchoredReview:A.review({...anchoredInput,dimensions:[{...dimension,unit:'unsupported-printed-unit-description'}]})});assert.equal(unusualUnit.coverage[2].status,'unknown');assert.equal(unusualUnit.findings.find(f=>f.code==='anchor:synthetic-anchor').unit,null);assert.ok(unusualUnit.findings.some(f=>f.code==='review-incomplete'));
+const unbound=R.createReport({...options,anchoredReview:A.review({...anchoredInput,dimensions:[dimension,{...dimension,id:'synthetic-unbound'}]})});
+assert.equal(unbound.coverage[2].status,'unknown','Bound subset pass cannot hide unbound source dimensions');assert.equal(unbound.anchoredReview.status,'unknown');
+assert.ok(unbound.findings.find(f=>f.code==='anchor-coverage-unbound').affectedIds.includes('synthetic-unbound'));
+const none=R.createReport({...options,anchoredReview:A.review({...anchoredInput,anchors:[]})});assert.equal(none.coverage[2].status,'unknown');assert.equal(none.anchoredReview.checked,0);
+const longId='a'.repeat(300),longBinding=A.createBinding({id:longId,projectId:options.projectId,dimensionId:dimension.id,start:binding.start,end:binding.end,sourceHash:options.sourceHash});
+
+
+const longReport=R.createReport({...options,anchoredReview:A.review({...anchoredInput,anchors:[longBinding]})});assert.ok(longReport.findings.some(f=>f.code==='anchor:'+longId&&f.affectedIds.includes(longId)));
+const manyAnchors=Array.from({length:5000},(_,i)=>({...anchoredRaw.findings[0],anchorId:'synthetic-anchor-'+i,affectedIds:['synthetic-anchor-'+i,dimension.id,square[0].id]}));
+const anchoredLarge=R.createReport({...largeOptions,anchoredReview:{...anchoredRaw,findings:manyAnchors,total:5000,checked:5000,coverage:{bindings:5000,comparisons:5000,verifiedComparisons:5000,unknown:0,unboundDimensions:[]}}});
+assert.ok(anchoredLarge.findings.length<=5000);assert.equal(anchoredLarge.coverage[2].status,'unknown');assert.ok(anchoredLarge.findings.find(f=>f.code==='review-incomplete').evidence.some(e=>e.includes('Anchored endpoint results')));
+assert.deepEqual(R.createReport({...largeOptions,anchoredReview:{...anchoredRaw,findings:manyAnchors,total:5000,checked:5000,coverage:{bindings:5000,comparisons:5000,verifiedComparisons:5000,unknown:0,unboundDimensions:[]}}}),anchoredLarge);
+const evidenceLong=R.createReport({...options,anchoredReview:{...anchoredRaw,findings:[{...anchoredRaw.findings[0],evidence:{...anchoredRaw.findings[0].evidence,note:'x'.repeat(3000)}}]}});assert.equal(evidenceLong.coverage[2].status,'unknown');assert.ok(evidenceLong.findings.some(f=>f.code==='review-incomplete'));
+assert.throws(()=>R.createReport({...options,anchoredReview:{...anchoredRaw,checked:0}}));
+assert.throws(()=>R.createReport({...options,anchoredReview:{...anchoredRaw,findings:[{...anchoredRaw.findings[0],extra:'untrusted'}]}}));
+const forged=structuredClone(unbound);forged.anchoredReview.status='pass';forged.coverage[2].status='pass';assert.throws(()=>R.validateReports([forged]));
+const dropped=structuredClone(anchored);dropped.findings=dropped.findings.filter(f=>!f.code.startsWith('anchor:'));assert.throws(()=>R.validateReports([dropped]));
+const previousMinor=structuredClone(previousVersion);previousMinor.checkerVersion='schematic-1.1.0';assert.deepEqual(R.validateReports([previousMinor]),[previousMinor]);
+const legacyAnchored=structuredClone(anchored);legacyAnchored.checkerVersion='schematic-1.1.0';assert.throws(()=>R.validateReports([legacyAnchored]));
+console.log('PASS: bounded saved reviews, strict imports, honest coverage, stable anchor comparisons, source evidence, missing bindings and legacy checker compatibility.');

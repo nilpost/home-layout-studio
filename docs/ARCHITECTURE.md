@@ -169,3 +169,20 @@ their pre-drag state. Imports, history navigation, reset, migrations and report 
 also check writes. Lightweight view settings remain in memory with a sticky unsaved
 indicator on failure. Rendering after a successful write is separate from rollback, so
 a refresh exception does not create contradictory in-memory and persisted versions.
+
+
+## Source-anchored endpoint spans
+
+Private `measurementAnchors` records reference a declared dimension and two stable
+segment endpoints, with project identity and a source hash at explicit association.
+`measurementTolerancePercent` is nullable until the user chooses a review threshold.
+Neither field changes geometry, printed dimensions, source units or calibration status.
+The [binding contract](MEASUREMENT_ANCHORS.md) defines validation and unknown states.
+
+The UI previews exact choices before a state-guarded, undoable save. Source changes make
+bindings unknown until re-confirmed; missing references persist as findings. Metadata
+with unverified units or provisional/manual calibration cannot produce pass/fail. The
+checker does not decide physical truth. Endpoint-only coverage is separate from unmodeled
+chains, rooms and hosted openings. Private backups and manual correction handoffs preserve
+bindings/tolerance; full source replacement is refused while bindings remain. Checker1.2
+retains older report formats, including their original unchecked coverage statements.

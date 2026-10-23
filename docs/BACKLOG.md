@@ -263,3 +263,21 @@ acceptance for transactional edits, imports, history navigation, drags, migratio
 and review recording. Display refresh failures after persistence retain committed state.
 This strengthens HLS-101 backup/persistence integrity without claiming remote storage
 or eliminating browser quota limits.
+
+
+## Verified development progress — 2026-10-24, v0.11.0
+
+HLS-106 now supports explicit source-dimension bindings to stable segment endpoints,
+measured/declared comparison, a user-chosen project tolerance, readable preview,
+reviewed save/cancel and reversible removal. Source hash changes invalidate verification
+until the binding is explicitly reviewed again. Missing/duplicate geometry, absent
+tolerance, unsupported units and provisional calibration remain unknown. Source facts
+are not marked verified by this UI. Checks can pass/fail only from verified input metadata
+and an explicit tolerance; numerical previews may still be shown provisionally.
+
+Bindings, tolerance and evidence travel in private backups/provider handoffs. Full SVG
+replacement refuses active bindings to avoid accidentally reusing endpoint identities.
+Checker 1.2 reports selected-endpoint coverage separately, keeps unbound dimensions
+unknown, and retains checker1.0/1.1 reports. [Binding format](MEASUREMENT_ANCHORS.md).
+This is a partial endpoint-span delivery; chains/totals, axes/levels, rooms, hosted doors,
+physical calibration, source tracing and professional/regulatory review remain open.
