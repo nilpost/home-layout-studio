@@ -89,3 +89,15 @@ Correction handoffs include photo-reference metadata, not image bytes. Review th
 ## Development requirements
 
 See [the backlog and deployment gates](docs/BACKLOG.md) for site-native workflows, private vault-linked asset management, an authenticated project portal and Codex/Claude interoperability. These are planned requirements that must inform development; they are not implemented integrations.
+
+## Comment review and change history
+
+Cancel closes a new-comment dialog immediately, including when the required text is empty. Save still requires text. Cancelled drafts create no comment, revision or change record.
+
+Comments are **Open** (orange) or **Completed** (gray). Use the All/Open/Completed filter to show the review work you need. Completed comments remain in the project and can be reopened; prior resolutions remain in history.
+
+When reviewing an architectural source revision, select the comments it addresses and enter a change summary. Applying the proposal links those comments to the resulting project revision and records the changed element IDs with before/after SVG. Completion is atomic with the source edit and participates in undo/redo. For work already performed or non-architectural changes, open a comment's Review button and record a resolution note. Such manual records are explicitly distinguished from architectural diffs.
+
+**View change history** shows chronological change summaries, linked comments, timestamps and affected source elements. History and resolutions are included in private project JSON and survive export/import. Historical baselines should be imported with provenance; do not automatically mark old comments complete just because of their age or number. A completed comment means its documented drawing/task change is recorded, not that physical measurements are certified. Note approximate geometry and pending physical verification in its resolution.
+
+Correction JSON may include `resolvedCommentIds` and `changeSummary` alongside `baseRevision`, `baseSourceHash` and `newBaseSvg`; these preselect a review proposal and never bypass review. Handoff previews include history metadata; before/after source fragments are included only when source inclusion is selected.
