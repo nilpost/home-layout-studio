@@ -1,6 +1,6 @@
 # Development backlog and deployment gates
 
-These requirements were accepted on 2026-10-22. They must inform development now and
+These requirements were accepted on 2026-10-22, with collaboration added on 2026-10-23. They must inform development now and
 be reviewed before production deployment. They are planned work, not delivered features.
 This document is the canonical requirements backlog; private deployment configuration
 and household datasets remain outside this repository. Repository issues, if introduced,
@@ -100,9 +100,39 @@ Acceptance criteria:
 Consider during development: keep tool contracts and correction semantics shared, with
 explicit capability discovery and project-scoped authorization in each adapter.
 
+## HLS-105 — Invite collaborators by email
+
+Status: planned · Priority: design now; required before deployment
+Depends on: HLS-103 authenticated project portal and project authorization.
+
+A project owner can invite another person by email to collaborate on a specific private
+project, with access managed directly from the site.
+
+Acceptance criteria:
+- Provide a Share / Invite screen: enter an email address, select viewer or editor access,
+  review the project and permissions, and send an invitation. Only owners manage sharing.
+- Require sign-in and verified ownership of the invited email before accepting an invitation.
+  Use expiring, single-use invitations; support pending/accepted/expired/revoked states,
+  resending and cancellation without creating duplicate memberships.
+- Let owners inspect members, change roles and revoke access. Enforce permissions server-side
+  for the project and every plan, photo, original PDF, asset, attachment, revision and export.
+  Revocation must prevent subsequent requests and invalidate outstanding attachment links.
+- Limit invitations to the selected project. Email messages must not contain private plans,
+  photographs, annotations or chat transcripts; recipients see project content only after
+  accepting authorized access. Keep recipient addresses and invitation tokens out of public
+  code, builds and logs. Sending invitations must be an explicit owner action in the site.
+- Attribute edits, comments and resolutions to a collaborator and timestamp in project history.
+  Detect concurrent or stale edits and offer conflict review without silently overwriting work;
+  preserve reversible revisions. Do not require real-time co-editing for the first release.
+- Test owner/editor/viewer permissions, wrong-account acceptance, expired/reused/revoked
+  invitations, cross-project access denial, revocation and conflicting edits end to end.
+
+Consider during development: model project membership, roles and invitation lifecycle now;
+sharing a project must not grant access to the owner's entire vault or ChatGPT account.
+
 ## Deployment review
 
-Before deployment, review HLS-101 through HLS-104 and record evidence or an explicit
+Before deployment, review HLS-101 through HLS-105 and record evidence or an explicit
 user-approved deferral for every acceptance criterion. Begin with the shared data model,
 private storage/authorization design and agent contracts because all four requirements
 rely on them. This backlog does not authorize a deployment, DNS change or new access grant.

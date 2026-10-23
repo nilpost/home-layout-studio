@@ -35,7 +35,7 @@ Host bridge reference: https://developers.openai.com/plugins/reference. Project 
 
 ## Development requirements and deployment gates
 
-[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-104 require site-native workflows, private vault-linked assets, an authenticated multi-project portal and Codex/Claude interoperability. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
+[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-105 require site-native workflows, private vault-linked assets, an authenticated multi-project portal, Codex/Claude interoperability and email-invited project collaboration. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
 
 ## Original reference layer
 
