@@ -6,7 +6,10 @@ This repository is deliberately generic. The editor owns its anonymous starting 
 
 ## 2. Private apartment data
 
-Store externally, e.g. local encrypted drive or an authenticated private backend. Authoritative project format: `{schemaVersion,name,revision,baseSvg,viewBox,items,comments,nextId,note}`.
+Store externally, e.g. local encrypted drive or an authenticated private backend. The private project JSON retains source, items, comments, photos/original references,
+object settings, calibration, reversible change records and saved consistency reports.
+`projectId` identifies a document; `stateToken` identifies a committed state independently
+of the display revision. Legacy imports receive identities without changing original files.
 
 The source PDF, site survey photos, dimensioned fixed-wall SVG, and annotated exports must not be added to this public codebase. One-time transfer to the ChatGPT Project can be done via user-uploaded files, subject to normal ChatGPT project/file limits.
 
@@ -18,7 +21,7 @@ Choose Work within that project for repo and architecture tasks. In ChatGPT-host
 
 ## 4. Authentication, future phase
 
-Use Sign in with ChatGPT (OIDC + PKCE), or supported connector OAuth, to map a verified user to a server-side project ID. OpenAI identity scopes do not grant access to chats or Projects. Server-owned data access and ACLs are mandatory. Do not hardcode usernames, emails, addresses, bearer tokens, project IDs, or API keys into frontend bundles.
+Select and verify an identity provider before implementation; none is configured. Map verified identity to server-side project membership. A product login must not imply access to provider chats or Projects. Server-owned data access and ACLs are mandatory. Do not hardcode usernames, emails, addresses, bearer tokens, project IDs, or API keys into frontend bundles.
 
 ## 5. Roadmap
 
@@ -110,3 +113,32 @@ completed only when its requested correction is implemented and checked; retain 
 or unresolved comments as open. Completed pins are gray. Existing completion history
 must survive backup/restore. Site-native review initiation and provider-neutral handoffs
 remain governed by HLS-101 and HLS-104; no notification service is deployed.
+
+## Reviewed operations and evidence
+
+See [AGENT_CONTRACT.md](AGENT_CONTRACT.md) for the versioned manual correction format
+and [WORKFLOWS.md](WORKFLOWS.md) for capability boundaries. All providers use the same
+source sanitization, stale identity checks, label/lock checks and explicit review.
+Identity metadata is a concurrency guard, not authentication or authorization.
+
+Single-overlay adjustment proposals are pure, detached before/after records. Preview
+uses only the transient SVG layer; Apply rechecks project/state/item, locks and effective
+visibility, then records one reversible change. Rotation, architectural topology and
+multi-item transforms are intentionally unsupported until their relationships exist.
+The unit display does not convert provisional drawing coordinates into verified survey
+measurements. Applying an adjustment reruns and saves schematic checks when possible;
+a failed rerun is reported separately from the committed edit.
+
+Consistency reports contain checker/schema versions, source hash, revision, project/state
+identities, timestamps, findings, measurements and explicit coverage. Latest 50 runs stay
+in private backups and survive same-project undo/redo; they never merge across projects.
+Standalone report download is `{report,staleAtExport}`. Report creation does not alter the
+geometry revision. Missing units/scale are unknown, not passing measurements. Source
+locks include root SVG attributes and global style/definition dependencies conservatively.
+
+Asynchronous JSON exports read one snapshot. Imports stage assets outside project state
+and reject a changed document before committing; staged unreferenced media may remain
+in IndexedDB after a rejected import. No automatic media deletion is performed because
+undo snapshots may retain references. History-producing edits validate before persistence;
+a full 2,000-record change log rejects the transaction instead of creating an unrestorable
+backup. Browser storage quotas and explicit long-term archival remain operational limits.

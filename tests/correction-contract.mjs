@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import '../src/correction-contract.js';
+const C=globalThis.CorrectionContract;
+const context={projectId:'synthetic-project',stateToken:'state-a',revision:'v3',sourceHash:'source-a',commentIds:['comment-1'],itemRefs:['base:wall-1']};
+const payload={project:'Synthetic fixture',comments:[{id:'comment-1',text:'Synthetic request'}],photoReferences:[{id:'photo-1',note:'Synthetic provenance'}],assets:[{id:'asset-1',sourceRef:'synthetic-reference'}],items:[],baseSvg:'<svg xmlns="http://www.w3.org/2000/svg"/>',forbidden:'discard'};
+const original=structuredClone(payload);
+const handoff=C.createHandoff({...context,selectedRefs:['base:wall-1'],instructions:'Review synthetic wall',payload});
+assert.equal(handoff.baseRevision,context.revision);
+assert.equal(handoff.capabilities.liveProviderIntegration,false);
+assert.equal(handoff.forbidden,undefined);
+assert.deepEqual(payload,original);
+assert.deepEqual(handoff.photoReferences,payload.photoReferences);
+assert.deepEqual(handoff.assets,payload.assets);
+handoff.photoReferences[0].note='Changed copy';assert.equal(payload.photoReferences[0].note,'Synthetic provenance');
+const correction={contractVersion:1,projectId:context.projectId,stateToken:context.stateToken,baseRevision:context.revision,baseSourceHash:context.sourceHash,newBaseSvg:payload.baseSvg,resolvedCommentIds:['comment-1'],selectedRefs:['base:wall-1'],changeSummary:'Synthetic change'};
+const before=structuredClone({correction,context});
+const codex=C.validateCorrection({...correction,provider:'Codex'},context);
+const claude=C.validateCorrection({...correction,provider:'Claude'},context);
+delete codex.provider;delete claude.provider;assert.deepEqual(codex,claude);
+assert.deepEqual({correction,context},before);
+for(const change of [{contractVersion:2},{projectId:'foreign'},{stateToken:'state-other-branch'},{baseRevision:'v2'},{baseSourceHash:'changed'},{newBaseSvg:''},{newBaseSvg:'x'.repeat(2_000_001)},{changeSummary:'x'.repeat(3001)},{resolvedCommentIds:['missing']},{resolvedCommentIds:['comment-1','comment-1']},{selectedRefs:['base:missing']},{provider:{}},{newBaseSvg:null}]){
+ const candidate={...correction,...change},snapshot=structuredClone(candidate);
+ assert.throws(()=>C.validateCorrection(candidate,context));assert.deepEqual(candidate,snapshot);assert.deepEqual(context,before.context);
+}
+const legacy={...correction};delete legacy.contractVersion;delete legacy.projectId;delete legacy.stateToken;
+assert.throws(()=>C.validateCorrection(legacy,context),/Legacy/);
+assert.equal(C.validateCorrection(legacy,{...context,allowLegacy:true}).warnings.length,1);
+assert.throws(()=>C.validateCorrection({...legacy,baseRevision:'v0'},{...context,allowLegacy:true}),/Stale/);
+assert.throws(()=>C.createHandoff({...context,selectedRefs:['same','same']}));
+assert.throws(()=>C.createHandoff({...context,instructions:'x'.repeat(20001)}));
+console.log('PASS: provider-neutral contract, manual capabilities, detached metadata, version/project/state guards, references and explicit legacy compatibility.');

@@ -157,3 +157,16 @@ Private JSON exports preserve per-item visibility/locks and stable source object
 Existing source shapes without IDs receive identities once, without moving geometry;
 that migration is recorded. Selection highlights and invisible hit targets are excluded
 from SVG exports. Correction authors should preserve all unmodified element IDs.
+
+
+## Version 0.9.0
+
+Saved consistency reviews now retain findings and coverage, compare runs and identify
+stale state. Private backups preserve the latest 50 runs. Furniture and markups support
+exact numeric Preview / Apply / Cancel controls, with reversible history and fresh checks.
+Manual correction files use a [provider-neutral contract](docs/AGENT_CONTRACT.md) bound
+to project/state identity, preventing same-revision undo branches from accepting stale
+changes. Older correction files require a fresh handoff; old project backups remain
+supported. Export/import concurrency and source-lock integrity have regression coverage.
+See [workflow inventory](docs/WORKFLOWS.md) and the [canonical backlog](docs/BACKLOG.md)
+for partial deliveries and deployment gates. No authenticated service is deployed.

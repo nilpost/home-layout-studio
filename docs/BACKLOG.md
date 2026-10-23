@@ -207,3 +207,26 @@ Before deployment, review HLS-101 through HLS-107 and record evidence or an expl
 user-approved deferral for every acceptance criterion. Begin with the shared data model,
 private storage/authorization design and agent contracts because these requirements
 rely on them. This backlog does not authorize a deployment, DNS change or new access grant.
+
+## Verified development progress — 2026-10-24, v0.9.0
+
+These are partial deliveries, not acceptance of every criterion or permission to deploy.
+
+| Requirement | Implemented slice | Remaining gate |
+| --- | --- | --- |
+| HLS-101 | [Workflow inventory](WORKFLOWS.md), source review, private backups, saved checks and overlay preview/apply/cancel | Site-native instruction execution, asset management and complete workflow acceptance |
+| HLS-102 | Stable project/source/item identities retained | Asset entity, read-only authorized vault references, field provenance and attachment access |
+| HLS-103 | Local project identity and state isolation | Owner-selected hosting/login/storage, server authorization and denial/recovery tests |
+| HLS-104 | [Version 1 manual correction contract](AGENT_CONTRACT.md), common parser and reviewed apply path; fabricated Codex/Claude equivalence | Live authenticated adapters, complete asset format and reciprocal live-provider verification |
+| HLS-105 | Dependency boundaries documented | Authenticated portal, invitation lifecycle, verified email, roles and revocation |
+| HLS-106 | Saved checker-version/revision/source/state-bound runs, coverage matrix, comparison, stale highlights, private backup/report export | Anchored dimensions, project tolerances, room/door relationships, source/survey/professional review |
+| HLS-107 | Exact numeric single-overlay preview/apply/cancel; lock/visibility/state guards; reversible history and rerun checks | Architectural relationships, connected neighbors, rotation, handles, group transforms and physical-unit editing |
+
+Integrity repairs cover asynchronous export snapshots, concurrent import rejection,
+undo-branch correction identity, stylesheet/root lock dependencies, semantic dimension
+labels and atomic history capacity rejection. Audit history is not silently pruned:
+at the 2,000-record schema boundary, a transaction requiring another record is rejected
+without persisting an unreadable project. A full-history archive/continuation workflow
+remains future work. Saved consistency runs retain the latest 50 across same-project
+undo/redo; backups contain the retained evidence. Standalone report export wraps the
+versioned `report` with `staleAtExport` metadata.
