@@ -173,9 +173,37 @@ Consider during development: use stable element/room/dimension identities, ancho
 measurements, explicit units and provenance now; keep the review engine independent of
 agent providers and all actual project evidence private.
 
+## HLS-107 — Adjust selected items with contextual controls
+
+Status: planned · Priority: design during development; review before deployment
+
+Selecting a door, wall or other layout item on the plan or in Layer items opens controls
+suited to that item: position, rotation, scale, length and other applicable dimensions.
+
+Acceptance criteria:
+- Keep selection and the adjustment panel synchronized between the plan and item list.
+  Show only supported controls, with visible handles and precise numeric inputs.
+- Support move and rotation with a clear pivot; uniform scaling where appropriate;
+  wall length/thickness, door width/swing/hinge and object width/depth as applicable.
+  Use project units and distinguish calibrated values from provisional measurements.
+- Preserve connected wall junctions and door/window relationships to their host openings;
+  preview affected neighbors and report conflicts before applying changes. Do not distort
+  architectural items with arbitrary nonuniform scaling or silently rewrite source labels.
+- Respect hidden/locked items and protected dimensions. Explain unsupported or conflicting
+  edits; preserve original uploads and offer explicit review of affected measurements.
+- Make changes reversible with cancel, undo/redo and revision-linked history; rerun relevant
+  HLS-106 consistency checks after applying edits and mark older reports stale.
+- For multiple selected items, distinguish group transforms from individual dimensions,
+  make the pivot and affected items explicit and prevent partial edits of locked selections.
+- Use the same validated editing operations for site controls and HLS-104 agent corrections;
+  test connected walls, hosted doors, unit conversion, locks, cancellation and undo.
+
+Consider during development: model editable geometry and relationships by stable item ID;
+keep transform previews separate from committed geometry and source measurements.
+
 ## Deployment review
 
-Before deployment, review HLS-101 through HLS-106 and record evidence or an explicit
+Before deployment, review HLS-101 through HLS-107 and record evidence or an explicit
 user-approved deferral for every acceptance criterion. Begin with the shared data model,
 private storage/authorization design and agent contracts because these requirements
 rely on them. This backlog does not authorize a deployment, DNS change or new access grant.
