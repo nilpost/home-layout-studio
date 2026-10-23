@@ -184,3 +184,12 @@ foreign-project rejection and current limits.
 Consistency review now explains unsupported CSS/coordinate contexts and handles large
 finding sets with explicit incomplete coverage. Existing plans and checker records remain
 compatible. All authenticated hosting, connector and collaboration gates remain open.
+
+
+## Version 0.10.1
+
+Transactional edits, imports, undo/redo, drags, legacy identity migration, reset and saved
+reviews now stop cleanly when browser metadata storage fails. Prior state and history
+remain intact for retry; an unsaved indicator stays visible for lightweight view-setting
+writes until storage succeeds. A display refresh error after a successful save cannot
+roll in-memory state behind the saved project. Export remains available for recovery.

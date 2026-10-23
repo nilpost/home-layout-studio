@@ -256,3 +256,10 @@ item, full SVG replacement is rejected until those links are explicitly removed 
 reviewed same-source edit is used). This conservative boundary avoids guessing whether
 similarly named IDs in a different plan represent the same object. All other deployment
 gates and incomplete architectural relationships above still apply.
+
+
+Version 0.10.1 adds executable quota-failure regressions and explicit storage-write
+acceptance for transactional edits, imports, history navigation, drags, migration/reset
+and review recording. Display refresh failures after persistence retain committed state.
+This strengthens HLS-101 backup/persistence integrity without claiming remote storage
+or eliminating browser quota limits.

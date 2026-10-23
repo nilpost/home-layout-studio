@@ -160,3 +160,12 @@ root/ancestor transforms or nested viewports require coordinate mapping. Global 
 are inspected once per extraction. Bounded review truncation records explicit incomplete
 coverage and preserves unknown status. Previous checker records remain readable. None
 of this performs architectural topology mapping or verifies physical measurements.
+
+
+Metadata persistence is checked before transactional history/redo changes commit. A failed
+write restores the previous project state, identity and stacks; staged media may remain
+unreferenced in IndexedDB. Item/photo drags use the shared mutation path after restoring
+their pre-drag state. Imports, history navigation, reset, migrations and report recording
+also check writes. Lightweight view settings remain in memory with a sticky unsaved
+indicator on failure. Rendering after a successful write is separate from rollback, so
+a refresh exception does not create contradictory in-memory and persisted versions.
