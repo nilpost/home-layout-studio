@@ -35,7 +35,7 @@ Host bridge reference: https://developers.openai.com/plugins/reference. Project 
 
 ## Development requirements and deployment gates
 
-[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-106 require site-native workflows, private vault-linked assets, an authenticated multi-project portal, Codex/Claude interoperability email-invited project collaboration and a versioned architectural consistency review. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
+[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-107 require site-native workflows, private vault-linked assets, an authenticated multi-project portal, Codex/Claude interoperability, email-invited project collaboration, a versioned architectural consistency review and contextual item adjustment controls. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
 
 ## Original reference layer
 
@@ -91,3 +91,22 @@ ancestor changes. Drag and legacy inspector controls also honor locks. Hiding an
 changes do not rewrite source geometry; deletion of unlocked base shapes records a source
 change and is undoable. Immutable original dimension labels remain protected. Full project
 imports replace a document and its settings, rather than treating locks as authorization.
+
+## Comment and markup review handoffs
+
+Comments describe intent; pins, boxes, arrows and paint provide spatial references.
+Adding them stores private project state locally; it does not notify an agent or apply
+architectural changes. The standalone Review corrections handoff copies revision text
+for deliberate transfer. A supported host bridge is conditional, not automatic sync.
+
+For a local agent review, explicitly request review of the current saved project. Export
+a fresh private JSON backup through the UI before reloads or edits. For another device,
+transfer that backup privately; revision text alone does not carry the full layout or
+embedded reference media. Compare requested corrections against the original source,
+measurements and current revision, then propose/apply validated reversible operations.
+
+Record the actual changes and affected comments in revision history. Mark a comment
+completed only when its requested correction is implemented and checked; retain unclear
+or unresolved comments as open. Completed pins are gray. Existing completion history
+must survive backup/restore. Site-native review initiation and provider-neutral handoffs
+remain governed by HLS-101 and HLS-104; no notification service is deployed.
