@@ -56,3 +56,10 @@ Only same-origin module/worker requests are allowed by CSP; no CDN or external o
 is permitted. PDF data is passed as bytes, not a URL. Scripting/eval, XFA, WASM and
 external font/CMap resources are disabled. Image/SVG references are rasterized before
 canvas use; SVG is sanitized before rendering. Rendering/import limits are explicit.
+
+Landmark registration uses a least-squares similarity transform (uniform scale,
+rotation and translation). Optional registration metadata records paired points,
+residual error and the base source hash. It does not deform the reference or rewrite
+base geometry. The six-click workflow temporarily isolates source/target views without
+persisting those temporary layer overrides; cancellation and undo restore the view.
+Whole-page fitting is explicitly separate because PDF margins are not plan landmarks.

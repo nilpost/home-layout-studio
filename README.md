@@ -123,3 +123,12 @@ Original files and rendered previews stay in private browser IndexedDB. Private 
 backups include both, plus page/alignment/opacity/visibility. SVG exports include the
 visible raster reference; correction handoffs include reference metadata only, without
 automatically sending the PDF or preview. Removing a reference is reversible with Undo.
+
+For accurate superposition, use **Match 3 landmarks** in Original plan alignment.
+Click a corner on the original, then the same corner on the editable base; repeat for
+three widely spaced corners. The editor alternates the two views, fits one uniform
+scale/rotation/translation, and reports residual error. It preserves proportions and
+never changes the architectural base. Cancel or Undo restores the previous alignment.
+Whole-page fit includes paper margins and is only a starting view, not registration.
+Use **Hide original / Show original** above the plan, or **Original plan / PDF** under
+Layers; both controls share the same saved visibility setting.
