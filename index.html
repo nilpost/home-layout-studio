@@ -6,9 +6,10 @@
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
   <link rel="stylesheet" href="src/styles.css" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
   <script src="src/geometry.js" defer></script>
   <script src="src/review-history.js" defer></script>
+  <script src="src/original-overlay.js" defer></script>
   <script src="src/app.js" defer></script>
 </head>
 <body>
@@ -41,6 +42,7 @@
       <label class="toggle"><input type="checkbox" checked id="show-markup" /> Markups</label>
       <label class="toggle"><input type="checkbox" checked id="show-comments" /> Comments</label><label class="toggle"><input type="checkbox" checked id="show-photos" /> Photo references</label><details><summary>Architectural layers</summary><div id="base-layer-controls"></div></details>
       <div class="separator"></div>
+      <details id="original-settings"><summary>Original plan alignment</summary><p id="original-name" class="fine muted">No original reference loaded.</p><div id="original-controls" hidden><label>PDF page<input type="number" id="original-page" min="1" step="1" value="1" /></label><button class="button full" id="original-change-page">Load page</button><div class="prop-grid"><label>Position X<input type="number" id="original-x" step="any" /></label><label>Position Y<input type="number" id="original-y" step="any" /></label><label>Width<input type="number" id="original-w" min="1" step="any" /></label><label>Height<input type="number" id="original-h" min="1" step="any" /></label><label>Rotation °<input type="number" id="original-rotation" min="-360" max="360" step="1" /></label></div><label class="toggle"><input type="checkbox" id="original-lock-ratio" checked /> Keep aspect ratio</label><button class="button primary full" id="original-apply">Apply alignment</button><div class="two-cols"><button class="button" id="original-smaller">Smaller −</button><button class="button" id="original-larger">Larger +</button></div><button class="button full" id="original-fit">Fit original to canvas</button><button class="button full" id="original-download">Download original file</button><button class="button full" id="original-remove">Remove reference</button><p class="fine muted">Drag on the plan while Align original is active. Compare at 50% opacity, or hide Architectural base to inspect only the original. Alignment is visual, not a measured survey.</p></div></details><div class="separator"></div>
       <div class="section-label">SOURCE PLAN</div>
       <button class="button full" id="load-svg">Import architectural SVG</button>
       <div class="muted fine">Upload your own local SVG. The public project ships only with an anonymous demonstration plan.</div>
@@ -52,7 +54,8 @@
     </aside>
     <main class="main">
       <div class="main-bar"><div><strong id="document-title">Untitled home</strong><span class="muted"> · <span id="revision-label">v0</span></span></div><div class="bar-actions"><button class="button mini" id="undo" title="Undo">↶</button><button class="button mini" id="redo" title="Redo">↷</button><button class="button mini" id="zoom-out">−</button><span id="zoom-level">100%</span><button class="button mini" id="zoom-in">+</button><button class="button mini" id="fit">Fit</button></div></div>
-      <div id="drawing-shell" class="drawing-shell"><svg id="drawing" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editable floor plan" viewBox="0 0 1000 700"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6" fill="none" stroke="context-stroke" stroke-width="1.5" /></marker></defs><g id="plan-layer"></g><g id="furniture-layer"></g><g id="markup-layer"></g><g id="comment-layer"></g><g id="photo-layer"></g><g id="preview-layer"></g></svg></div>
+      <div class="reference-bar"><button class="button" id="load-original">Add original PDF / image</button><label class="toggle"><input type="checkbox" id="show-original" disabled /> Original overlay</label><label class="opacity-control">Opacity <input type="range" id="original-opacity" min="0" max="100" step="5" value="50" disabled /><output id="original-opacity-value">50%</output></label><button class="button" id="align-original" disabled>Align original</button></div>
+      <div id="drawing-shell" class="drawing-shell"><svg id="drawing" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editable floor plan" viewBox="0 0 1000 700"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6" fill="none" stroke="context-stroke" stroke-width="1.5" /></marker></defs><g id="plan-layer"></g><g id="original-layer" pointer-events="none"></g><g id="furniture-layer"></g><g id="markup-layer"></g><g id="comment-layer"></g><g id="photo-layer"></g><g id="preview-layer"></g></svg></div>
       <div class="footer-bar"><span id="tool-status">Select an item or choose a drawing tool.</span><span>Editable source · Reversible revisions · Exportable JSON / SVG</span></div>
     </main>
     <aside class="inspector">
@@ -63,6 +66,7 @@
     </aside>
   </div>
 </div>
+<input type="file" id="original-file" accept=".pdf,.svg,image/png,image/jpeg,image/webp,application/pdf,image/svg+xml" hidden />
 <input type="file" id="photos-file" accept="image/jpeg,image/png,image/webp" multiple hidden />
 <input type="file" id="project-file" accept=".json,application/json" hidden />
 <input type="file" id="svg-file" accept=".svg,image/svg+xml" hidden />

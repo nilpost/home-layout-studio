@@ -36,3 +36,23 @@ Host bridge reference: https://developers.openai.com/plugins/reference. Project 
 ## Development requirements and deployment gates
 
 [docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-104 require site-native workflows, private vault-linked assets, an authenticated multi-project portal and Codex/Claude interoperability. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
+
+## Original reference layer
+
+Optional `original` metadata contains stable source/preview asset keys, filename/type,
+PDF page/pageCount, x/y/w/h/rotation and opacity. `layers.original` controls visibility.
+Raster previews sit above the architectural base and below annotations; they never
+enter structural checks. The initial page fit is not a measured registration.
+
+Source bytes and rendered page previews use the existing private IndexedDB asset store;
+only metadata goes in localStorage. Export includes `dataUrl` and `rasterDataUrl` inside
+the original reference. Import validates embedded media and alignment, allocates new
+asset keys, and preserves earlier assets for undo. Existing projects without an original
+reference remain compatible. Correction handoffs include descriptive reference metadata
+only. Visible SVG exports embed the preview, not a live PDF or active SVG.
+
+PDF.js is pinned and bundled under `vendor/pdfjs/`, with Apache-2.0 attribution.
+Only same-origin module/worker requests are allowed by CSP; no CDN or external origin
+is permitted. PDF data is passed as bytes, not a URL. Scripting/eval, XFA, WASM and
+external font/CMap resources are disabled. Image/SVG references are rasterized before
+canvas use; SVG is sanitized before rendering. Rendering/import limits are explicit.

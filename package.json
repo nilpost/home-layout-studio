@@ -1,11 +1,11 @@
 {
   "name": "home-layout-studio",
   "private": false,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "Generic local-first SVG layout editor with annotations",
   "scripts": {
-    "test": "node tests/static-check.mjs && node tests/geometry.mjs && node tests/comment-history.mjs && node tests/painting.mjs && node tests/history-privacy.mjs",
+    "test": "node tests/static-check.mjs && node tests/geometry.mjs && node tests/comment-history.mjs && node tests/painting.mjs && node tests/original-overlay.mjs && node tests/history-privacy.mjs",
     "serve": "python3 -m http.server 8080"
   },
   "license": "MIT"

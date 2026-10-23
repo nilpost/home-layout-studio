@@ -103,3 +103,23 @@ When reviewing an architectural source revision, select the comments it addresse
 Correction JSON may include `resolvedCommentIds` and `changeSummary` alongside `baseRevision`, `baseSourceHash` and `newBaseSvg`; these preselect a review proposal and never bypass review. Handoff previews include history metadata; before/after source fragments are included only when source inclusion is selected.
 
 Freehand painting: choose **Paint**, pick a preset or custom color and brush width, then drag on the plan. Strokes belong to **Markups**; use Select to move/delete them and Undo/Redo to revise. Colors also apply to new arrows and rectangles. Paint points and brush settings travel in private JSON exports; visible strokes appear in SVG exports.
+
+Original-plan comparison: **Add original PDF / image** loads a local PDF, SVG, PNG,
+JPEG or WebP as a separate reference. Toggle **Original overlay**, adjust **Opacity**,
+and use **Align original** to drag it. **Original plan alignment** supplies position,
+aspect-preserving size, rotation, page selection, and download of the unchanged original.
+Hide **Architectural base** and set opacity to 100% to inspect the original alone.
+Alignment initially fits the page to the canvas; adjust it against shared landmarks
+before comparing positions. Reference alignment never changes measured layout geometry.
+
+PDF rendering uses bundled PDF.js, entirely in-browser, with no CDN. Serve the editor
+on loopback to use PDF imports (module workers require HTTP); image/SVG references do
+not need the PDF renderer. Files up to 20 MB and PDFs up to 1000 pages are accepted;
+rendered pages are limited to 3000 pixels on their longest edge. Optional PDF font/CMap
+and image-codec packs are not bundled, so unusual PDFs may be incomplete or fail to
+render. Keep the original and inspect it independently if anything is missing.
+
+Original files and rendered previews stay in private browser IndexedDB. Private JSON
+backups include both, plus page/alignment/opacity/visibility. SVG exports include the
+visible raster reference; correction handoffs include reference metadata only, without
+automatically sending the PDF or preview. Removing a reference is reversible with Undo.
