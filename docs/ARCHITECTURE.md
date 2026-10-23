@@ -71,3 +71,23 @@ and provisional calibration separately. These annotation spans are not yet assoc
 with wall/room endpoints; HLS-106 requires anchored geometry, full room/door semantics,
 project-specific tolerances and saved revision-bound reports. Source paper scale can be
 derived conditionally, but is distinct from screen zoom and reconstruction accuracy.
+
+## Item inventory and selection
+
+`objectSettings` maps provider-neutral references (`base:<svg-id>`, `item:<id>`,
+`comment:<id>`, `photo:<id>`, `original:reference`) to boolean `hidden`/`locked` flags.
+Flags are validated on import and kept in private project metadata. SVG primitives receive
+stable IDs in the editable working source; original uploaded files remain unchanged.
+Dimension groups are single protected inventory items. Selection/anchor/category-open
+state is transient. Hidden items remain in the structural model and checks.
+
+The base stays isolated in an SVG image; a separate transparent hit layer maps pointer
+selection to source IDs. The hit layer contains no styles/defs and does not affect export.
+A separate highlight layer renders visible selections; range/disjoint selection shares a
+pure helper with regression tests. Export removes both layers.
+
+Mutations enforce existing item locks transactionally, including source-element and
+ancestor changes. Drag and legacy inspector controls also honor locks. Hiding and lock
+changes do not rewrite source geometry; deletion of unlocked base shapes records a source
+change and is undoable. Immutable original dimension labels remain protected. Full project
+imports replace a document and its settings, rather than treating locks as authorization.

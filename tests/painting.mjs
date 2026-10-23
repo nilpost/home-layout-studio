@@ -4,6 +4,7 @@ import vm from 'node:vm';
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const scope=vm.createContext({validatePhotos:()=>{}});
 vm.runInContext(fs.readFileSync(new URL('../src/original-overlay.js',import.meta.url),'utf8'),scope);
+vm.runInContext(fs.readFileSync(new URL('../src/layer-items.js',import.meta.url),'utf8'),scope);
 vm.runInContext(app.split('\n').find(line=>line.startsWith('function validProject(')),scope);
 const project={schemaVersion:1,name:'Synthetic studio',revision:'v1',note:'',items:[],comments:[]};
 assert.doesNotThrow(()=>scope.validProject(project),'Older projects do not require a brush setting');

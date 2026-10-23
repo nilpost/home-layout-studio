@@ -138,3 +138,22 @@ dimension groups are compared against the nominal conversion; inferred units and
 provisional calibration stay flagged. The initial comparison measures annotation spans,
 not full architectural constraints. HLS-106 in the canonical backlog defines the broader
 architectural consistency run, including anchored measurements, room enclosure and doors.
+
+**Layers → Layer items** lists individual walls, windows, doors, fixtures, dimensions,
+labels/source shapes, furniture, boxes, arrows, paint, comments, photos and the original
+reference. Expand a category or search. Click a name for one item, Shift-click a range,
+or Command/Ctrl-click (or use checkboxes) for separate selections. Shift+Up/Down also
+extends a range. Clicking an object on the plan opens its category and highlights its row;
+spatial Shift/Command/Ctrl-click toggles separate map items. List selection highlights the
+visible objects on the plan.
+
+Use row actions or the selection toolbar to Show/Hide, Lock/Unlock or Delete. Parent
+layer visibility still applies. Locks prevent movement, property edits, source revisions
+that alter locked shapes, and deletion; visibility remains adjustable. Source dimension
+labels are protected from deletion. Deletion and setting changes support Undo/Redo and
+change history. Locks are editing guards, not account/project access permissions.
+
+Private JSON exports preserve per-item visibility/locks and stable source object IDs.
+Existing source shapes without IDs receive identities once, without moving geometry;
+that migration is recorded. Selection highlights and invisible hit targets are excluded
+from SVG exports. Correction authors should preserve all unmodified element IDs.
