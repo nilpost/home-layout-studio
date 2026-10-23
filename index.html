@@ -30,8 +30,10 @@
         <button class="tool" data-tool="comment" title="Pin a comment"><b>✎</b> Comment</button>
         <button class="tool" data-tool="arrow" title="Draw an arrow"><b>↗</b> Arrow</button>
         <button class="tool" data-tool="rect" title="Highlight an area"><b>▭</b> Markup</button>
+        <button class="tool" data-tool="paint" title="Paint freehand"><b>〰</b> Paint</button>
         <button class="tool" data-tool="furniture" title="Add a furniture placeholder"><b>▣</b> Furniture</button>
       </div>
+      <div class="drawing-style"><label for="drawing-color">Drawing color</label><div class="color-palette" aria-label="Drawing colors"><button type="button" class="color-swatch" data-color="#e55f39" aria-label="Orange drawing color" aria-pressed="false"></button><button type="button" class="color-swatch" data-color="#d63b45" aria-label="Red drawing color" aria-pressed="false"></button><button type="button" class="color-swatch" data-color="#2979d3" aria-label="Blue drawing color" aria-pressed="false"></button><button type="button" class="color-swatch" data-color="#23835a" aria-label="Green drawing color" aria-pressed="false"></button><button type="button" class="color-swatch" data-color="#8556bd" aria-label="Purple drawing color" aria-pressed="false"></button><button type="button" class="color-swatch" data-color="#25343a" aria-label="Black drawing color" aria-pressed="false"></button></div><div class="brush-controls"><label>Custom color<input type="color" id="drawing-color" value="#e55f39"></label><label>Brush width<input type="number" id="brush-width" min="1" max="20" step="1" value="4"></label></div><p class="fine muted">Color applies to new paint, arrows and markups. Width applies to paint.</p></div>
       <div class="separator"></div>
       <div class="section-label">LAYERS</div>
       <label class="toggle"><input type="checkbox" checked id="show-base" /> Architectural base <span class="locked">VERSIONED</span></label>
@@ -50,7 +52,7 @@
     </aside>
     <main class="main">
       <div class="main-bar"><div><strong id="document-title">Untitled home</strong><span class="muted"> · <span id="revision-label">v0</span></span></div><div class="bar-actions"><button class="button mini" id="undo" title="Undo">↶</button><button class="button mini" id="redo" title="Redo">↷</button><button class="button mini" id="zoom-out">−</button><span id="zoom-level">100%</span><button class="button mini" id="zoom-in">+</button><button class="button mini" id="fit">Fit</button></div></div>
-      <div id="drawing-shell" class="drawing-shell"><svg id="drawing" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editable floor plan" viewBox="0 0 1000 700"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6" fill="none" stroke="#e55f39" stroke-width="1.5" /></marker></defs><g id="plan-layer"></g><g id="furniture-layer"></g><g id="markup-layer"></g><g id="comment-layer"></g><g id="photo-layer"></g><g id="preview-layer"></g></svg></div>
+      <div id="drawing-shell" class="drawing-shell"><svg id="drawing" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editable floor plan" viewBox="0 0 1000 700"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6" fill="none" stroke="context-stroke" stroke-width="1.5" /></marker></defs><g id="plan-layer"></g><g id="furniture-layer"></g><g id="markup-layer"></g><g id="comment-layer"></g><g id="photo-layer"></g><g id="preview-layer"></g></svg></div>
       <div class="footer-bar"><span id="tool-status">Select an item or choose a drawing tool.</span><span>Editable source · Reversible revisions · Exportable JSON / SVG</span></div>
     </main>
     <aside class="inspector">
