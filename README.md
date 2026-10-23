@@ -170,3 +170,17 @@ changes. Older correction files require a fresh handoff; old project backups rem
 supported. Export/import concurrency and source-lock integrity have regression coverage.
 See [workflow inventory](docs/WORKFLOWS.md) and the [canonical backlog](docs/BACKLOG.md)
 for partial deliveries and deployment gates. No authenticated service is deployed.
+
+
+## Version 0.10.0
+
+Project assets now stores private records linked to selected layout items, with
+manufacturer/model notes, field provenance and read-only knowledge-source references.
+Import private asset JSON through a findings preview; edits/deletions/imports support
+undo and full project backups retain the records. No source is fetched automatically.
+See [asset format](docs/ASSET_RECORDS.md) for deliberate imports, maintenance/issues,
+foreign-project rejection and current limits.
+
+Consistency review now explains unsupported CSS/coordinate contexts and handles large
+finding sets with explicit incomplete coverage. Existing plans and checker records remain
+compatible. All authenticated hosting, connector and collaboration gates remain open.

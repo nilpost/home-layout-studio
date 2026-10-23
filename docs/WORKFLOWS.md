@@ -17,7 +17,8 @@ service. Private content remains on the current device until deliberate export/t
 | Portable agent work | Review corrections handoff / Review agent correction | Deliberate private file/text transfer; version 1 contract; user reviews before Apply |
 | Undo/history | Undo, Redo, View change history | Same-project review evidence retained; history capacity rejects further audit-producing edits atomically |
 | Deliverable export | Export SVG / JSON / private consistency report | Exports include private content; they are not publication actions |
-| Vault-linked assets | Unavailable | No browser filesystem/vault connector or stable asset record model |
+| Private asset records | Project assets; edit/link selected items; review/import/export private asset JSON | Stable identity and field provenance; read-only source metadata, no automatic source access |
+| Vault source/attachments | Metadata references only | No browser vault connector, retrieval or write-back; server authorization remains undeployed |
 | Login/sharing/invites | Unavailable | No authenticated backend, remote private storage or email service deployed |
 
 ## Regression evidence

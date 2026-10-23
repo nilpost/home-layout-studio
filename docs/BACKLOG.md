@@ -230,3 +230,29 @@ without persisting an unreadable project. A full-history archive/continuation wo
 remains future work. Saved consistency runs retain the latest 50 across same-project
 undo/redo; backups contain the retained evidence. Standalone report export wraps the
 versioned `report` with `staleAtExport` metadata.
+
+
+## Verified development progress — 2026-10-24, v0.10.0
+
+HLS-102 now has a local private asset manager with stable project-bound records,
+selected-item links, manufacturer/model/room/notes, per-field authority, read-only
+source revision/hash/status references, and imported maintenance/issues. Deliberate
+asset JSON import previews orphan/stale/unverified findings before Apply; edits,
+deletions and imports share undoable history. Private project backup/restore and
+manual provider handoffs preserve asset identities and evidence. See
+[asset schema and import boundary](ASSET_RECORDS.md). No vault/remote connector or
+attachment retrieval has been deployed. Maintenance/issue authoring beyond imported
+records remains future UI work; server permissions remain mandatory before hosting.
+
+HLS-106 excludes semantic shapes and dimension spans whose stylesheet, root, ancestor
+or nested viewport changes require unsupported coordinate mapping. The source evidence
+is visible. Stylesheet coverage is interpreted once per extraction. Large valid review
+outputs are bounded with an explicit incomplete/unknown disclosure rather than aborting
+or claiming complete coverage. Checker 1.1 imports prior 1.0 records.
+
+Full SVG replacement keeps the annotation ID counter, preventing orphan links from
+reattaching to unrelated new objects. If an asset still links any architectural base
+item, full SVG replacement is rejected until those links are explicitly removed (or a
+reviewed same-source edit is used). This conservative boundary avoids guessing whether
+similarly named IDs in a different plan represent the same object. All other deployment
+gates and incomplete architectural relationships above still apply.

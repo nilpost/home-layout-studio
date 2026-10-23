@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
-  <link rel="stylesheet" href="src/styles.css?v=0.9.0" />
+  <link rel="stylesheet" href="src/styles.css?v=0.10.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
-  <script src="src/geometry.js?v=0.9.0" defer></script>
-  <script src="src/review-history.js?v=0.9.0" defer></script>
-  <script src="src/original-overlay.js?v=0.9.0" defer></script>
-  <script src="src/layer-items.js?v=0.9.0" defer></script>
-  <script src="src/consistency-review.js?v=0.9.0" defer></script>
-  <script src="src/correction-contract.js?v=0.9.0" defer></script>
-  <script src="src/item-adjustments.js?v=0.9.0" defer></script>
-  <script src="src/app.js?v=0.9.0" defer></script>
+  <script src="src/geometry.js?v=0.10.0" defer></script>
+  <script src="src/review-history.js?v=0.10.0" defer></script>
+  <script src="src/original-overlay.js?v=0.10.0" defer></script>
+  <script src="src/layer-items.js?v=0.10.0" defer></script>
+  <script src="src/consistency-review.js?v=0.10.0" defer></script>
+  <script src="src/correction-contract.js?v=0.10.0" defer></script>
+  <script src="src/item-adjustments.js?v=0.10.0" defer></script>
+  <script src="src/geometry-coverage.js?v=0.10.0" defer></script>
+  <script src="src/asset-records.js?v=0.10.0" defer></script>
+  <script src="src/app.js?v=0.10.0" defer></script>
 </head>
 <body>
 <div class="shell" data-panel="photos">
@@ -29,6 +31,7 @@
       <label for="project-name" class="form-label">Project title</label><input id="project-name" value="Untitled home" maxlength="120" />
       <div class="muted fine">All changes stay on this device unless you explicitly export or send them.</div>
       <div class="separator"></div>
+      <button class="button full" id="manage-assets">Project assets</button><p class="fine muted">Private records, linked items and read-only knowledge references.</p>
       <div class="section-label">TOOLS</div>
       <div class="tools" id="tools">
         <button class="tool active" data-tool="select" title="Select / move annotation"><b>↖</b> Select</button>
@@ -82,5 +85,7 @@
 <dialog id="handoff-dialog" class="wide-dialog"><h2>Private correction handoff</h2><p>Review the exact text below. Copy it into your private project chat, or send to the current conversation when the ChatGPT host bridge is available. No files or chat history are retrieved automatically.</p><label><input type="checkbox" id="include-source" /> Include private architectural SVG in this handoff</label><textarea id="handoff-text" rows="15" aria-label="Correction handoff text"></textarea><div class="dialog-actions"><button class="button" id="handoff-close">Close</button><button class="button" id="copy-handoff">Copy for private chat</button><button class="button primary" id="send-host">Send to current ChatGPT chat</button></div></dialog>
 <dialog id="review-comment-dialog" class="wide-dialog"><h2 id="review-comment-title">Review comment</h2><p id="review-comment-body"></p><p id="review-comment-status" class="fine muted"></p><label for="comment-resolution">Change made / resolution note</label><textarea id="comment-resolution" rows="3" maxlength="3000"></textarea><div id="comment-resolution-history"></div><div class="dialog-actions"><button class="button" id="close-review-comment">Cancel</button><button class="button" id="reopen-comment">Reopen</button><button class="button primary" id="complete-comment">Record completed change</button></div></dialog>
 <dialog id="change-log-dialog" class="wide-dialog"><h2>Project change history</h2><div id="change-log-list"></div><button class="button" id="close-change-log">Close</button></dialog>
+<input type="file" id="asset-import-file" accept=".json,application/json" hidden />
+<dialog id="assets-dialog" class="wide-dialog"><h2>Private project assets</h2><p class="fine muted">Local records only. Knowledge references are read-only metadata; no vault access, source fetching or write-back is connected.</p><label for="asset-select">Saved assets</label><select id="asset-select"></select><div class="dialog-actions"><button class="button" id="asset-new">New asset</button><button class="button" id="asset-import">Import private asset JSON</button><button class="button" id="asset-export">Export private asset JSON</button></div><div id="asset-form"><div class="asset-grid"><label>Asset name<input type="text" id="asset-name" maxlength="160" /></label><label>Room / zone label<input type="text" id="asset-room" maxlength="160" /></label><label>Manufacturer<input type="text" id="asset-manufacturer" maxlength="240" /></label><label>Model<input type="text" id="asset-model" maxlength="240" /></label></div><label>Owner notes<textarea id="asset-notes" rows="3" maxlength="6000"></textarea></label><p id="asset-linked" class="fine"></p><div class="dialog-actions"><button class="button" id="asset-link-selection">Add selected layout items</button><button class="button" id="asset-clear-links">Clear draft links</button></div><details><summary>Field provenance and read-only references</summary><pre id="asset-provenance"></pre></details><div class="dialog-actions"><button class="button" id="asset-delete">Delete asset</button><button class="button" id="asset-cancel">Cancel draft</button><button class="button primary" id="asset-save">Save asset</button></div></div><section id="asset-import-preview" hidden><h3>Review asset import</h3><p id="asset-import-summary"></p><pre id="asset-import-findings"></pre><div class="dialog-actions"><button class="button" id="asset-import-cancel">Cancel import</button><button class="button primary" id="asset-import-apply">Apply reviewed asset import</button></div></section><p id="asset-message" role="status" aria-live="polite"></p><div class="dialog-actions"><button class="button" id="assets-close">Close</button></div></dialog>
 </body>
 </html>

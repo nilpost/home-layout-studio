@@ -41,7 +41,7 @@ The optional `payload` copies only `project`, `comments`, `changeLog`, `items`,
 `objectSettings`, `originalReference`, `photoReferences`, `notes`, `calibration`,
 `checks`, `consistencyReports`, `baseSvg` and `assets`. Source/media references retain
 their supplied stable IDs and metadata; the contract does not invent asset identities
-or promise a complete asset schema. Private content belongs outside public repositories,
+or promise a complete asset schema. The local version 1 asset format is documented in [ASSET_RECORDS.md](ASSET_RECORDS.md); remote attachment access is not included. Private content belongs outside public repositories,
 logs, builds and fabricated test fixtures.
 
 ## Returned correction

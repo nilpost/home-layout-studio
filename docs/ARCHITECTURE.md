@@ -142,3 +142,21 @@ in IndexedDB after a rejected import. No automatic media deletion is performed b
 undo snapshots may retain references. History-producing edits validate before persistence;
 a full 2,000-record change log rejects the transaction instead of creating an unrestorable
 backup. Browser storage quotas and explicit long-term archival remain operational limits.
+
+
+## Local asset records
+
+`assets` defaults to an empty array for legacy projects and travels in private backups
+and handoffs. Nonempty collections require an enclosing `projectId`; ownership is never
+inferred from asset names or source filenames. [ASSET_RECORDS.md](ASSET_RECORDS.md)
+defines fields, per-field authority and read-only source evidence. Imports are append-only
+proposals; Apply checks the whole project's state identity again. Local ID guards do not
+implement remote permissions. Dangling references survive as findings rather than being
+deleted or rebound by guesswork. Entire SVG replacement is refused with architectural
+asset links; annotation counters remain monotonic across such replacement.
+
+The source checker now conservatively rejects raw-coordinate analysis when CSS geometry,
+root/ancestor transforms or nested viewports require coordinate mapping. Global styles
+are inspected once per extraction. Bounded review truncation records explicit incomplete
+coverage and preserves unknown status. Previous checker records remain readable. None
+of this performs architectural topology mapping or verifies physical measurements.
