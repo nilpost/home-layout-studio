@@ -205,3 +205,14 @@ units/calibration never produce a verified pass. This checks selected endpoint s
 not dimension chains, rooms, door relationships or construction. See
 [measurement bindings](docs/MEASUREMENT_ANCHORS.md). Original geometry and labels are
 unchanged. Checker 1.2 retains older saved reports.
+
+### Selected dimension-chain totals
+
+Review dimension chains uses 2–8 saved endpoint bindings, selected in order, and a
+separate overall-total binding. The declared span values are summed and compared with
+the declared total after supported metric conversion. Contiguous monotonic horizontal
+or vertical geometry, current source identity, verified units/calibration and an explicit
+project threshold are required for pass/fail. Missing, stale, provisional or unsupported
+inputs remain unknown. Preview/save/cancel/remove, undo, private backup and manual
+handoffs preserve the selected relationship. This does not infer rooms, levels or
+physical accuracy. See [chain model](docs/MEASUREMENT_CHAINS.md).

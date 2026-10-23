@@ -3,7 +3,7 @@
 'use strict';
 const VERSION=1;
 const CAPABILITIES=Object.freeze({transport:'manual-private-json',correction:'reviewed-source-replacement',operations:Object.freeze(['replace-base-svg','resolve-existing-comments']),reviewRequired:true,liveProviderIntegration:false});
-const payloadFields=['project','comments','changeLog','items','objectSettings','originalReference','photoReferences','notes','calibration','checks','consistencyReports','baseSvg','assets','measurementAnchors','measurementTolerancePercent'];
+const payloadFields=['project','comments','changeLog','items','objectSettings','originalReference','photoReferences','notes','calibration','checks','consistencyReports','baseSvg','assets','measurementAnchors','measurementChains','measurementTolerancePercent'];
 function object(value,label){if(!value||Array.isArray(value)||typeof value!=='object')throw Error('Invalid '+label);return value;}
 function text(value,label,max=300){if(typeof value!=='string'||!value.trim()||value.length>max)throw Error('Invalid '+label);return value;}
 function strings(value,label,limit=20000){if(!Array.isArray(value)||value.length>limit||value.some(v=>typeof v!=='string'||!v.trim()||v.length>300)||new Set(value).size!==value.length)throw Error('Invalid '+label);return [...value];}

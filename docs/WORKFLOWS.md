@@ -14,6 +14,7 @@ service. Private content remains on the current device until deliberate export/t
 | Comments | Pin, review, record completion, reopen | Completion is attributed to a recorded change; adding a comment does not notify an agent |
 | Layer management | Layer items, selection, hide/show, lock/unlock, reversible deletion | Locked/protected items cannot be adjusted; parent visibility still applies |
 | Source-anchored spans | Measure source spans; explicit dimension/endpoints; preview/save/cancel/remove | Selected endpoints only; user threshold; unknown until source units/calibration are verified |
+| Source dimension chains | Review dimension chains; ordered saved span bindings and separate overall total | Single horizontal/vertical chain; explicit existing tolerance; verified inputs required for pass/fail |
 | Consistency review | Review consistency, saved runs, rerun, comparisons, highlights | Stale runs cannot highlight; unknown/not-checked coverage is explicit |
 | Portable agent work | Review corrections handoff / Review agent correction | Deliberate private file/text transfer; version 1 contract; user reviews before Apply |
 | Undo/history | Undo, Redo, View change history | Same-project review evidence retained; history capacity rejects further audit-producing edits atomically |

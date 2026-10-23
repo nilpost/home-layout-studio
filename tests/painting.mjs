@@ -8,6 +8,7 @@ vm.runInContext(fs.readFileSync(new URL('../src/layer-items.js',import.meta.url)
 vm.runInContext(fs.readFileSync(new URL('../src/consistency-review.js',import.meta.url),'utf8'),scope);
 vm.runInContext(fs.readFileSync(new URL('../src/asset-records.js',import.meta.url),'utf8'),scope);
 vm.runInContext(fs.readFileSync(new URL('../src/measurement-anchors.js',import.meta.url),'utf8'),scope);
+vm.runInContext(fs.readFileSync(new URL('../src/measurement-chains.js',import.meta.url),'utf8'),scope);
 vm.runInContext(app.split('\n').find(line=>line.startsWith('function validProject(')),scope);
 const project={schemaVersion:1,name:'Synthetic studio',revision:'v1',note:'',items:[],comments:[]};
 assert.doesNotThrow(()=>scope.validProject(project),'Older projects do not require a brush setting');

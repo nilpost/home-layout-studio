@@ -1,7 +1,7 @@
 /* Provider-neutral, bounded schematic review records. No source documents are stored. */
 (function(root){
 'use strict';
-const SCHEMA_VERSION=1,CHECKER_VERSION='schematic-1.2.0';
+const SCHEMA_VERSION=1,CHECKER_VERSION='schematic-1.3.0';
 const STATUSES=['pass','fail','warning','unknown','not-checked'],SEVERITIES=['info','warning','error'];
 const MAX_REPORTS=50,MAX_FINDINGS=5000,MAX_TEXT=2000,MAX_IDS=100;
 function object(v){return v!==null&&typeof v==='object'&&!Array.isArray(v)&&[Object.prototype,null].includes(Object.getPrototypeOf(v));}
@@ -13,18 +13,20 @@ function finite(v){return v===null||typeof v==='number'&&Number.isFinite(v);}
 function date(v){return text(v,40)&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString()===v;}
 function stable(value){let a=2166136261,b=5381;for(let i=0;i<value.length;i++){a=Math.imul(a^value.charCodeAt(i),16777619);b=Math.imul(b,33)^value.charCodeAt(i);}return (a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
 function identity(code,ids){return 'finding-'+stable(JSON.stringify([code,[...ids].sort()]));}
-function coverage(geometryStatus,dimensionStatus,anchorStatus='not-checked',legacy=false){return [
+function supportsAnchors(version){return [CHECKER_VERSION,'schematic-1.2.0'].includes(version);}
+function coverage(geometryStatus,dimensionStatus,anchorStatus='not-checked',legacy=false,chainStatus='not-checked',includeChains=true){return [
  {id:'schematic-geometry',category:'automated-geometry',status:geometryStatus,detail:'Semantic linear walls, explicit opening/window spans and rectangular fixtures only; wall thickness and full topology are unmodeled.'},
  {id:'dimension-line-scale',category:'automated-geometry',status:dimensionStatus,detail:'Declared dimensions compared to dimension-line spans using the supplied calibration and tolerance; spans are not anchored to walls.'},
  {id:'anchored-dimension-chains',category:'automated-geometry',status:legacy?'not-checked':anchorStatus,detail:legacy?'Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.':'Source-anchored endpoint spans only; dimension chains, totals, room relationships, axes and levels are not modeled.'},
  {id:'rooms-openings-doors',category:'automated-geometry',status:'not-checked',detail:'Closed room regions, areas, adjacency, hosted door relationships, swings and clearances are not modeled. Explicit opening segments receive schematic checks only.'},
  {id:'source-notation',category:'source-notation',status:'unknown',detail:'Original page provenance, notation, source distortion and missing or changed labels require source review.'},
  {id:'as-built-survey',category:'survey-dependent',status:'not-checked',detail:'No physical survey or as-built verification has been performed by this checker.'},
- {id:'structural-regulatory',category:'professional-code',status:'not-checked',detail:'No structural, safety or regulatory certification; no jurisdiction, rule edition or authoritative rule set is evaluated.'}
+ {id:'structural-regulatory',category:'professional-code',status:'not-checked',detail:'No structural, safety or regulatory certification; no jurisdiction, rule edition or authoritative rule set is evaluated.'},
+ ...(includeChains?[{id:'dimension-chain-totals',category:'automated-geometry',status:chainStatus,detail:'User-selected contiguous endpoint-bound chains on one explicit axis only; complete source chains, cross-axis totals, rooms and levels are not modeled.'}]:[])
  ];}
 function severity(status){return status==='fail'?'error':['warning','unknown'].includes(status)?'warning':'info';}
 function worst(statuses){return statuses.includes('fail')?'fail':statuses.some(s=>s==='warning')?'warning':statuses.includes('unknown')?'unknown':statuses.includes('pass')?'pass':'not-checked';}
-function createReport({revision,sourceHash,geometryReport=null,measurementAudit,anchoredReview,projectId,stateToken,runAt=new Date().toISOString()}={}){
+function createReport({revision,sourceHash,geometryReport=null,measurementAudit,anchoredReview,chainReview,projectId,stateToken,runAt=new Date().toISOString()}={}){
  need(text(revision,200)&&text(sourceHash,200),'revision and source hash required');need(date(runAt),'run time must be an ISO UTC timestamp');
  for(const v of [projectId,stateToken])need(v===undefined||text(v,200),'project or state identity');
  const findings=[],seen=new Set(),notices=[];
@@ -74,55 +76,95 @@ function createReport({revision,sourceHash,geometryReport=null,measurementAudit,
   anchorSummary={checked:anchoredReview.checked,total:anchoredReview.total,status:worst([anchoredReview.status,...anchors.map(f=>f.status),...(anchoredReview.checked<anchoredReview.total||!anchoredReview.total||unbound.length?['unknown']:[])])};
   need(anchorSummary.status!=='pass'||anchorSummary.checked===anchorSummary.total&&anchors.length>0&&anchors.every(f=>f.status==='pass'),'anchored pass requires all bindings checked');
  }
+ let chainSummary;
+ if(chainReview!==undefined){
+  keys(chainReview,['findings','checked','total','status']);
+  need(Array.isArray(chainReview.findings)&&Number.isSafeInteger(chainReview.total)&&chainReview.total>=0&&Number.isSafeInteger(chainReview.checked)&&chainReview.checked>=0&&chainReview.checked<=chainReview.total&&STATUSES.includes(chainReview.status),'chain review metadata');
+  need(chainReview.findings.length===chainReview.total,'chain review requires one result per chain');
+  need(chainReview.checked===chainReview.findings.filter(f=>f&&['pass','fail'].includes(f.status)).length,'verified chain comparison count');
+  const retained=bounded(chainReview.findings,Math.max(0,MAX_FINDINGS-2-findings.length),'Dimension chain results');
+  for(const f of retained){
+   keys(f,['chainId','code','status','severity','affectedIds','measured','expected','unit','errorPercent','evidence']);
+   need(text(f.chainId,300)&&text(f.code,200)&&STATUSES.includes(f.status)&&f.severity===severity(f.status)&&strings(f.affectedIds,100000,300),'chain finding');
+   need(finite(f.measured)&&finite(f.expected)&&finite(f.errorPercent)&&(f.unit===null||typeof f.unit==='string'),'chain measurements');
+   const savedUnit=f.unit===null||text(f.unit,20)?f.unit:null;if(savedUnit!==f.unit)notices.push('Unsupported chain unit text could not be represented in the bounded unit field; retained in source evidence.');
+   need(!['pass','fail'].includes(f.status)||(f.expected>0&&f.measured!==null&&f.errorPercent!==null&&['mm','cm','m'].includes(f.unit)),'chain comparison needs verified measurements');
+   let details=f.evidence;
+   if(object(details)){
+    const encode=value=>JSON.stringify(value,(_key,item)=>{need(item!==undefined&&typeof item!=='function'&&typeof item!=='symbol'&&(typeof item!=='number'||Number.isFinite(item)),'chain evidence must be JSON data');return item;});
+    const full=encode(details);
+    // Ordinary chain evidence contains nested provenance for every participating anchor.
+    // Keep complete indexed records instead of clipping a normal multi-anchor JSON blob.
+    if(full.length>MAX_TEXT&&Array.isArray(details.anchors)){const {anchors,...context}=details;details=[encode(context),...anchors.map((anchor,anchorIndex)=>encode({anchorIndex,anchor}))];}
+    else details=[full];
+   }
+   need(Array.isArray(details),'chain evidence');
+   const refs=[...new Set([f.chainId,...f.affectedIds])];if(refs.length>MAX_IDS)notices.push('Chain affected identifiers truncated to '+MAX_IDS+' of '+refs.length+'.');
+   add('chain:'+f.chainId,f.status,refs.slice(0,MAX_IDS),{measured:f.measured,expected:f.expected,unit:savedUnit,errorPercent:f.errorPercent,evidence:['Chain checker result: '+f.code,...details]});
+  }
+  const chains=findings.filter(f=>f.code.startsWith('chain:'));
+  chainSummary={total:chainReview.total,checked:chainReview.checked,status:worst([chainReview.status,...chains.map(f=>f.status),...(chainReview.checked<chainReview.total||!chainReview.total||!chains.length?['unknown']:[])])};
+  need(chainSummary.status!=='pass'||chainSummary.checked===chainSummary.total&&chains.length>0&&chains.every(f=>f.status==='pass'),'chain pass requires all selected chains checked');
+ }
  if(!geometryReport)add('geometry-unavailable','unknown');
  if(notices.length)add('review-incomplete','unknown',[],{evidence:[...new Set(notices)].slice(0,100)});
  findings.sort((a,b)=>a.id.localeCompare(b.id));
  const geometryStatus=notices.length||!geometryReport?'unknown':!geometryReport.walls?'unknown':worst(['pass',...findings.filter(f=>f.code.startsWith('geometry:')||f.code.startsWith('unsupported:')).map(f=>f.status)]);
  const dimensions=findings.filter(isDimensionFinding);
- const report={schemaVersion:SCHEMA_VERSION,checkerVersion:CHECKER_VERSION,revision,sourceHash,...(projectId===undefined?{}:{projectId}),...(stateToken===undefined?{}:{stateToken}),runAt,...(anchorSummary?{anchoredReview:anchorSummary}:{}),status:worst(['unknown',...(anchorSummary?[anchorSummary.status]:[]),...findings.map(f=>f.status)]),findings,coverage:coverage(geometryStatus,notices.length?'unknown':dimensions.length?worst(dimensions.map(f=>f.status)):'not-checked',anchorSummary?(notices.length?'unknown':anchorSummary.status):'not-checked')};
+ const report={schemaVersion:SCHEMA_VERSION,checkerVersion:CHECKER_VERSION,revision,sourceHash,...(projectId===undefined?{}:{projectId}),...(stateToken===undefined?{}:{stateToken}),runAt,...(anchorSummary?{anchoredReview:anchorSummary}:{}),...(chainSummary?{chains:chainSummary}:{}),status:worst(['unknown',...(anchorSummary?[anchorSummary.status]:[]),...(chainSummary?[chainSummary.status]:[]),...findings.map(f=>f.status)]),findings,coverage:coverage(geometryStatus,notices.length?'unknown':dimensions.length?worst(dimensions.map(f=>f.status)):'not-checked',anchorSummary?(notices.length?'unknown':anchorSummary.status):'not-checked',false,chainSummary?(notices.length?'unknown':chainSummary.status):'not-checked')};
  return validateReports([report])[0];
 }
 function isDimensionFinding(f){return f.code.startsWith('dimension-line:')||['geometry:unsupported-dimension-unit','geometry:invalid-dimension','geometry:dimension-unit-unverified','geometry:dimension-scale-mismatch'].includes(f.code);}
 function validateReports(reports){
  need(Array.isArray(reports)&&reports.length<=MAX_REPORTS,'report array limit');
  for(const r of reports){
-  keys(r,['schemaVersion','checkerVersion','revision','sourceHash','runAt','status','findings','coverage'],['projectId','stateToken','anchoredReview']);
+  keys(r,['schemaVersion','checkerVersion','revision','sourceHash','runAt','status','findings','coverage'],['projectId','stateToken','anchoredReview','chains']);
   for(const k of ['projectId','stateToken'])need(!Object.hasOwn(r,k)||text(r[k],200),'project or state identity');
-  need(r.schemaVersion===SCHEMA_VERSION&&[CHECKER_VERSION,'schematic-1.0.0','schematic-1.1.0'].includes(r.checkerVersion),'unsupported schema or checker version');
+  need(r.schemaVersion===SCHEMA_VERSION&&[CHECKER_VERSION,'schematic-1.0.0','schematic-1.1.0','schematic-1.2.0'].includes(r.checkerVersion),'unsupported schema or checker version');
   need(text(r.revision,200)&&text(r.sourceHash,200)&&date(r.runAt)&&STATUSES.includes(r.status),'report metadata');
   need(Array.isArray(r.findings)&&r.findings.length<=MAX_FINDINGS,'finding limit');
   const seen=new Set();
   for(const f of r.findings){
    keys(f,['id','code','status','severity','affectedIds','measured','expected','unit','errorPercent','evidence']);
-   need(text(f.code,r.checkerVersion===CHECKER_VERSION?400:300)&&strings(f.affectedIds,MAX_IDS,300)&&new Set(f.affectedIds).size===f.affectedIds.length,'finding identity');
+   need(text(f.code,supportsAnchors(r.checkerVersion)?400:300)&&strings(f.affectedIds,MAX_IDS,300)&&new Set(f.affectedIds).size===f.affectedIds.length,'finding identity');
    need(f.id===identity(f.code,f.affectedIds)&&!seen.has(f.id),'invalid or duplicate finding ID');seen.add(f.id);
    need(STATUSES.includes(f.status)&&SEVERITIES.includes(f.severity)&&f.severity===severity(f.status),'finding status or severity');
    need(finite(f.measured)&&finite(f.expected)&&finite(f.errorPercent)&&(f.unit===null||text(f.unit,20))&&strings(f.evidence,100),'finding measurements or evidence');
    if(f.code==='anchor-coverage-unbound')need(f.status==='unknown'&&f.evidence.length>0,'unbound dimension coverage must remain unknown');
-   if(f.code.startsWith('anchor:'))need(!['pass','fail'].includes(f.status)||(f.expected>0&&f.measured!==null&&f.errorPercent!==null&&['mm','cm','m'].includes(f.unit)),'saved anchored comparison requires measurements');
+   if(f.code.startsWith('anchor:')||f.code.startsWith('chain:'))need(!['pass','fail'].includes(f.status)||(f.expected>0&&f.measured!==null&&f.errorPercent!==null&&['mm','cm','m'].includes(f.unit)),'saved anchored comparison requires measurements');
    if(f.code.startsWith('dimension-line:'))need(f.expected>0&&(!(f.status==='pass'||f.status==='fail')||(['mm','cm','m'].includes(f.unit)&&f.measured!==null&&f.errorPercent!==null)),'dimension result requires measurements');
   }
   const anchorFindings=r.findings.filter(f=>f.code.startsWith('anchor:'));
   if(r.anchoredReview!==undefined){
-   need(r.checkerVersion===CHECKER_VERSION,'legacy checker cannot contain anchored endpoint review');keys(r.anchoredReview,['checked','total','status']);const a=r.anchoredReview;
+   need(supportsAnchors(r.checkerVersion),'legacy checker cannot contain anchored endpoint review');keys(r.anchoredReview,['checked','total','status']);const a=r.anchoredReview;
    need(Number.isSafeInteger(a.total)&&a.total>=0&&Number.isSafeInteger(a.checked)&&a.checked>=0&&a.checked<=a.total&&STATUSES.includes(a.status)&&anchorFindings.length<=a.total,'saved anchor summary');
    need(anchorFindings.length===a.total||r.findings.some(f=>f.code==='review-incomplete'),'omitted anchored findings require disclosure');
    if(anchorFindings.length===a.total)need(a.checked===anchorFindings.filter(f=>['pass','fail'].includes(f.status)).length,'saved verified anchor count');
    need(a.status!== 'pass'||a.total>0&&a.checked===a.total&&anchorFindings.length>0&&anchorFindings.every(f=>f.status==='pass'),'saved anchored pass needs checked results');
    need(a.status===worst([a.status,...anchorFindings.map(f=>f.status),...(a.checked<a.total||!a.total||r.findings.some(f=>f.code==='anchor-coverage-unbound')?['unknown']:[])]),'saved anchored status');
   }else need(!anchorFindings.length,'anchored findings require summary');
-  need(r.status===worst(['unknown',...(r.anchoredReview?[r.anchoredReview.status]:[]),...r.findings.map(f=>f.status)]),'overall status');
-  const expected=coverage('unknown','not-checked','not-checked',r.checkerVersion!==CHECKER_VERSION);need(Array.isArray(r.coverage)&&r.coverage.length===expected.length,'coverage matrix');
+  const chainFindings=r.findings.filter(f=>f.code.startsWith('chain:'));
+  if(r.chains!==undefined){
+   need(r.checkerVersion===CHECKER_VERSION,'legacy checker cannot contain chain review');keys(r.chains,['total','checked','status']);const c=r.chains;
+   need(Number.isSafeInteger(c.total)&&c.total>=0&&Number.isSafeInteger(c.checked)&&c.checked>=0&&c.checked<=c.total&&STATUSES.includes(c.status)&&chainFindings.length<=c.total,'saved chain summary');
+   need(chainFindings.length===c.total||r.findings.some(f=>f.code==='review-incomplete'),'omitted chain findings require disclosure');
+   if(chainFindings.length===c.total)need(c.checked===chainFindings.filter(f=>['pass','fail'].includes(f.status)).length,'saved verified chain count');
+   need(c.status!=='pass'||c.total>0&&c.checked===c.total&&chainFindings.length>0&&chainFindings.every(f=>f.status==='pass'),'saved chain pass needs checked results');
+   need(c.status===worst([c.status,...chainFindings.map(f=>f.status),...(c.checked<c.total||!c.total||!chainFindings.length?['unknown']:[])]),'saved chain status');
+  }else need(!chainFindings.length,'chain findings require summary');
+  need(r.status===worst(['unknown',...(r.anchoredReview?[r.anchoredReview.status]:[]),...(r.chains?[r.chains.status]:[]),...r.findings.map(f=>f.status)]),'overall status');
+  const expected=coverage('unknown','not-checked','not-checked',!supportsAnchors(r.checkerVersion),'not-checked',r.checkerVersion===CHECKER_VERSION);need(Array.isArray(r.coverage)&&r.coverage.length===expected.length,'coverage matrix');
   for(let i=0;i<expected.length;i++){
    const c=r.coverage[i],e=expected[i];keys(c,['id','category','status','detail']);
    need(c.id===e.id&&c.category===e.category&&c.detail===e.detail&&STATUSES.includes(c.status),'coverage definition');
-   if(i>=2&&(i!==2||r.checkerVersion!==CHECKER_VERSION))need(c.status===e.status,'unsupported checks cannot pass');
+   if(i>=2&&(i!==2||!supportsAnchors(r.checkerVersion))&&i!==7)need(c.status===e.status,'unsupported checks cannot pass');
   }
   const gs=!r.findings.some(f=>f.code==='geometry-unavailable')?worst(['pass',...r.findings.filter(f=>f.code.startsWith('geometry:')||f.code.startsWith('unsupported:')).map(f=>f.status)]):'unknown';
   const incomplete=r.findings.some(f=>f.code==='review-incomplete');
   if(incomplete){const f=r.findings.find(f=>f.code==='review-incomplete');need(f.status==='unknown'&&f.evidence.length>0&&r.coverage[0].status==='unknown','incomplete review must disclose unknown coverage');}
   need(r.coverage[0].status===gs||r.coverage[0].status==='unknown','schematic coverage status');
-  if(r.checkerVersion===CHECKER_VERSION)need(r.coverage[2].status===(r.anchoredReview?(incomplete?'unknown':r.anchoredReview.status):'not-checked'),'anchored endpoint coverage status');
+  if(supportsAnchors(r.checkerVersion))need(r.coverage[2].status===(r.anchoredReview?(incomplete?'unknown':r.anchoredReview.status):'not-checked'),'anchored endpoint coverage status');
+  if(r.checkerVersion===CHECKER_VERSION)need(r.coverage[7].status===(r.chains?(incomplete?'unknown':r.chains.status):'not-checked'),'dimension chain coverage status');
   const ds=r.findings.filter(isDimensionFinding),dimensionStatus=incomplete?'unknown':ds.length?worst(ds.map(f=>f.status)):'not-checked';need(r.coverage[1].status===dimensionStatus||(r.checkerVersion!==CHECKER_VERSION&&r.coverage[1].status==='not-checked'&&!r.findings.some(f=>f.code.startsWith('dimension-line:'))),'dimension coverage status');
  }
  return JSON.parse(JSON.stringify(reports));

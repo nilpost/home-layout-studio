@@ -186,3 +186,10 @@ checker does not decide physical truth. Endpoint-only coverage is separate from 
 chains, rooms and hosted openings. Private backups and manual correction handoffs preserve
 bindings/tolerance; full source replacement is refused while bindings remain. Checker1.2
 retains older report formats, including their original unchecked coverage statements.
+
+MeasurementChains keeps explicit project-bound ordered anchor relationships separate from
+geometry. The pure module validates the relationship and compares declared values only
+after checking current endpoint topology and source authority. Removing an anchor leaves
+its chain reference visibly unresolved rather than silently selecting another binding.
+Saved reports, private backup and manual handoffs retain these relationships; full source
+replacement is blocked while chains exist. No geometry inference or remote access is added.

@@ -281,3 +281,14 @@ Checker 1.2 reports selected-endpoint coverage separately, keeps unbound dimensi
 unknown, and retains checker1.0/1.1 reports. [Binding format](MEASUREMENT_ANCHORS.md).
 This is a partial endpoint-span delivery; chains/totals, axes/levels, rooms, hosted doors,
 physical calibration, source tracing and professional/regulatory review remain open.
+
+
+## Verified development progress — 2026-10-24, v0.12.0
+
+HLS-106 adds explicitly selected single-axis dimension-chain totals: 2–8 ordered endpoint
+bindings and a separate total, contiguous and monotonic on one horizontal/vertical axis.
+Declared values are compared after metric conversion using the explicit project threshold.
+Preview/save/cancel/remove, undo and private backup/manual handoff are supported. Missing,
+stale, ambiguous, noncollinear or provisional inputs remain unknown; source labels and
+geometry are unchanged. Broader multi-axis/level, rooms and hosted door relationships,
+source verification and survey/professional review remain open. [Chain model](MEASUREMENT_CHAINS.md).

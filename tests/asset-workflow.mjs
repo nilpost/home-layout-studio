@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 import '../src/asset-records.js';
 import '../src/measurement-anchors.js';
+import '../src/measurement-chains.js';
 import '../src/layer-items.js';
 import '../src/review-history.js';
 import '../src/consistency-review.js';
@@ -19,7 +20,7 @@ class Element{
 const fixture=()=>({schemaVersion:1,projectId:'project-a',stateToken:'state-a',name:'Fabricated project',revision:'v0',baseSvg:'<svg/>',viewBox:[0,0,100,100],items:[{id:'box-a',kind:'rect',x:0,y:0,w:10,h:10}],comments:[],photos:[],original:null,objectSettings:{},assets:[],consistencyReports:[],changeLog:[],note:'',nextId:1,layers:{base:true,photos:true}});
 function context(){
  const elements=new Map(),get=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};let saves=0;
- const c=vm.createContext({state:fixture(),clone,crypto:webcrypto,URL,Blob,Date,Set,Map,history:[],future:[],selectedRefs:new Set(['item:box-a']),editingAssetId:null,assetExpected:null,assetDraftLinks:[],pendingAssetImport:null,selected:null,zoom:1,$:get,document:{createElement:()=>new Element()},AssetRecords,MeasurementAnchors,LayerItems,ReviewHistory,ConsistencyReview,OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},saveLocal:()=>saves++,notify:text=>get('message').textContent=text,cancelLandmarkMatch(){},fileText(){},download(){},DOMParser:class{parseFromString(){return {}; }},editableNodes:()=>[{id:'stable'}],safeSVG:s=>s,sourceWithIds:s=>s,XMLSerializer:class{serializeToString=s=>s;},parseVB:()=>[0,0,100,100],normalizedLayers:l=>l});
+ const c=vm.createContext({state:fixture(),clone,crypto:webcrypto,URL,Blob,Date,Set,Map,history:[],future:[],selectedRefs:new Set(['item:box-a']),editingAssetId:null,assetExpected:null,assetDraftLinks:[],pendingAssetImport:null,selected:null,zoom:1,$:get,document:{createElement:()=>new Element()},AssetRecords,MeasurementAnchors,MeasurementChains,LayerItems,ReviewHistory,ConsistencyReview,OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},saveLocal:()=>saves++,notify:text=>get('message').textContent=text,cancelLandmarkMatch(){},fileText(){},download(){},DOMParser:class{parseFromString(){return {}; }},editableNodes:()=>[{id:'stable'}],safeSVG:s=>s,sourceWithIds:s=>s,XMLSerializer:class{serializeToString=s=>s;},parseVB:()=>[0,0,100,100],normalizedLayers:l=>l});
  c.inventory=()=>c.state.items.map(i=>({ref:'item:'+i.id,id:i.id,name:'Fabricated box'}));
  c.recordChange=(...args)=>ReviewHistory.recordChange(c.state,...args);
  c.saves=()=>saves;

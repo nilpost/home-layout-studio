@@ -90,3 +90,8 @@ provider integration remain unverified HLS-104 deployment gates.
 Measurement bindings follow [MEASUREMENT_ANCHORS.md](MEASUREMENT_ANCHORS.md). They are
 project-scoped evidence associations, not authority to move walls or verify units. A source
 replacement retains them as unknown until explicitly reviewed against the new source.
+
+Optional `measurementChains` retains explicit project-bound `spanAnchorIds` and
+`totalAnchorId`, source hash and creation metadata. It is private handoff context, not
+permission to alter or verify source geometry. Missing bindings remain unresolved.
+See [chain schema](MEASUREMENT_CHAINS.md).
