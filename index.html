@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
-  <link rel="stylesheet" href="src/styles.css" />
+  <link rel="stylesheet" href="src/styles.css?v=0.7.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
-  <script src="src/geometry.js" defer></script>
-  <script src="src/review-history.js" defer></script>
-  <script src="src/original-overlay.js" defer></script>
-  <script src="src/app.js" defer></script>
+  <script src="src/geometry.js?v=0.7.0" defer></script>
+  <script src="src/review-history.js?v=0.7.0" defer></script>
+  <script src="src/original-overlay.js?v=0.7.0" defer></script>
+  <script src="src/app.js?v=0.7.0" defer></script>
 </head>
 <body>
 <div class="shell" data-panel="photos">
@@ -49,12 +49,12 @@
       <div class="muted fine">Upload your own local SVG. The public project ships only with an anonymous demonstration plan.</div>
       <div class="separator"></div>
       <label for="architecture-segment">Wall / window segment</label><select id="architecture-segment"></select><div class="prop-grid"><label>Start X<input type="number" step="any" id="segment-ax" /></label><label>Start Y<input type="number" step="any" id="segment-ay" /></label><label>End X<input type="number" step="any" id="segment-bx" /></label><label>End Y<input type="number" step="any" id="segment-by" /></label></div><button class="button full" id="propose-segment">Review coordinate change</button><button class="button full" id="edit-source">Edit architectural SVG</button><button class="button full" id="load-correction">Review ChatGPT correction</button>
-      <div class="section-label">SCALE CALIBRATION</div><label>Known span (SVG units)<input type="number" id="scale-units" min="0.001" step="any" /></label><label>Measured length (mm)<input type="number" id="scale-mm" min="0.001" step="any" /></label><button class="button full" id="save-calibration">Record scale</button><p class="fine muted">Record a known span from the source plan. No scale is assumed.</p>
+      <div class="section-label">SCALE CALIBRATION</div><label>Known span (SVG units)<input type="number" id="scale-units" min="0.001" step="any" /></label><label>Measured length (mm)<input type="number" id="scale-mm" min="0.001" step="any" /></label><button class="button full" id="save-calibration">Record scale</button><p id="scale-details" class="fine muted">Record a known span from the source plan. No scale is assumed.</p>
       <div class="section-label">SELECTION</div>
       <div id="selection-props" class="muted fine">Select a markup or furniture item to edit its coordinates.</div>
     </aside>
     <main class="main">
-      <div class="main-bar"><div><strong id="document-title">Untitled home</strong><span class="muted"> · <span id="revision-label">v0</span></span></div><div class="bar-actions"><button class="button mini" id="undo" title="Undo">↶</button><button class="button mini" id="redo" title="Redo">↷</button><button class="button mini" id="zoom-out">−</button><span id="zoom-level">100%</span><button class="button mini" id="zoom-in">+</button><button class="button mini" id="fit">Fit</button></div></div>
+      <div class="main-bar"><div><strong id="document-title">Untitled home</strong><span class="muted"> · <span id="revision-label">v0</span></span><small id="scale-summary" class="fine muted">Scale and units not verified</small></div><div class="bar-actions"><button class="button mini" id="undo" title="Undo">↶</button><button class="button mini" id="redo" title="Redo">↷</button><button class="button mini" id="zoom-out">−</button><span id="zoom-level">100%</span><button class="button mini" id="zoom-in">+</button><button class="button mini" id="fit">Fit</button></div></div>
       <div class="reference-bar"><button class="button" id="load-original">Add original PDF / image</button><button class="button" id="toggle-original" disabled aria-pressed="false">Show original</button><label class="opacity-control">Opacity <input type="range" id="original-opacity" min="0" max="100" step="5" value="50" disabled /><output id="original-opacity-value">50%</output></label><button class="button" id="align-original" disabled>Align original</button></div>
       <div id="drawing-shell" class="drawing-shell"><svg id="drawing" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editable floor plan" viewBox="0 0 1000 700"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6" fill="none" stroke="context-stroke" stroke-width="1.5" /></marker></defs><g id="plan-layer"></g><g id="original-layer" pointer-events="none"></g><g id="furniture-layer"></g><g id="markup-layer"></g><g id="comment-layer"></g><g id="photo-layer"></g><g id="preview-layer"></g></svg></div>
       <div class="footer-bar"><span id="tool-status">Select an item or choose a drawing tool.</span><span>Editable source · Reversible revisions · Exportable JSON / SVG</span></div>

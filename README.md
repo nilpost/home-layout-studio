@@ -132,3 +132,9 @@ never changes the architectural base. Cancel or Undo restores the previous align
 Whole-page fit includes paper margins and is only a starting view, not registration.
 Use **Hide original / Show original** above the plan, or **Original plan / PDF** under
 Layers; both controls share the same saved visibility setting.
+
+Scale readouts show millimetres per drawing unit and calibration status. Semantic
+dimension groups are compared against the nominal conversion; inferred units and
+provisional calibration stay flagged. The initial comparison measures annotation spans,
+not full architectural constraints. HLS-106 in the canonical backlog defines the broader
+architectural consistency run, including anchored measurements, room enclosure and doors.

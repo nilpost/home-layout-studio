@@ -22,3 +22,16 @@ assert.deepEqual(G.linearPath('m0 0h100v100h-100z','room','wall').map(s=>[s.a,s.
 assert.throws(()=>G.linearPath('M0 0A10 10 0 0 0 50 50','curve','wall'));
 assert.throws(()=>G.linearPath('M0','bad','wall'));
 console.log('PASS: 15 geometry checks (closed boundaries, gaps, duplicates, crossings, windows, doors, fixtures, calibration and unsupported paths).');
+const dimension={id:'synthetic-dim',a:[0,0],b:[100,0],value:1000,unit:'mm',unitStatus:'verified'};
+assert(!codes({segments:square,dimensions:[dimension]}).includes('dimension-scale-mismatch'));
+assert(codes({segments:square,dimensions:[{...dimension,value:900}]}).includes('dimension-scale-mismatch'));
+assert(!codes({segments:square,dimensions:[{...dimension,value:1,unit:'m'}]}).includes('dimension-scale-mismatch'));
+assert(codes({segments:square,dimensions:[{...dimension,unitStatus:'inferred'}]}).includes('dimension-unit-unverified'));
+assert(codes({segments:square,calibration:{...scale,status:'provisional'}}).includes('scale-provisional'));
+assert(codes({segments:square,dimensions:[{...dimension,unit:'J'}]}).includes('unsupported-dimension-unit'));
+assert(codes({segments:square,dimensions:[{...dimension,value:0}]}).includes('invalid-dimension'));
+assert.equal(G.validate({segments:square,calibration:null,dimensions:[dimension]}).dimensionAudit[0].measured,null);
+console.log('PASS: dimension comparison, metric conversion, provisional scale, inferred units, unsupported area units and invalid spans.');
+
+assert(codes({segments:square,dimensions:[{...dimension,unit:'constructor'}]}).includes('unsupported-dimension-unit'));
+assert(codes({segments:square,dimensions:[{...dimension,a:[0,0,1]}]}).includes('invalid-dimension'));

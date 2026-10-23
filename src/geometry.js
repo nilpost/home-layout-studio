@@ -25,8 +25,19 @@ function validate(model){
  for(const w of walls){for(const p of [w.a,w.b])if(!boundaries.some(s=>s!==w&&on(p,s)))add('open-wall-end',[w.id]);for(const r of model.fixtures||[])if(hitsRect(w,r))add('wall-through-fixture',[w.id,r.id]);}
  const scale=model.calibration;
  if(!scale||![scale.drawingUnits,scale.realMillimetres].every(x=>Number.isFinite(x)&&x>0))add('scale-unverified',[]);
+ const dimensionAudit=[],unitFactors={mm:1,cm:10,m:1000},mmPerUnit=scale?.realMillimetres/scale?.drawingUnits;
+ if(scale&&scale.status&&scale.status!=='verified')add('scale-provisional',[]);
+ const tolerance=Number.isFinite(model.dimensionTolerancePercent)?Math.max(0,model.dimensionTolerancePercent):1;
+ for(const d of model.dimensions||[]){
+  if(!d||!Array.isArray(d.a)||!Array.isArray(d.b)||d.a.length!==2||d.b.length!==2||![...d.a,...d.b,d.value].every(Number.isFinite)||d.value<=0||dist(d.a,d.b)<EPS){add('invalid-dimension',[d?.id||'unknown']);continue;}
+  const factor=Object.hasOwn(unitFactors,d.unit)?unitFactors[d.unit]:null;if(!factor){add('unsupported-dimension-unit',[d.id]);continue;}
+  if(d.unitStatus!=='verified')add('dimension-unit-unverified',[d.id]);
+  const measured=Number.isFinite(mmPerUnit)&&mmPerUnit>0?dist(d.a,d.b)*mmPerUnit/factor:null,errorPercent=measured===null?null:100*(measured/d.value-1);
+  dimensionAudit.push({id:d.id,value:d.value,unit:d.unit,measured,errorPercent,unitStatus:d.unitStatus||'unverified'});
+  if(errorPercent!==null&&Math.abs(errorPercent)>tolerance)add('dimension-scale-mismatch',[d.id]);
+ }
  if(!walls.length)add('no-semantic-walls',[]);
- return {segments:segments.length,walls:walls.length,fixtures:(model.fixtures||[]).length,issues,unsupported:model.unsupported||[],limitations:['Schematic centreline checks only. Open wall ends may be intentional; explicit opening segments close door gaps. Door leaves and curves are not opening spans. Wall thickness, door swings, load-bearing safety and as-built accuracy are not certified.']};
+ return {segments:segments.length,walls:walls.length,fixtures:(model.fixtures||[]).length,issues,unsupported:model.unsupported||[],dimensionAudit,dimensionTolerancePercent:tolerance,limitations:['Schematic centreline checks only. Open wall ends may be intentional; explicit opening segments close door gaps. Door leaves and curves are not opening spans. Dimension-line spans are not yet anchored to wall endpoints. The dimension tolerance is a review threshold, not a construction allowance. Wall thickness, door swings, load-bearing safety and as-built accuracy are not certified.']};
 }
 root.LayoutGeometry={linearPath,validate,on,overlap,crossing,hitsRect};
 })(typeof window==='undefined'?globalThis:window);

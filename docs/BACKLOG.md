@@ -1,6 +1,6 @@
 # Development backlog and deployment gates
 
-These requirements were accepted on 2026-10-22, with collaboration added on 2026-10-23. They must inform development now and
+These requirements were accepted on 2026-10-22, with collaboration and architectural review added on 2026-10-23. They must inform development now and
 be reviewed before production deployment. They are planned work, not delivered features.
 This document is the canonical requirements backlog; private deployment configuration
 and household datasets remain outside this repository. Repository issues, if introduced,
@@ -130,9 +130,52 @@ Acceptance criteria:
 Consider during development: model project membership, roles and invitation lifecycle now;
 sharing a project must not grant access to the owner's entire vault or ChatGPT account.
 
+## HLS-106 — Run an architectural consistency review
+
+Status: planned · Priority: core development; required before deployment
+
+Provide a site-native **Review project consistency** run covering measured geometry,
+notation and architectural relationships, with a traceable report for a real project.
+Existing schematic checks and dimension comparisons provide partial coverage only.
+
+Acceptance criteria:
+- Inventory original plans, page/revision provenance, units, printed/derived scale and
+  calibration references. Distinguish verified measurements, inferred units and approximate
+  geometry; screen zoom and PDF paper size must not be treated as calibrated plan scale.
+- Compare dimension chains and totals against anchored wall/opening geometry on both axes,
+  across rooms and levels. Detect inconsistent scaling, mixed units, distorted references,
+  missing/changed dimension labels and contradictory dimensions. Require project-specific
+  tolerances; identify the source spans behind each calibration and finding.
+- Check wall junctions, gaps, overlaps, duplicates, crossings, thickness and consistent
+  alignment. Model intentional door/window openings so they do not create false gaps.
+- Check room boundaries as closed regions, room labels/IDs, areas and adjacency, including
+  exterior/terrace boundaries. Distinguish physical enclosure from intentionally open-plan
+  zones. Preserve source area units; do not silently convert jo/tatami figures to square metres.
+- Check doors against openings, wall/jamb connections, hinge and swing direction, widths,
+  collisions and passage clearances; check windows/glazing placement and conflicting solids.
+- Review fixed equipment, circulation, access, stairs/level changes and other relevant
+  project constraints when sufficient dimensions and semantics are available. Report missing
+  inputs and unsupported geometry explicitly instead of marking unknown checks as passed.
+- Maintain a coverage matrix separating automated geometry checks, source-notation review,
+  survey-dependent verification and professional/code review. Any jurisdictional rule set
+  needs its location, edition and authoritative source; geometric consistency alone must not
+  be presented as structural safety, regulatory compliance or as-built certification.
+- Produce a saved report bound to project revision/source hash, run time and checker version,
+  with pass/fail/warning/unknown/not-checked results, severity, affected items, source evidence,
+  measured versus expected values and click-through highlights on the plan.
+- Let the user rerun review after imports or edits, compare with earlier runs, and include
+  unresolved findings in correction handoffs and deployment/export readiness checks.
+  Propose fixes for review; never silently reshape walls or overwrite source measurements.
+- Test representative valid and invalid plans, intentional openings/open-plan spaces,
+  incomplete semantic models, unit/scale conflicts, stale reports and regression cases.
+
+Consider during development: use stable element/room/dimension identities, anchored
+measurements, explicit units and provenance now; keep the review engine independent of
+agent providers and all actual project evidence private.
+
 ## Deployment review
 
-Before deployment, review HLS-101 through HLS-105 and record evidence or an explicit
+Before deployment, review HLS-101 through HLS-106 and record evidence or an explicit
 user-approved deferral for every acceptance criterion. Begin with the shared data model,
-private storage/authorization design and agent contracts because all four requirements
+private storage/authorization design and agent contracts because these requirements
 rely on them. This backlog does not authorize a deployment, DNS change or new access grant.

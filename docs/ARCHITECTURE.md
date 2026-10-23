@@ -35,7 +35,7 @@ Host bridge reference: https://developers.openai.com/plugins/reference. Project 
 
 ## Development requirements and deployment gates
 
-[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-105 require site-native workflows, private vault-linked assets, an authenticated multi-project portal, Codex/Claude interoperability and email-invited project collaboration. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
+[docs/BACKLOG.md](BACKLOG.md) is the canonical requirements backlog. HLS-101 through HLS-106 require site-native workflows, private vault-linked assets, an authenticated multi-project portal, Codex/Claude interoperability email-invited project collaboration and a versioned architectural consistency review. Account/project/asset identities, versioned operations and provider-neutral correction contracts must be considered before further feature development. Owner-specific domain settings remain private.
 
 ## Original reference layer
 
@@ -63,3 +63,11 @@ residual error and the base source hash. It does not deform the reference or rew
 base geometry. The six-click workflow temporarily isolates source/target views without
 persisting those temporary layer overrides; cancellation and undo restore the view.
 Whole-page fitting is explicitly separate because PDF margins are not plan landmarks.
+
+Dimension groups can declare `data-dimension-value`, `data-unit` and `data-unit-status`.
+The current audit measures the longest dimension-line span and compares it with the
+nominal calibrated conversion, using a 1% review threshold. It reports inferred units
+and provisional calibration separately. These annotation spans are not yet associated
+with wall/room endpoints; HLS-106 requires anchored geometry, full room/door semantics,
+project-specific tolerances and saved revision-bound reports. Source paper scale can be
+derived conditionally, but is distinct from screen zoom and reconstruction accuracy.
