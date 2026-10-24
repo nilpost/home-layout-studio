@@ -24,7 +24,7 @@ function context(){
  c.inventory=()=>c.state.items.map(i=>({ref:'item:'+i.id,id:i.id,name:'Fabricated box'}));
  c.recordChange=(...args)=>ReviewHistory.recordChange(c.state,...args);
  c.saves=()=>saves;
- for(const name of ['remember','restoreSnapshot','validProject','mutate','assetContext','assertAssetContext','assetNotice','showAssetLinks','renderAssetActivity','setAssetActivityDraft','addAssetMaintenance','removeAssetMaintenance','addAssetIssue','changeAssetIssue','showAssetForm','refreshAssets','saveAssetDraft','stageAssetImport','wireAssets','jsonExport','importJSON'])vm.runInContext(code(name),c);
+ for(const name of ['remember','restoreSnapshot','validProject','mutate','assetContext','assertAssetContext','assetNotice','showAssetLinks','assetProvenanceText','renderAssetActivity','setAssetActivityDraft','addAssetMaintenance','removeAssetMaintenance','addAssetIssue','changeAssetIssue','showAssetForm','refreshAssets','saveAssetDraft','stageAssetImport','wireAssets','jsonExport','importJSON'])vm.runInContext(code(name),c);
  for(const name of ['undo','redo']){const body=app.match(new RegExp("\\$\\('"+name+"'\\)\\.onclick=\\(\\)=>\\{(.*?)\\};",'s'))?.[1];assert.ok(body);vm.runInContext('function '+name+'(){'+body+'}',c);}
  c.wireAssets();return c;
 }
@@ -88,4 +88,35 @@ const payload=record=>JSON.stringify({assetSchemaVersion:1,projectId:'project-a'
  assert.equal(JSON.stringify(c.state),before,'Full SVG replacement with base-linked assets must preserve source and asset identities');assert.equal(c.history.length,0);assert.equal(c.saves(),saved);assert.match(c.$('message').textContent,/asset|link|source/i);
 }
 
-console.log('PASS: transactional asset create/edit/delete/undo, provenance, orphan links, import preview/cancel/stale guards and private backup round trip.');
+{
+ const c=context(),untrusted='Synthetic <img src=https://example.invalid/never-fetch onerror=alert(1)>\nSecond label line';
+ const sources=[
+  {id:'source-unverified',label:untrusted,kind:'vault-note',uri:'obsidian://open?vault=Example&file=Synthetic%20Reference',status:'unverified',revision:'revision-unverified',contentHash:'hash-unverified'},
+  {id:'source-import',label:'Synthetic historical manual',kind:'manual',uri:'https://example.invalid/manual-at-import',status:'available-at-import',revision:'revision-import',contentHash:'hash-import',importedAt:'2025-03-04T05:06:07.123Z'},
+  {id:'source-unavailable',label:'Synthetic unavailable reference',kind:'other',uri:'https://example.invalid/unavailable',status:'unavailable',revision:'revision-unavailable',contentHash:'hash-unavailable',importedAt:'2024-01-02T03:04:05Z'},
+  {id:'source-changed',label:'Synthetic changed manual',kind:'manual',uri:'https://example.invalid/changed',status:'changed',revision:'revision-changed',contentHash:'hash-changed'}
+ ];
+ const record=AssetRecords.validate([{...importedRecord(),name:'Synthetic readable provenance',room:'Synthetic room',manufacturer:'Owner-entered maker',notes:'Synthetic source note\nMultiline owner-visible content',sources,linkedRefs:['item:box-a','photo:missing','original:reference'],provenance:{name:{authority:'user'},room:{authority:'unverified',sourceId:'source-unavailable'},manufacturer:{authority:'user',sourceId:'source-changed'},model:{authority:'imported-source',sourceId:'source-import'},notes:{authority:'imported-source',sourceId:'source-unverified'}}}],{projectId:'project-a'})[0];
+ c.state.assets=[record];c.assetDraftMaintenance=[{id:'draft-only',kind:'history',text:'Unsaved synthetic activity'}];c.$('asset-model').value='Unsaved field value';
+ const before=JSON.stringify(c.state),history=JSON.stringify(c.history),future=JSON.stringify(c.future),draft=JSON.stringify(c.assetDraftMaintenance),saved=c.saves();
+ let externalActions=0;const forbid=()=>{externalActions++;throw Error('Formatting must not perform external actions');};c.fetch=forbid;c.open=forbid;c.window={fetch:forbid,open:forbid};c.XMLHttpRequest=class{constructor(){forbid();}};c.Image=class{constructor(){forbid();}};
+ const text=c.assetProvenanceText(record);
+ assert.equal(typeof text,'string');
+ for(const phrase of ['Asset name: User annotation','Room / zone: Unverified','Manufacturer: User annotation','Model: Imported source','Notes: Imported source'])assert.ok(text.includes(phrase),phrase);
+ assert.ok(text.includes('Model: Imported source · Reference: Synthetic historical manual [source-import]'),'Source-derived model retains exact source identity association');
+ assert.ok(text.includes('Manufacturer: User annotation · Reference: Synthetic changed manual [source-changed]'),'User annotations with source references retain that association');
+ assert.ok(text.includes('Room / zone: Unverified · Reference: Synthetic unavailable reference [source-unavailable]'),'Unverified fields retain their source association');
+ assert.ok(text.includes('Notes: Imported source · Reference: '+untrusted+' [source-unverified]'),'Multiline labels remain literal reference text');
+ for(const source of sources){for(const value of [source.id,source.label,source.uri,source.revision,source.contentHash,source.importedAt].filter(Boolean))assert.ok(text.includes(value),'Readable source details retain '+value);}
+ for(const phrase of ['Unverified — source has not been checked','Available at import only — current availability is unverified','Reported unavailable — linked facts need review','Reported changed — review dependent fields','Vault note','Manual','Other reference'])assert.ok(text.includes(phrase),phrase);
+ for(const ref of ['photo:missing','original:reference'])assert.ok(text.includes('Missing layout item: '+ref+' — stable reference retained.'));
+ assert.equal(text.includes('Missing layout item: item:box-a'),false,'Available local item is not reported missing');
+ assert.match(text,/not independent verification/);assert.match(text,/No source is opened, fetched or updated/);
+ assert.equal(JSON.stringify(c.state),before);assert.equal(JSON.stringify(c.history),history);assert.equal(JSON.stringify(c.future),future);assert.equal(JSON.stringify(c.assetDraftMaintenance),draft);assert.equal(c.$('asset-model').value,'Unsaved field value');assert.equal(c.saves(),saved);assert.equal(externalActions,0,'Read-only formatting never fetches or opens references');
+ const target=c.$('asset-provenance');Object.defineProperty(target,'innerHTML',{set(){throw Error('Untrusted reference text cannot be interpreted as HTML');}});target.insertAdjacentHTML=()=>{throw Error('Untrusted reference text cannot be interpreted as HTML');};
+ c.showAssetForm(record.id);assert.equal(target.textContent,text,'The actual form renders the formatter through a plain text sink');assert.ok(target.textContent.includes('<img src=https://example.invalid/never-fetch onerror=alert(1)>'));assert.equal(target.children.length,0,'Reference values do not create active DOM children');assert.equal(externalActions,0);assert.equal(JSON.stringify(c.state),before);assert.equal(c.saves(),saved);
+ const noSources=AssetRecords.createRecord({id:'synthetic-no-sources',projectId:'project-a',name:'Synthetic local annotation'}),localText=c.assetProvenanceText(noSources);assert.match(localText,/No knowledge references linked/);assert.match(localText,/not a live source check/);
+ assert.match(c.assetProvenanceText(null),/No source facts are inferred/);
+}
+
+console.log('PASS: transactional assets, plain-text provenance/source evidence, historical availability, inert references, draft isolation and private backup round trip.');

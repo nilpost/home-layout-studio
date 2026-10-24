@@ -90,3 +90,8 @@ field authority. Editing activities does not verify imported source facts, compl
 real maintenance job, set reminders, fetch links or write back to any source. Existing
 per-collection bounds and date/status validation apply. Private backup, asset export
 and manual handoff retain saved activity entries; undo restores prior records.
+
+The evidence panel uses plain human-readable text for field authority, source identity,
+URI, revision/hash, recorded availability time and reference findings. Source links are
+not activated or fetched. Historical availability at import remains distinct from live
+verification; unavailable and changed references retain their recorded evidence.

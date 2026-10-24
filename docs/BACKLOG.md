@@ -302,3 +302,7 @@ asset revisions. Field provenance and read-only source records are preserved. Da
 are user-entered metadata; no reminder delivery, source write-back or physical verification
 is implied. Remote source/attachment connectors and authenticated permissions remain
 undeployed gates. [Activity workflow](ASSET_RECORDS.md#local-maintenance-and-issues).
+
+Version0.13.1 makes HLS-102 field attribution, read-only source evidence and unresolved
+reference findings readable inside the asset form. It changes presentation only; no source
+fetch, verification status change or remote permission is introduced.
