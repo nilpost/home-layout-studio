@@ -321,3 +321,14 @@ Startup now blocks editing before loading or writing a project if required edito
 components fail to load, or saved metadata fails validation. It preserves existing
 storage instead of falling through to a writable demonstration project. Reload to retry;
 no automatic reset or recovery overwrite is performed.
+
+
+## Verified development progress — 2026-10-24, v0.15.0
+
+HLS-107 adds numeric translation of 2–100 selected overlays as one reviewed group.
+Furniture/boxes move by their origins, arrows move both endpoints, and paint moves its
+origin while retaining stroke points. Every selected item must remain present, visible
+and unlocked. Mixed architectural/comment/photo selections reject the entire operation.
+Preview shows all affected overlays, Apply creates one reversible history entry, and
+Cancel makes no change. Selection membership and project/item identity are rechecked
+before committing. Rotation, group scaling and connected architectural edits remain open.

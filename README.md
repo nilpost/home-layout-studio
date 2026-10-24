@@ -226,3 +226,8 @@ One selected furniture or box overlay can be scaled proportionally about its cen
 Enter a percentage, preview the new outline and pivot, then Apply or Cancel. The same
 project/item guards, locks, undo and review recording apply. This preserves aspect ratio
 and metadata; it does not rotate items or modify connected architecture.
+
+Multiple overlay selections can move together using explicit X/Y offsets. Preview shows
+every member; Apply records one undoable change. If any member is stale, hidden, locked
+or unsupported, the whole proposal is rejected. Architecture and photo/comment selections
+are excluded; rotation and group scaling remain unavailable.

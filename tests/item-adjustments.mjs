@@ -62,4 +62,29 @@ const changedScale=structuredClone(staleScale);changedScale.after.w=999;assert.t
 assert.throws(()=>A.proposeScale({...context,item:{...item,x:A.MAX_COORDINATE,y:A.MAX_COORDINATE},scalePercent:50}));
 assert.throws(()=>A.proposeScale({...context,item:{...item,x:A.MAX_COORDINATE-10},scalePercent:200}));
 assert.deepEqual(context,snapshot);
-console.log('PASS: exact single-overlay preview/apply, center uniform scaling, units, metadata, locks/visibility, stale-state/item guards, unsupported edits and atomic rejection.');
+const groupItems=[item,{id:'synthetic-arrow',kind:'arrow',x:-3,y:4,x2:9,y2:14,color:'#123456',assetId:'arrow-asset'},{id:'synthetic-paint',kind:'paint',x:3,y:5,points:[[0,0],[-2,4]],width:2,color:'#654321',sourceId:'synthetic-source'},{id:'synthetic-rect',kind:'rect',x:1,y:2,w:7,h:9}];
+const group={items:groupItems,selectedRefs:groupItems.map(item=>'item:'+item.id),projectId:context.projectId,stateToken:context.stateToken,lockedRefs:[],hiddenRefs:[],deltaX:12.125,deltaY:-3.5};
+const groupBefore=structuredClone(group),translated=A.proposeTranslation(group),replacements=A.applyTranslation(translated,group);
+assert.deepEqual(group,groupBefore);assert.equal(translated.members.length,4);
+for(let i=0;i<replacements.length;i++){
+ assert.equal(replacements[i].id,groupItems[i].id);assert.equal(replacements[i].x,groupItems[i].x+group.deltaX);assert.equal(replacements[i].y,groupItems[i].y+group.deltaY);
+ if(replacements[i].kind==='arrow'){assert.equal(replacements[i].x2,groupItems[i].x2+group.deltaX);assert.equal(replacements[i].y2,groupItems[i].y2+group.deltaY);assert.equal(replacements[i].x2-replacements[i].x,groupItems[i].x2-groupItems[i].x);}
+ else if(replacements[i].kind==='paint')assert.deepEqual(replacements[i].points,groupItems[i].points);
+ else {assert.equal(replacements[i].w,groupItems[i].w);assert.equal(replacements[i].h,groupItems[i].h);}
+}
+assert.equal(replacements[0].assetId,item.assetId);assert.equal(replacements[1].assetId,'arrow-asset');assert.equal(replacements[2].sourceId,'synthetic-source');
+assert.deepEqual(A.applyTranslation(JSON.parse(JSON.stringify(translated)),{...group,selectedRefs:[...group.selectedRefs].reverse()}),replacements);
+for(const change of [{selectedRefs:group.selectedRefs.slice(0,1)},{selectedRefs:['item:synthetic-item','photo:synthetic-photo']},{selectedRefs:['item:synthetic-item','item:synthetic-item']},{selectedRefs:['item:synthetic-item','item:missing']},{items:[...groupItems,item]},{deltaX:NaN},{deltaY:Infinity},{deltaX:'2'},{deltaX:A.MAX_COORDINATE},{lockedRefs:['item:synthetic-arrow']},{hiddenRefs:['item:synthetic-paint']}]){
+ assert.throws(()=>A.proposeTranslation({...group,...change}));assert.deepEqual(group,groupBefore);
+}
+assert.throws(()=>A.proposeTranslation({...group,selectedRefs:Array.from({length:101},(_,i)=>'item:'+i)}));
+for(const change of [{selectedRefs:group.selectedRefs.slice(1)},{selectedRefs:[...group.selectedRefs.slice(1),'item:other']},{stateToken:'changed'},{projectId:'foreign'},{lockedRefs:['item:synthetic-rect']},{hiddenRefs:['item:synthetic-arrow']},{items:groupItems.slice(1)},{items:groupItems.map((item,i)=>i===3?{...item,x:99}:item)}]){
+ assert.throws(()=>A.applyTranslation(translated,{...group,...change}));assert.deepEqual(group,groupBefore);
+}
+for(const tamper of [p=>p.members.pop(),p=>p.members.push(p.members[0]),p=>{p.members[1].patch.x2++;},p=>{p.members[1].after.color='#ffffff';},p=>{p.members[1].extraOperation='delete';},p=>{p.extraOperation='delete';},p=>{p.deltaX++;}]){const changed=structuredClone(translated);tamper(changed);assert.throws(()=>A.applyTranslation(changed,group));assert.deepEqual(group,groupBefore);}
+const paintOverflow={...groupItems[2],x:A.MAX_COORDINATE-1,points:[[0,0],[4,0]]};
+assert.throws(()=>A.proposeTranslation({...group,items:[item,paintOverflow],selectedRefs:['item:'+item.id,'item:'+paintOverflow.id],deltaX:0,deltaY:0}));
+const rectOverflow={...item,x:A.MAX_COORDINATE-1};assert.throws(()=>A.proposeTranslation({...group,items:[rectOverflow,groupItems[1]],selectedRefs:['item:'+item.id,'item:synthetic-arrow'],deltaX:0,deltaY:0}));
+const detachedGroup=structuredClone(translated);detachedGroup.members[2].after.points[0][0]=888;assert.deepEqual(group,groupBefore);
+assert.throws(()=>A.proposeTranslation({...group,deltaX:Number.MIN_VALUE}),'Unrepresentable motion must not partially move the group');
+console.log('PASS: single-overlay preview/scaling and atomic group translation, bounds, metadata, locks/visibility, exact selection/state guards, tampering and detached serialization.');

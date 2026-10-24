@@ -62,5 +62,50 @@ function applyProposal(proposal,current){
  if(canonical(checked.after)!==canonical(proposal.after))throw Error('Invalid adjustment preview: proposed geometry changed.');
  return copy(checked.after);
 }
-root.ItemAdjustments=Object.freeze({MAX_COORDINATE,propose,proposeScale,applyProposal});
+function exactKeys(value,allowed,label){object(value,label);for(const key of Object.keys(value))if(!allowed.includes(key))throw Error('Unsupported '+label+' field: '+key);}
+function refs(value,label,{selection=false}={}){
+ if(!Array.isArray(value)||value.length>(selection?100:20000)||selection&&value.length<2)throw Error('Choose 2 to 100 distinct overlay items for translation.');
+ for(const ref of value)if(typeof ref!=='string'||!ref||ref.length>300||/[\s\u0000-\u001f\u007f]/.test(ref)||selection&&!/^item:.+/.test(ref))throw Error('Invalid '+label+': only explicit overlay item references can move together.');
+ if(selection&&new Set(value).size!==value.length)throw Error('Duplicate selected item reference');
+ return [...value];
+}
+function translationFootprint(item){
+ const points=item.kind==='paint'?item.points.map(p=>[item.x+p[0],item.y+p[1]]):item.kind==='arrow'?[[item.x,item.y],[item.x2,item.y2]]:[[item.x,item.y],[item.x+item.w,item.y+item.h]];
+ for(const [x,y]of points){number(x,'translated footprint X');number(y,'translated footprint Y');}
+}
+function proposeTranslation(input){
+ object(input,'group translation');
+ const selectedRefs=refs(input.selectedRefs,'selected references',{selection:true}),locked=new Set(refs(input.lockedRefs===undefined?[]:input.lockedRefs,'locked references')),hidden=new Set(refs(input.hiddenRefs===undefined?[]:input.hiddenRefs,'hidden references'));
+ if(!Array.isArray(input.items)||input.items.length>5000)throw Error('Invalid current overlay items');
+ number(input.deltaX,'translation X');number(input.deltaY,'translation Y');
+ const context={projectId:identity(input.projectId,'project identity'),stateToken:identity(input.stateToken,'state token')};
+ const members=selectedRefs.map(ref=>{
+  const found=input.items.filter(item=>item&&'item:'+item.id===ref);
+  if(found.length!==1)throw Error('Selected item is missing or duplicated: '+ref);
+  const item=found[0];available({locked:locked.has(ref),hidden:hidden.has(ref)});validateItem(item);
+  const patch={x:item.x+input.deltaX,y:item.y+input.deltaY};
+  if(item.kind==='arrow'){patch.x2=item.x2+input.deltaX;patch.y2=item.y2+input.deltaY;}
+  for(const key of Object.keys(patch))if((key==='x'||key==='x2'?input.deltaX:input.deltaY)!==0&&patch[key]===item[key])throw Error('Translation is too small to represent for every selected item.');
+  const member=propose({item,patch,...context,locked:false,hidden:false,calibration:input.calibration});
+  translationFootprint(member.after);return member;
+ });
+ return {operationVersion:1,context,selectedRefs,deltaX:input.deltaX,deltaY:input.deltaY,members,unitDescription:units(input.calibration)};
+}
+function applyTranslation(proposal,current){
+ exactKeys(proposal,['operationVersion','context','selectedRefs','deltaX','deltaY','members','unitDescription'],'translation proposal');object(current,'current translation context');
+ if(proposal.operationVersion!==1)throw Error('Unsupported translation proposal version');
+ exactKeys(proposal.context,['projectId','stateToken'],'translation context');
+ if(proposal.context.projectId!==current.projectId||proposal.context.stateToken!==current.stateToken)throw Error('Stale translation: project state changed.');
+ const originalRefs=refs(proposal.selectedRefs,'proposal selection',{selection:true}),currentRefs=refs(current.selectedRefs,'current selection',{selection:true});
+ if(canonical([...originalRefs].sort())!==canonical([...currentRefs].sort()))throw Error('Stale translation: selected item identities changed.');
+ if(!Array.isArray(proposal.members)||proposal.members.length!==originalRefs.length)throw Error('Invalid translation members');
+ const checked=proposeTranslation({...current,selectedRefs:originalRefs,deltaX:proposal.deltaX,deltaY:proposal.deltaY});
+ for(let i=0;i<checked.members.length;i++){
+  const member=proposal.members[i],expected=checked.members[i];
+  exactKeys(member,['operationVersion','context','before','after','patch','unitDescription'],'translation member');
+  for(const key of ['operationVersion','context','before','after','patch'])if(canonical(member[key])!==canonical(expected[key]))throw Error('Stale or modified translation member: review the complete selection again.');
+ }
+ return checked.members.map(member=>copy(member.after));
+}
+root.ItemAdjustments=Object.freeze({MAX_COORDINATE,propose,proposeScale,applyProposal,proposeTranslation,applyTranslation});
 })(typeof window==='undefined'?globalThis:window);
