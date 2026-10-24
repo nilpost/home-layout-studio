@@ -39,4 +39,44 @@ assert.match(A.findings(historical)[0].message,/current availability is unverifi
 assert.equal(historical[0].sources[0].status,'available-at-import');
 assert.throws(()=>A.validate([{...base,maintenance:[{id:'bad-date',kind:'schedule',text:'Synthetic service',date:'2026-02-30'}]}],context));
 assert.throws(()=>A.stageImport(payload,{...context,now:'2026-02-30T00:00:00Z'}));
+const currentActivity=A.validate([record],context)[0];
+const activityPatch={maintenance:[{id:'schedule-2',kind:'schedule',text:'Synthetic scheduled check',date:'2028-02-29'},{id:'history-2',kind:'history',text:'Synthetic completed service',date:'2026-04-01'}],issues:[{id:'issue-2',text:'Synthetic inspection issue',status:'resolved',recordedAt:'2026-04-02T03:04:05.123Z'}]};
+const activityBefore=structuredClone({currentActivity,activityPatch});
+const activity=A.updateActivity(currentActivity,activityPatch);
+assert.deepEqual({currentActivity,activityPatch},activityBefore,'Activity authoring cannot mutate current state or draft collections');
+for(const key of ['id','projectId','name','room','manufacturer','model','notes','linkedRefs','sources','provenance'])assert.deepEqual(activity[key],currentActivity[key],key+' retained exactly');
+assert.equal(activity.provenance.model.authority,'imported-source');assert.equal(activity.provenance.model.sourceId,'source-1');assert.equal(activity.sources[0].status,'changed');assert.equal(activity.sources[0].contentHash,'fabricated-hash');
+assert.deepEqual(activity.maintenance,activityPatch.maintenance);assert.deepEqual(activity.issues,activityPatch.issues);
+assert.deepEqual(A.validate(JSON.parse(JSON.stringify([activity])),context),[activity],'Activity edits preserve schema 1 import/export compatibility');
+const maintenanceOnly=A.updateActivity(currentActivity,{maintenance:activityPatch.maintenance});assert.deepEqual(maintenanceOnly.issues,currentActivity.issues);
+const issuesOnly=A.updateActivity(currentActivity,{issues:activityPatch.issues});assert.deepEqual(issuesOnly.maintenance,currentActivity.maintenance);
+const cleared=A.updateActivity(currentActivity,{maintenance:[],issues:[]});assert.deepEqual(cleared.maintenance,[]);assert.deepEqual(cleared.issues,[]);assert.equal(currentActivity.maintenance.length,1);
+activity.maintenance[0].text='Edited detached schedule';activity.issues[0].status='open';activity.sources[0].label='Detached source';activity.provenance.model.sourceId='detached-source';activity.linkedRefs.push('item:detached');
+assert.deepEqual({currentActivity,activityPatch},activityBefore,'Nested result metadata and collections are fully detached');
+function freeze(value){if(value&&typeof value==='object'){Object.freeze(value);for(const child of Object.values(value))freeze(child);}return value;}
+assert.doesNotThrow(()=>A.updateActivity(freeze(structuredClone(currentActivity)),freeze(structuredClone(activityPatch))));
+const boundaryMaintenance=Array.from({length:200},(_,i)=>({id:'synthetic-maintenance-'+i,kind:'history',text:'Synthetic activity'}));
+const boundaryIssues=Array.from({length:200},(_,i)=>({id:'synthetic-issue-'+i,status:'open',text:'Synthetic issue'}));
+const boundaryActivity=A.updateActivity(currentActivity,{maintenance:boundaryMaintenance,issues:boundaryIssues});assert.equal(boundaryActivity.maintenance.length,200);assert.equal(boundaryActivity.issues.length,200);
+for(const patch of [
+ {},{unknown:[]},{id:'replacement'},{projectId:'foreign'},{sources:[]},{provenance:{}},{name:'Unexpected metadata edit'},
+ {maintenance:undefined},{maintenance:null},{maintenance:{}},{issues:undefined},{issues:null},
+ {maintenance:[...boundaryMaintenance,{id:'overflow',kind:'history',text:'Synthetic overflow'}]},
+ {issues:[...boundaryIssues,{id:'overflow',status:'open',text:'Synthetic overflow'}]},
+ {maintenance:[activityPatch.maintenance[0],activityPatch.maintenance[0]]},
+ {issues:[activityPatch.issues[0],activityPatch.issues[0]]},
+ {maintenance:[{id:'bad-date',kind:'schedule',text:'Synthetic schedule',date:'2026-02-30'}]},
+ {maintenance:[{id:'bad-date',kind:'history',text:'Synthetic history',date:'2027-02-29'}]},
+ {maintenance:[{id:'bad-date',kind:'history',text:'Synthetic history',date:'2026-4-1'}]},
+ {maintenance:[{id:'bad-kind',kind:'done',text:'Synthetic activity'}]},
+ {issues:[{id:'bad-time',status:'open',text:'Synthetic issue',recordedAt:'2026-02-30T00:00:00Z'}]},
+ {issues:[{id:'bad-time',status:'open',text:'Synthetic issue',recordedAt:'2026-04-02T03:04:05+09:00'}]},
+ {issues:[{id:'bad-status',status:'closed',text:'Synthetic issue'}]},
+ {issues:[{id:'bad-text',status:'open',text:'x'.repeat(2001)}]},
+ {issues:[{id:'bad-field',status:'open',text:'Synthetic issue',sourceId:'source-1'}]},
+ {maintenance:activityPatch.maintenance,issues:[{id:'bad-status',status:'closed',text:'Synthetic issue'}]}
+]){
+ const beforePatch=structuredClone(patch),beforeCurrent=structuredClone(currentActivity);assert.throws(()=>A.updateActivity(currentActivity,patch));assert.deepEqual(patch,beforePatch);assert.deepEqual(currentActivity,beforeCurrent,'Failed validation cannot partially apply activity edits');
+}
+const invalidCurrent={...currentActivity,provenance:{...currentActivity.provenance,model:{authority:'imported-source',sourceId:'missing-source'}}};const invalidSnapshot=structuredClone(invalidCurrent);assert.throws(()=>A.updateActivity(invalidCurrent,{issues:[]}));assert.deepEqual(invalidCurrent,invalidSnapshot);
 console.log('PASS: local asset identity/provenance, read-only source evidence, detached import preview, orphan findings, strict bounds and foreign/duplicate/unsafe-reference rejection.');

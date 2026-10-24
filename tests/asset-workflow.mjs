@@ -14,17 +14,17 @@ const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const clone=v=>JSON.parse(JSON.stringify(v));
 function code(name){const start=app.search(new RegExp('^(?:async )?function '+name+'\\(','m'));assert.ok(start>=0,'Missing '+name);const end=app.indexOf('\n',start),line=app.slice(start,end);return line.endsWith('{')?app.slice(start,app.indexOf('\n}',start)+2):line;}
 class Element{
- constructor(){this.value='';this.textContent='';this.hidden=false;this.disabled=false;this.children=[];}
- replaceChildren(...children){this.children=children;}append(...children){this.children.push(...children);}showModal(){}close(){}click(){this.onclick?.();}
+ constructor(){this.value='';this.textContent='';this.hidden=false;this.disabled=false;this.children=[];this.dataset={};}
+ replaceChildren(...children){this.children=children;}append(...children){this.children.push(...children);}showModal(){}close(){}addEventListener(){}click(){this.onclick?.();}
 }
 const fixture=()=>({schemaVersion:1,projectId:'project-a',stateToken:'state-a',name:'Fabricated project',revision:'v0',baseSvg:'<svg/>',viewBox:[0,0,100,100],items:[{id:'box-a',kind:'rect',x:0,y:0,w:10,h:10}],comments:[],photos:[],original:null,objectSettings:{},assets:[],consistencyReports:[],changeLog:[],note:'',nextId:1,layers:{base:true,photos:true}});
 function context(){
  const elements=new Map(),get=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};let saves=0;
- const c=vm.createContext({state:fixture(),clone,crypto:webcrypto,URL,Blob,Date,Set,Map,history:[],future:[],selectedRefs:new Set(['item:box-a']),editingAssetId:null,assetExpected:null,assetDraftLinks:[],pendingAssetImport:null,selected:null,zoom:1,$:get,document:{createElement:()=>new Element()},AssetRecords,MeasurementAnchors,MeasurementChains,LayerItems,ReviewHistory,ConsistencyReview,OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},saveLocal:()=>saves++,notify:text=>get('message').textContent=text,cancelLandmarkMatch(){},fileText(){},download(){},DOMParser:class{parseFromString(){return {}; }},editableNodes:()=>[{id:'stable'}],safeSVG:s=>s,sourceWithIds:s=>s,XMLSerializer:class{serializeToString=s=>s;},parseVB:()=>[0,0,100,100],normalizedLayers:l=>l});
+ const c=vm.createContext({state:fixture(),clone,crypto:webcrypto,URL,Blob,Date,Set,Map,history:[],future:[],selectedRefs:new Set(['item:box-a']),editingAssetId:null,assetExpected:null,assetDraftLinks:[],pendingAssetImport:null,assetDraftMaintenance:[],assetDraftIssues:[],assetActivityDirty:false,assetInitialFields:{},selected:null,zoom:1,$:get,document:{createElement:()=>new Element()},AssetRecords,MeasurementAnchors,MeasurementChains,LayerItems,ReviewHistory,ConsistencyReview,OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},saveLocal:()=>saves++,notify:text=>get('message').textContent=text,cancelLandmarkMatch(){},fileText(){},download(){},DOMParser:class{parseFromString(){return {}; }},editableNodes:()=>[{id:'stable'}],safeSVG:s=>s,sourceWithIds:s=>s,XMLSerializer:class{serializeToString=s=>s;},parseVB:()=>[0,0,100,100],normalizedLayers:l=>l});
  c.inventory=()=>c.state.items.map(i=>({ref:'item:'+i.id,id:i.id,name:'Fabricated box'}));
  c.recordChange=(...args)=>ReviewHistory.recordChange(c.state,...args);
  c.saves=()=>saves;
- for(const name of ['remember','restoreSnapshot','validProject','mutate','assetContext','assertAssetContext','assetNotice','showAssetLinks','showAssetForm','refreshAssets','saveAssetDraft','stageAssetImport','wireAssets','jsonExport','importJSON'])vm.runInContext(code(name),c);
+ for(const name of ['remember','restoreSnapshot','validProject','mutate','assetContext','assertAssetContext','assetNotice','showAssetLinks','renderAssetActivity','setAssetActivityDraft','addAssetMaintenance','removeAssetMaintenance','addAssetIssue','changeAssetIssue','showAssetForm','refreshAssets','saveAssetDraft','stageAssetImport','wireAssets','jsonExport','importJSON'])vm.runInContext(code(name),c);
  for(const name of ['undo','redo']){const body=app.match(new RegExp("\\$\\('"+name+"'\\)\\.onclick=\\(\\)=>\\{(.*?)\\};",'s'))?.[1];assert.ok(body);vm.runInContext('function '+name+'(){'+body+'}',c);}
  c.wireAssets();return c;
 }

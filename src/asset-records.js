@@ -80,6 +80,14 @@ function updateRecord(current,patch){
  }
  return record(out,{projectId:before.projectId});
 }
+// Activity edits remain local records; linked source facts and field authority are
+// preserved. Validate complete collections atomically before returning detached data.
+function updateActivity(current,patch){
+ const before=record(current);obj(patch,'asset activity update');keys(patch,['maintenance','issues'],'asset activity update');
+ const changed=Object.keys(patch);if(!changed.length)throw Error('An asset activity update needs maintenance or issues.');
+ for(const kind of changed)list(patch[kind],kind,200);
+ return record({...before,...patch},{projectId:before.projectId});
+}
 function findingsFor(assets,context={}){
  const findings=[],known=context.knownRefs===undefined?null:new Set(context.knownRefs);
  for(const asset of assets){
@@ -101,5 +109,5 @@ function stageImport(payload,context){
  const assets=validate([...existing,...incoming],{projectId});
  return {assets,findings:findingsFor(assets,context)};
 }
-root.AssetRecords=Object.freeze({VERSION,MAX_ASSETS,validate,createRecord,updateRecord,stageImport,findings:findingsFor,inspectReferences:findingsFor});
+root.AssetRecords=Object.freeze({VERSION,MAX_ASSETS,validate,createRecord,updateRecord,updateActivity,stageImport,findings:findingsFor,inspectReferences:findingsFor});
 })(typeof window==='undefined'?globalThis:window);

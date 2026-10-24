@@ -292,3 +292,13 @@ Preview/save/cancel/remove, undo and private backup/manual handoff are supported
 stale, ambiguous, noncollinear or provisional inputs remain unknown; source labels and
 geometry are unchanged. Broader multi-axis/level, rooms and hosted door relationships,
 source verification and survey/professional review remain open. [Chain model](MEASUREMENT_CHAINS.md).
+
+
+## Verified development progress — 2026-10-24, v0.13.0
+
+HLS-102 now supports site-native authoring of local maintenance schedules/history and
+open/resolved issues, with explicit draft/save/cancel, stable activity IDs and reversible
+asset revisions. Field provenance and read-only source records are preserved. Dates
+are user-entered metadata; no reminder delivery, source write-back or physical verification
+is implied. Remote source/attachment connectors and authenticated permissions remain
+undeployed gates. [Activity workflow](ASSET_RECORDS.md#local-maintenance-and-issues).

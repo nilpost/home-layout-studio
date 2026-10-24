@@ -75,3 +75,18 @@ Limits: 1,000 records; 1,000 item links, 100 sources and 200 entries per mainten
 collection per record; name/room 160 characters, manufacturer/model 240, notes 6,000,
 entry text 2,000, source URI 2,000. Unknown fields reject instead of being silently lost.
 Private backups and correction handoffs must preserve the full normalized metadata.
+
+## Local maintenance and issues
+
+The asset form supports owner-entered maintenance schedules/history with an optional
+calendar date, plus open/resolved issues. Add, remove, resolve and reopen operate on
+a draft; **Save asset** commits the full record with reversible project history.
+**Cancel draft** restores the saved record. Activity changes do not replace unsaved
+name/model/notes fields. The visible draft status reminds users to save.
+
+`AssetRecords.updateActivity(current,{maintenance,issues})` validates detached activity
+collections and preserves source references, stable asset identity, text fields and
+field authority. Editing activities does not verify imported source facts, complete a
+real maintenance job, set reminders, fetch links or write back to any source. Existing
+per-collection bounds and date/status validation apply. Private backup, asset export
+and manual handoff retain saved activity entries; undo restores prior records.

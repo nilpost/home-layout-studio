@@ -216,3 +216,8 @@ project threshold are required for pass/fail. Missing, stale, provisional or uns
 inputs remain unknown. Preview/save/cancel/remove, undo, private backup and manual
 handoffs preserve the selected relationship. This does not infer rooms, levels or
 physical accuracy. See [chain model](docs/MEASUREMENT_CHAINS.md).
+
+Asset forms also support local maintenance schedules/history and issue resolution.
+Activity controls edit a draft; Save asset records the change and Cancel draft discards
+it. These are owner-entered records, with undo and private backup/handoff preservation,
+not automatic reminders or proof that physical maintenance occurred.
