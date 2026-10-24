@@ -147,5 +147,35 @@ for(const patch of [{rotation:90},{rotationVersion:1},{rotation:90,rotationVersi
 for(const invalid of [{rotationVersion:0,rotation:0},{rotationVersion:2,rotation:90},{rotationVersion:'1',rotation:90},{rotationVersion:1,rotation:361},{rotationVersion:1,rotation:'90'},{rotationVersion:1}])assert.throws(()=>A.validateRotation({...item,...invalid}));
 assert.equal(A.propose({...context,patch:{rotation:90,rotationVersion:1}}).after.rotation,90);
 assert.equal(A.propose({...rotatedContext,patch:{rotation:-90}}).after.rotationVersion,1);
+const scaleItems=[{...item,x:0,y:0,w:20,h:10,rotationVersion:1,rotation:90},{id:'group-box',kind:'rect',x:50,y:20,w:10,h:20,rotation:'Historical label',sourceReference:{id:'synthetic-source'}}];
+const scaleGroup={items:scaleItems,selectedRefs:scaleItems.map(item=>'item:'+item.id),projectId:context.projectId,stateToken:context.stateToken,lockedRefs:[],hiddenRefs:[]},scaleBefore=structuredClone(scaleGroup);
+const close=(a,b)=>assert(Math.abs(a-b)<1e-9,a+' != '+b);
+const groupScale=A.proposeGroupScale({...scaleGroup,scalePercent:200});
+assert.deepEqual(groupScale.pivot,{x:32.5,y:17.5},'Pivot uses effective rotated bounds, not local rectangles');
+assert.equal(groupScale.members.length,2);
+const groupScaled=A.applyGroupScale(groupScale,scaleGroup);
+for(let i=0;i<scaleItems.length;i++){
+ const before=scaleItems[i],after=groupScaled[i],p=groupScale.pivot;
+ close(after.x+after.w/2,p.x+2*(before.x+before.w/2-p.x));close(after.y+after.h/2,p.y+2*(before.y+before.h/2-p.y));
+ assert.equal(after.w,before.w*2);assert.equal(after.h,before.h*2);assert.equal(after.rotation,before.rotation);assert.equal(after.rotationVersion,before.rotationVersion);
+}
+assert.deepEqual(groupScaled[0].assetId,item.assetId);assert.deepEqual(groupScaled[1].sourceReference,scaleItems[1].sourceReference);assert(!Object.hasOwn(groupScaled[1],'rotationVersion'));
+assert.deepEqual(A.applyGroupScale(JSON.parse(JSON.stringify(groupScale)),{...scaleGroup,selectedRefs:[...scaleGroup.selectedRefs].reverse()}),groupScaled);
+const inverseContext={...scaleGroup,items:groupScaled,stateToken:'after-group-scale'},inverse=A.applyGroupScale(A.proposeGroupScale({...inverseContext,scalePercent:50}),inverseContext);
+for(let i=0;i<inverse.length;i++){for(const key of ['x','y','w','h'])close(inverse[i][key],scaleItems[i][key]);assert.equal(inverse[i].rotation,scaleItems[i].rotation);}
+assert.deepEqual(A.proposeGroupScale({...scaleGroup,scalePercent:100}).members.map(member=>member.after),scaleItems);
+for(const rotation of [45,-90,180,22.5]){
+ const mixed={...scaleGroup,items:[{...scaleItems[0],rotation},scaleItems[1]]};
+ const preview=A.proposeGroupScale({...mixed,scalePercent:112.5});assert.equal(A.applyGroupScale(preview,mixed)[0].rotation,rotation);
+}
+for(const change of [{selectedRefs:scaleGroup.selectedRefs.slice(0,1)},{selectedRefs:['item:'+item.id,'photo:synthetic-photo']},{selectedRefs:[scaleGroup.selectedRefs[0],scaleGroup.selectedRefs[0]]},{selectedRefs:[scaleGroup.selectedRefs[0],'item:missing']},{items:[...scaleItems,scaleItems[0]]},{lockedRefs:[scaleGroup.selectedRefs[1]]},{hiddenRefs:[scaleGroup.selectedRefs[0]]},{items:[scaleItems[0],groupItems[1]],selectedRefs:[scaleGroup.selectedRefs[0],'item:synthetic-arrow']},{items:[scaleItems[0],groupItems[2]],selectedRefs:[scaleGroup.selectedRefs[0],'item:synthetic-paint']}]){
+ assert.throws(()=>A.proposeGroupScale({...scaleGroup,...change,scalePercent:200}));assert.deepEqual(scaleGroup,scaleBefore);
+}
+for(const scalePercent of [0,-1,'200',null,NaN,Infinity,Number.MIN_VALUE,1e-300,1e308])assert.throws(()=>A.proposeGroupScale({...scaleGroup,scalePercent}));
+for(const change of [{stateToken:'changed'},{projectId:'foreign'},{selectedRefs:[scaleGroup.selectedRefs[0],'item:other']},{lockedRefs:[scaleGroup.selectedRefs[1]]},{hiddenRefs:[scaleGroup.selectedRefs[0]]},{items:scaleItems.slice(0,1)},{items:scaleItems.map((item,i)=>i===1?{...item,rotation:'Changed metadata'}:item)}]){assert.throws(()=>A.applyGroupScale(groupScale,{...scaleGroup,...change}));assert.deepEqual(scaleGroup,scaleBefore);}
+for(const tamper of [p=>p.pivot.x++,p=>p.scalePercent++,p=>p.members.pop(),p=>p.members.push(p.members[0]),p=>p.members.reverse(),p=>{p.members[1].patch.w++;},p=>{p.members[1].after.rotationVersion=1;},p=>{p.members[0].extraOperation='delete';},p=>{p.extraOperation='delete';},p=>{p.pivot.extra=1;}]){const altered=structuredClone(groupScale);tamper(altered);assert.throws(()=>A.applyGroupScale(altered,scaleGroup));assert.deepEqual(scaleGroup,scaleBefore);}
+const edgeGroup={...scaleGroup,items:[{...scaleItems[0],x:A.MAX_COORDINATE-40,rotation:45},scaleItems[1]]};assert.throws(()=>A.proposeGroupScale({...edgeGroup,scalePercent:200}));
+assert.throws(()=>A.proposeGroupScale({...scaleGroup,items:[legacyExtreme,scaleItems[1]],scalePercent:100}),'A new group operation may reject an unsupported legacy footprint without changing import compatibility');
+const detachedScale=structuredClone(groupScale);detachedScale.members[1].after.sourceReference.id='modified copy';assert.deepEqual(scaleGroup,scaleBefore);
 assert.deepEqual(context,snapshot);assert.deepEqual(group,groupBefore);
-console.log('PASS: guarded rotation, rotated move/scale/group bounds, legacy unrotated compatibility, single/group transforms, metadata, stale selection and detached serialization.');
+console.log('PASS: guarded rotation, common-pivot group scaling and translation, strict footprints, legacy metadata, selection/state/tamper guards and detached serialization.');

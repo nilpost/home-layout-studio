@@ -100,3 +100,10 @@ Furniture/box overlay rotation travels in item metadata as explicit `rotationVer
 and finite `rotation` degrees in [-360,360]. Unmarked historical rotation metadata has no
 geometric meaning. Review and undo use the same item/state guards; adapters must retain
 the activation marker and local dimensions, and must not infer angles from legacy fields.
+
+Shared editing operations also support a reviewed furniture/box group-scale proposal.
+The exact selection, original member snapshots, derived common pivot and percentage
+are recomputed and checked before all replacements are returned. This operation does
+not activate historical rotation metadata or establish measured/architectural accuracy.
+Manual project handoffs preserve resulting item geometry and metadata; live-provider
+execution remains an independent acceptance gate.

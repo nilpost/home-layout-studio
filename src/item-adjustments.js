@@ -131,5 +131,51 @@ function applyTranslation(proposal,current){
  }
  return checked.members.map(member=>copy(member.after));
 }
-root.ItemAdjustments=Object.freeze({MAX_COORDINATE,validateRotation,propose,proposeScale,proposeRotate,applyProposal,proposeTranslation,applyTranslation});
+function proposeGroupScale(input){
+ object(input,'group scale');
+ const selectedRefs=refs(input.selectedRefs,'selected references',{selection:true}),locked=new Set(refs(input.lockedRefs===undefined?[]:input.lockedRefs,'locked references')),hidden=new Set(refs(input.hiddenRefs===undefined?[]:input.hiddenRefs,'hidden references'));
+ if(!Array.isArray(input.items)||input.items.length>5000)throw Error('Invalid current overlay items');
+ if(typeof input.scalePercent!=='number'||!Number.isFinite(input.scalePercent)||input.scalePercent<=0)throw Error('Enter a finite positive group scale percentage.');
+ const factor=input.scalePercent/100;if(!Number.isFinite(factor)||factor<=0)throw Error('Group scale is too small or too large to represent.');
+ const context={projectId:identity(input.projectId,'project identity'),stateToken:identity(input.stateToken,'state token')};
+ const selected=selectedRefs.map(ref=>{
+  const found=input.items.filter(item=>item&&'item:'+item.id===ref);
+  if(found.length!==1)throw Error('Selected item is missing or duplicated: '+ref);
+  const item=found[0];available({locked:locked.has(ref),hidden:hidden.has(ref)});validateItem(item);
+  if(!['furniture','rect'].includes(item.kind))throw Error('Group scaling supports furniture and box overlays only.');
+  return item;
+ });
+ // This new operation requires supported full footprints, without changing the import
+ // contract or assigning geometric meaning to unmarked historical rotation metadata.
+ const corners=selected.flatMap(item=>rotationFootprint({...item,rotation:validateRotation(item)}));
+ const xs=corners.map(p=>p[0]),ys=corners.map(p=>p[1]),pivot={x:(Math.min(...xs)+Math.max(...xs))/2,y:(Math.min(...ys)+Math.max(...ys))/2};
+ number(pivot.x,'group pivot X');number(pivot.y,'group pivot Y');
+ const members=selected.map(item=>{
+  const center={x:item.x+item.w/2,y:item.y+item.h/2},scaledCenter={x:pivot.x+factor*(center.x-pivot.x),y:pivot.y+factor*(center.y-pivot.y)},w=item.w*factor,h=item.h*factor;
+  const patch=factor===1?{x:item.x,y:item.y,w:item.w,h:item.h}:{x:scaledCenter.x-w/2,y:scaledCenter.y-h/2,w,h};
+  for(const key of ['x','y','w','h'])number(patch[key],key);
+  const widthFactor=w/item.w,heightFactor=h/item.h;
+  if(widthFactor<=0||heightFactor<=0||Math.abs(widthFactor/heightFactor-1)>Number.EPSILON*16||center.x!==pivot.x&&scaledCenter.x===pivot.x||center.y!==pivot.y&&scaledCenter.y===pivot.y)throw Error('Group scale is too small to preserve dimensions and relative centers.');
+  const member=propose({item,patch,...context,locked:false,hidden:false,calibration:input.calibration});
+  rotationFootprint({...member.after,rotation:validateRotation(member.after)});return member;
+ });
+ return {operationVersion:1,context,selectedRefs,pivot,scalePercent:input.scalePercent,members,unitDescription:units(input.calibration)};
+}
+function applyGroupScale(proposal,current){
+ exactKeys(proposal,['operationVersion','context','selectedRefs','pivot','scalePercent','members','unitDescription'],'group scale proposal');object(current,'current group scale context');
+ if(proposal.operationVersion!==1)throw Error('Unsupported group scale proposal version');
+ exactKeys(proposal.context,['projectId','stateToken'],'group scale context');exactKeys(proposal.pivot,['x','y'],'group scale pivot');
+ if(proposal.context.projectId!==current.projectId||proposal.context.stateToken!==current.stateToken)throw Error('Stale group scale: project state changed.');
+ const originalRefs=refs(proposal.selectedRefs,'proposal selection',{selection:true}),currentRefs=refs(current.selectedRefs,'current selection',{selection:true});
+ if(canonical([...originalRefs].sort())!==canonical([...currentRefs].sort()))throw Error('Stale group scale: selected item identities changed.');
+ if(!Array.isArray(proposal.members)||proposal.members.length!==originalRefs.length)throw Error('Invalid group scale members');
+ const checked=proposeGroupScale({...current,selectedRefs:originalRefs,scalePercent:proposal.scalePercent});
+ if(canonical(proposal.pivot)!==canonical(checked.pivot))throw Error('Modified group scale pivot: review the complete selection again.');
+ for(let i=0;i<checked.members.length;i++){
+  const member=proposal.members[i],expected=checked.members[i];exactKeys(member,['operationVersion','context','before','after','patch','unitDescription'],'group scale member');
+  for(const key of ['operationVersion','context','before','after','patch'])if(canonical(member[key])!==canonical(expected[key]))throw Error('Stale or modified group scale member: review the complete selection again.');
+ }
+ return checked.members.map(member=>copy(member.after));
+}
+root.ItemAdjustments=Object.freeze({MAX_COORDINATE,validateRotation,propose,proposeScale,proposeRotate,applyProposal,proposeTranslation,applyTranslation,proposeGroupScale,applyGroupScale});
 })(typeof window==='undefined'?globalThis:window);

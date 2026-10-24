@@ -360,3 +360,13 @@ pointer cancellation discards the gesture. Rotation and aspect ratio remain unch
 Group handles, group rotation/scaling and connected architecture remain open.
 Acceptance covered rotated/zoomed pointer mapping, cancellation, stale/locked/hidden
 rejection, invalid-bound protection, secondary-pointer isolation and one reversible commit.
+
+
+## Verified development progress — 2026-10-25, v0.18.0
+
+HLS-107 adds reviewed group uniform scaling for 2–100 furniture/box overlays around
+a shared center derived from complete effective rotated bounds. The operation scales
+local dimensions and relative centers together, preserving angle, proportions, labels
+and source/asset metadata. Every member is checked before the whole selection can apply.
+Preview and Cancel do not change saved geometry; Apply is one reversible transaction.
+Arrows/paint, group rotation/handles and connected architecture remain outside this slice.

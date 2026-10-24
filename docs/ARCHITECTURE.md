@@ -126,8 +126,10 @@ uses only the transient SVG layer; Apply rechecks project/state/item, locks and 
 visibility, then records one reversible change. Furniture/box scaling and rotation use
 a derived center pivot. Rotation is explicitly activated by `rotationVersion: 1`; raw
 unmarked historical angle metadata remains inert. Rotated corners are shared across
-rendering, highlights, bounds and guarded edits. Multi-overlay translation is atomic;
-group rotation/scaling and connected architectural topology remain unsupported.
+rendering, highlights, bounds and guarded edits. Multi-overlay translation is atomic. Furniture/box group uniform scaling derives a
+common pivot from effective rotated bounds, scales relative centers and local dimensions
+together, and validates every member before one commit. Group rotation and connected
+architectural topology remain unsupported.
 The unit display does not convert provisional drawing coordinates into verified survey
 measurements. Applying an adjustment reruns and saves schematic checks when possible;
 a failed rerun is reported separately from the committed edit.
