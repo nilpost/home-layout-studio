@@ -107,3 +107,8 @@ are recomputed and checked before all replacements are returned. This operation 
 not activate historical rotation metadata or establish measured/architectural accuracy.
 Manual project handoffs preserve resulting item geometry and metadata; live-provider
 execution remains an independent acceptance gate.
+
+Group rotation proposals carry a reviewed relative angle and derived pivot. Apply
+recomputes every final member center/angle, rejects inactive historical angle fields
+and verifies the whole current selection before returning replacements. This does not
+turn the handoff format into an authenticated live-provider adapter.

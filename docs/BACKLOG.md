@@ -370,3 +370,13 @@ local dimensions and relative centers together, preserving angle, proportions, l
 and source/asset metadata. Every member is checked before the whole selection can apply.
 Preview and Cancel do not change saved geometry; Apply is one reversible transaction.
 Arrows/paint, group rotation/handles and connected architecture remain outside this slice.
+
+
+## Verified development progress — 2026-10-25, v0.19.0
+
+HLS-107 adds reviewed relative group rotation for 2–100 furniture/box overlays about
+the current effective rotated-bounds center. Item centers rotate around the common
+pivot and active angles add the delta; local dimensions and proportions remain intact.
+Inactive historical rotation fields require individual reviewed activation before a
+group operation. Apply validates the complete selection and records one undoable change.
+Arrows/paint, group handles and connected architecture remain outside this slice.

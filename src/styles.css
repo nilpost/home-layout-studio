@@ -33,4 +33,4 @@
 /* Contextual adjustment controls and the single reviewed scale grip. */
 #selection-props section>label{display:block;margin-top:12px}#selection-props section>label input{display:block;margin-top:5px}#selection-props section>button{display:block}.item-scale-handle{fill:#fff;stroke:#008c9e;stroke-width:2;vector-effect:non-scaling-stroke;cursor:nwse-resize;pointer-events:all}.item-scale-handle:hover{fill:#def3f4}
 
-.group-scale-controls{border-top:1px solid var(--stroke);margin-top:16px;padding-top:16px}.group-scale-controls p{overflow-wrap:anywhere}
+.group-scale-controls,.group-rotation-controls{border-top:1px solid var(--stroke);margin-top:16px;padding-top:16px}.group-scale-controls p,.group-rotation-controls p{overflow-wrap:anywhere}

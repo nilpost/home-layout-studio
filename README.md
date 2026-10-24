@@ -230,13 +230,12 @@ and metadata; it does not rotate items or modify connected architecture.
 Multiple overlay selections can move together using explicit X/Y offsets. Preview shows
 every member; Apply records one undoable change. If any member is stale, hidden, locked
 or unsupported, the whole proposal is rejected. Architecture and photo/comment selections
-are excluded; group rotation remains unavailable.
+are excluded.
 
 One furniture or box overlay can also rotate about its center using an explicit angle
 from -360 to 360 degrees. Preview rotates the shape and label together, preserves local
 width/depth and records the angle only on Apply. JSON backups, agent handoffs and SVG
-exports retain rotation. Existing items without explicit rotation activation retain their appearance. Group
-rotation and connected architectural transforms remain unavailable.
+exports retain rotation. Existing items without explicit rotation activation retain their appearance. Connected architectural transforms remain unavailable.
 
 A selected furniture or box overlay has a canvas handle for centered uniform scaling.
 Drag to prepare a preview, then use Apply changes; releasing the pointer alone does not
@@ -249,3 +248,10 @@ item keeps its angle and proportions while its size and distance from the pivot 
 together. Apply saves the whole group in one reversible change; unsupported, hidden or
 locked members prevent scaling the selection. Arrows, paint and source architecture do
 not use group scaling.
+
+Furniture/box groups can also rotate by a relative angle about the current selection
+bounds center. Preview shows every affected footprint and label; Apply creates one
+undoable revision. Local dimensions stay unchanged. Items with inactive historical
+rotation metadata require an individually reviewed rotation activation first. Each new
+group operation derives its center again; use Undo to restore an arbitrary rotation
+exactly, since the opposite angle can use a different bounds center for irregular groups.

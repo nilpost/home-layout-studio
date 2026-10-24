@@ -177,5 +177,36 @@ for(const tamper of [p=>p.pivot.x++,p=>p.scalePercent++,p=>p.members.pop(),p=>p.
 const edgeGroup={...scaleGroup,items:[{...scaleItems[0],x:A.MAX_COORDINATE-40,rotation:45},scaleItems[1]]};assert.throws(()=>A.proposeGroupScale({...edgeGroup,scalePercent:200}));
 assert.throws(()=>A.proposeGroupScale({...scaleGroup,items:[legacyExtreme,scaleItems[1]],scalePercent:100}),'A new group operation may reject an unsupported legacy footprint without changing import compatibility');
 const detachedScale=structuredClone(groupScale);detachedScale.members[1].after.sourceReference.id='modified copy';assert.deepEqual(scaleGroup,scaleBefore);
+const rotateItems=[{...scaleItems[0],rotation:22.5},{...scaleItems[1]}];delete rotateItems[1].rotation;
+const rotateGroup={...scaleGroup,items:rotateItems},rotateBefore=structuredClone(rotateGroup);
+for(const deltaDegrees of [0,90,-90,180,-180,45,-45,360,-360]){
+ const preview=A.proposeGroupRotate({...rotateGroup,deltaDegrees}),after=A.applyGroupRotate(preview,rotateGroup),radians=deltaDegrees*Math.PI/180,p=preview.pivot;
+ for(let i=0;i<after.length;i++){
+  const original=rotateItems[i],cx=original.x+original.w/2,cy=original.y+original.h/2;
+  close(after[i].x+after[i].w/2,p.x+(cx-p.x)*Math.cos(radians)-(cy-p.y)*Math.sin(radians));
+  close(after[i].y+after[i].h/2,p.y+(cx-p.x)*Math.sin(radians)+(cy-p.y)*Math.cos(radians));
+  assert.equal(after[i].w,original.w);assert.equal(after[i].h,original.h);assert.equal(after[i].rotation,((A.validateRotation(original)+deltaDegrees)%360)||0);assert.equal(after[i].rotationVersion,1);
+  assert.equal(after[i].assetId,original.assetId);assert.deepEqual(after[i].sourceReference,original.sourceReference);
+  close(Math.hypot(cx-p.x,cy-p.y),Math.hypot(after[i].x+after[i].w/2-p.x,after[i].y+after[i].h/2-p.y));
+ }
+ close(Math.hypot(after[0].x+after[0].w/2-after[1].x-after[1].w/2,after[0].y+after[0].h/2-after[1].y-after[1].h/2),Math.hypot(rotateItems[0].x+rotateItems[0].w/2-rotateItems[1].x-rotateItems[1].w/2,rotateItems[0].y+rotateItems[0].h/2-rotateItems[1].y-rotateItems[1].h/2));
+ assert.deepEqual(A.applyGroupRotate(JSON.parse(JSON.stringify(preview)),{...rotateGroup,selectedRefs:[...rotateGroup.selectedRefs].reverse()}),after);
+ assert.deepEqual(rotateGroup,rotateBefore);
+}
+const quarter=A.proposeGroupRotate({...rotateGroup,deltaDegrees:90}),quarterAfter=A.applyGroupRotate(quarter,rotateGroup),quarterContext={...rotateGroup,items:quarterAfter,stateToken:'quarter-rotated'},quarterInverse=A.applyGroupRotate(A.proposeGroupRotate({...quarterContext,deltaDegrees:-90}),quarterContext);
+for(let i=0;i<rotateItems.length;i++)for(const key of ['x','y','w','h'])close(quarterInverse[i][key],rotateItems[i][key]);
+// Arbitrary-angle opposite commands invert on a centrally symmetric fixture. For an
+// asymmetric group the newly derived AABB pivot can shift; Undo uses exact snapshots.
+const symmetric={...rotateGroup,items:[{id:'symmetric-a',kind:'rect',x:-30,y:-5,w:10,h:10},{id:'symmetric-b',kind:'rect',x:20,y:-5,w:10,h:10}],selectedRefs:['item:symmetric-a','item:symmetric-b']};
+const symmetricAfter=A.applyGroupRotate(A.proposeGroupRotate({...symmetric,deltaDegrees:45}),symmetric),symmetricContext={...symmetric,items:symmetricAfter,stateToken:'symmetric-rotated'},symmetricInverse=A.applyGroupRotate(A.proposeGroupRotate({...symmetricContext,deltaDegrees:-45}),symmetricContext);
+for(let i=0;i<2;i++)for(const key of ['x','y','w','h'])close(symmetricInverse[i][key],symmetric.items[i][key]);
+const rotationPreview=A.proposeGroupRotate({...rotateGroup,deltaDegrees:45});
+for(const deltaDegrees of [NaN,Infinity,'90',null,361,-361,Number.MIN_VALUE,1e-30])assert.throws(()=>A.proposeGroupRotate({...rotateGroup,deltaDegrees}));
+for(const raw of [90,'Historical string',null,{vendor:'metadata'},undefined]){const legacy={...rotateItems[1],rotation:raw};assert.throws(()=>A.proposeGroupRotate({...rotateGroup,items:[rotateItems[0],legacy],deltaDegrees:0}),/individually/);assert.deepEqual(rotateGroup,rotateBefore);}
+for(const change of [{selectedRefs:[rotateGroup.selectedRefs[0]]},{selectedRefs:[rotateGroup.selectedRefs[0],rotateGroup.selectedRefs[0]]},{selectedRefs:[rotateGroup.selectedRefs[0],'photo:other']},{selectedRefs:[rotateGroup.selectedRefs[0],'item:missing']},{items:[...rotateItems,rotateItems[0]]},{lockedRefs:[rotateGroup.selectedRefs[1]]},{hiddenRefs:[rotateGroup.selectedRefs[0]]},{items:[rotateItems[0],groupItems[1]],selectedRefs:[rotateGroup.selectedRefs[0],'item:synthetic-arrow']}])assert.throws(()=>A.proposeGroupRotate({...rotateGroup,...change,deltaDegrees:45}));
+for(const change of [{stateToken:'changed'},{projectId:'foreign'},{selectedRefs:rotateGroup.selectedRefs.slice(1)},{lockedRefs:[rotateGroup.selectedRefs[1]]},{hiddenRefs:[rotateGroup.selectedRefs[0]]},{items:rotateItems.slice(1)},{items:rotateItems.map((item,i)=>i===1?{...item,sourceReference:{id:'changed'}}:item)}])assert.throws(()=>A.applyGroupRotate(rotationPreview,{...rotateGroup,...change}));
+for(const tamper of [p=>p.pivot.x++,p=>p.deltaDegrees++,p=>p.members.pop(),p=>p.members.reverse(),p=>{p.members[0].patch.x++;},p=>{p.members[1].after.w++;},p=>{p.members[0].extraOperation='delete';},p=>{p.extraOperation='delete';}]){const altered=structuredClone(rotationPreview);tamper(altered);assert.throws(()=>A.applyGroupRotate(altered,rotateGroup));}
+const rotationEdge={...rotateGroup,items:[{...rotateItems[0],x:A.MAX_COORDINATE-25,rotation:0,w:20,h:10},{...rotateItems[1],x:A.MAX_COORDINATE-25,y:500,w:20,h:10}]};assert.throws(()=>A.proposeGroupRotate({...rotationEdge,deltaDegrees:90}));
+const detachedRotation=structuredClone(rotationPreview);detachedRotation.members[1].after.sourceReference.id='detached edit';assert.deepEqual(rotateGroup,rotateBefore);
 assert.deepEqual(context,snapshot);assert.deepEqual(group,groupBefore);
-console.log('PASS: guarded rotation, common-pivot group scaling and translation, strict footprints, legacy metadata, selection/state/tamper guards and detached serialization.');
+console.log('PASS: guarded single/group rotation, common-pivot scaling/translation, exact quarter turns, metadata activation, geometry invariants, bounds and atomic context/tamper guards.');

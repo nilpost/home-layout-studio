@@ -177,5 +177,51 @@ function applyGroupScale(proposal,current){
  }
  return checked.members.map(member=>copy(member.after));
 }
-root.ItemAdjustments=Object.freeze({MAX_COORDINATE,validateRotation,propose,proposeScale,proposeRotate,applyProposal,proposeTranslation,applyTranslation,proposeGroupScale,applyGroupScale});
+function proposeGroupRotate(input){
+ object(input,'group rotation');
+ const selectedRefs=refs(input.selectedRefs,'selected references',{selection:true}),locked=new Set(refs(input.lockedRefs===undefined?[]:input.lockedRefs,'locked references')),hidden=new Set(refs(input.hiddenRefs===undefined?[]:input.hiddenRefs,'hidden references'));
+ if(!Array.isArray(input.items)||input.items.length>5000)throw Error('Invalid current overlay items');
+ if(typeof input.deltaDegrees!=='number'||!Number.isFinite(input.deltaDegrees)||Math.abs(input.deltaDegrees)>360)throw Error('Group rotation delta must be a finite number from -360 to 360 degrees.');
+ const context={projectId:identity(input.projectId,'project identity'),stateToken:identity(input.stateToken,'state token')};
+ const selected=selectedRefs.map(ref=>{
+  const found=input.items.filter(item=>item&&'item:'+item.id===ref);
+  if(found.length!==1)throw Error('Selected item is missing or duplicated: '+ref);
+  const item=found[0];available({locked:locked.has(ref),hidden:hidden.has(ref)});validateItem(item);
+  if(!['furniture','rect'].includes(item.kind))throw Error('Group rotation supports furniture and box overlays only.');
+  if(!Object.hasOwn(item,'rotationVersion')&&Object.hasOwn(item,'rotation'))throw Error('Review and activate this item\'s rotation individually before group rotation; historical rotation metadata will not be overwritten.');
+  return item;
+ });
+ const corners=selected.flatMap(item=>rotationFootprint({...item,rotation:validateRotation(item)}));
+ const xs=corners.map(p=>p[0]),ys=corners.map(p=>p[1]),pivot={x:(Math.min(...xs)+Math.max(...xs))/2,y:(Math.min(...ys)+Math.max(...ys))/2};
+ number(pivot.x,'group pivot X');number(pivot.y,'group pivot Y');
+ const delta=input.deltaDegrees%360,quarters={0:[1,0],90:[0,1],180:[-1,0],270:[0,-1],'-90':[0,-1],'-180':[-1,0],'-270':[0,1]};
+ const [cos,sin]=Object.hasOwn(quarters,delta)?quarters[delta]:[Math.cos(delta*Math.PI/180),Math.sin(delta*Math.PI/180)];
+ if(delta!==0&&cos===1&&sin===0)throw Error('Group rotation is too small to represent.');
+ const members=selected.map(item=>{
+  const center={x:item.x+item.w/2,y:item.y+item.h/2},dx=center.x-pivot.x,dy=center.y-pivot.y;
+  const rotatedCenter={x:pivot.x+dx*cos-dy*sin,y:pivot.y+dx*sin+dy*cos},angle=validateRotation(item),rotation=(angle+input.deltaDegrees)%360;
+  if(delta!==0&&(rotation===angle%360||(dx!==0||dy!==0)&&rotatedCenter.x===center.x&&rotatedCenter.y===center.y))throw Error('Group rotation is too small to preserve every selected item\'s angle and center.');
+  const patch={x:delta===0?item.x:rotatedCenter.x-item.w/2,y:delta===0?item.y:rotatedCenter.y-item.h/2,rotation,rotationVersion:1};
+  number(patch.x,'rotated item X');number(patch.y,'rotated item Y');
+  return propose({item,patch,...context,locked:false,hidden:false,calibration:input.calibration});
+ });
+ return {operationVersion:1,context,selectedRefs,pivot,deltaDegrees:input.deltaDegrees,members,unitDescription:units(input.calibration)};
+}
+function applyGroupRotate(proposal,current){
+ exactKeys(proposal,['operationVersion','context','selectedRefs','pivot','deltaDegrees','members','unitDescription'],'group rotation proposal');object(current,'current group rotation context');
+ if(proposal.operationVersion!==1)throw Error('Unsupported group rotation proposal version');
+ exactKeys(proposal.context,['projectId','stateToken'],'group rotation context');exactKeys(proposal.pivot,['x','y'],'group rotation pivot');
+ if(proposal.context.projectId!==current.projectId||proposal.context.stateToken!==current.stateToken)throw Error('Stale group rotation: project state changed.');
+ const originalRefs=refs(proposal.selectedRefs,'proposal selection',{selection:true}),currentRefs=refs(current.selectedRefs,'current selection',{selection:true});
+ if(canonical([...originalRefs].sort())!==canonical([...currentRefs].sort()))throw Error('Stale group rotation: selected item identities changed.');
+ if(!Array.isArray(proposal.members)||proposal.members.length!==originalRefs.length)throw Error('Invalid group rotation members');
+ const checked=proposeGroupRotate({...current,selectedRefs:originalRefs,deltaDegrees:proposal.deltaDegrees});
+ if(canonical(proposal.pivot)!==canonical(checked.pivot))throw Error('Modified group rotation pivot: review the complete selection again.');
+ for(let i=0;i<checked.members.length;i++){
+  const member=proposal.members[i],expected=checked.members[i];exactKeys(member,['operationVersion','context','before','after','patch','unitDescription'],'group rotation member');
+  for(const key of ['operationVersion','context','before','after','patch'])if(canonical(member[key])!==canonical(expected[key]))throw Error('Stale or modified group rotation member: review the complete selection again.');
+ }
+ return checked.members.map(member=>copy(member.after));
+}
+root.ItemAdjustments=Object.freeze({MAX_COORDINATE,validateRotation,propose,proposeScale,proposeRotate,applyProposal,proposeTranslation,applyTranslation,proposeGroupScale,applyGroupScale,proposeGroupRotate,applyGroupRotate});
 })(typeof window==='undefined'?globalThis:window);

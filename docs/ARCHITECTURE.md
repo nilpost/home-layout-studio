@@ -128,8 +128,12 @@ a derived center pivot. Rotation is explicitly activated by `rotationVersion: 1`
 unmarked historical angle metadata remains inert. Rotated corners are shared across
 rendering, highlights, bounds and guarded edits. Multi-overlay translation is atomic. Furniture/box group uniform scaling derives a
 common pivot from effective rotated bounds, scales relative centers and local dimensions
-together, and validates every member before one commit. Group rotation and connected
-architectural topology remain unsupported.
+together, and validates every member before one commit. Group rotation uses the same effective-bounds pivot, rotates relative centers and
+adds the reviewed delta to each effective angle without swapping local dimensions.
+Inactive historical rotation fields block group rotation pending individual activation.
+The pivot is derived for each proposal, so arbitrary opposite-angle commands on
+asymmetric selections need not invert; history Undo restores the original snapshot.
+Connected architectural topology remains unsupported.
 The unit display does not convert provisional drawing coordinates into verified survey
 measurements. Applying an adjustment reruns and saves schematic checks when possible;
 a failed rerun is reported separately from the committed edit.
