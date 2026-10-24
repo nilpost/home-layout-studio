@@ -410,3 +410,12 @@ stays unknown. Saved checker1.4 reports add bounded source evidence and a separa
 limited endpoint coverage row while retaining exact1.0–1.3 import compatibility.
 The operation changes declarations only; geometry/labels remain unchanged. Rooms,
 hosted doors/swings/clearance, physical survey and connected editing remain unmodeled.
+
+
+## Group scaling handle — 2026-10-25, v0.21.0
+
+HLS-107 adds a canvas handle for 2–100 eligible furniture/box overlays. It previews
+uniform scale around the shared pivot from the original selection snapshot and uses
+the existing explicit Apply/Cancel transaction. Whole-selection eligibility, pointer
+identity, cancellation, stale context, numeric bounds and pending-input guards apply.
+No new schema/domain operation or connected architectural editing is introduced.

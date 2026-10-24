@@ -54,3 +54,8 @@ three-segment preview, guarded Save/remove, Cancel and Undo. Source changes requ
 reconfirmation; stale, missing or unsupported geometry remains unknown. Saved checker1.4
 findings retain source evidence, and private JSON/manual handoffs retain records. This
 workflow never alters source geometry or establishes door hosting, swing or clearance.
+
+The group scaling handle reuses the same reviewed group-scale operation. Its displayed
+grip uses effective rotated selection bounds; each drag derives from the original
+selection snapshot. Release prepares the proposal, explicit Apply saves one revision,
+and cancellation or any invalid member discards the gesture.

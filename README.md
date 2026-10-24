@@ -261,3 +261,8 @@ in the editor. Choose an opening segment and two wall endpoints, preview all thr
 then save or cancel. Records and source-bound checker findings survive private backup,
 manual handoff and Undo. Changed or unsupported source geometry stays unknown; this
 operation does not snap/cut walls, attach doors or verify physical construction.
+
+Eligible furniture/box groups also have a canvas scaling handle at their combined
+lower-right footprint bounds. Dragging prepares a common-pivot preview; release does
+not save. Use Apply scale or Cancel scale. All selected members are guarded together,
+and numeric group controls remain available for exact input.
