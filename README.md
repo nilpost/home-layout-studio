@@ -255,3 +255,8 @@ undoable revision. Local dimensions stay unchanged. Items with inactive historic
 rotation metadata require an individually reviewed rotation activation first. Each new
 group operation derives its center again; use Undo to restore an arbitrary rotation
 exactly, since the opposite angle can use a different bounds center for irregular groups.
+
+An isolated [opening endpoint binding foundation](docs/OPENING_BINDINGS.md) validates
+explicit schematic opening-to-two-wall-endpoint associations using fabricated tests.
+It is not loaded by the editor; authoring, project collection persistence and saved
+report integration remain future work. It performs no wall cutting or source changes.

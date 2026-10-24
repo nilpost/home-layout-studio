@@ -380,3 +380,13 @@ pivot and active angles add the delta; local dimensions and proportions remain i
 Inactive historical rotation fields require individual reviewed activation before a
 group operation. Apply validates the complete selection and records one undoable change.
 Arrows/paint, group handles and connected architecture remain outside this slice.
+
+
+## Architectural foundation — 2026-10-25
+
+HLS-106 preparation adds an isolated opening-to-wall-endpoint declaration validator
+and conservative numerical checks for explicit endpoint alignment and conflicting wall
+spans. It does not infer a host wall, snap/cut geometry or interpret door swing.
+[Integration and checker compatibility gates](OPENING_BINDINGS.md) remain required.
+The module is not loaded by the editor; no new project field, UI or saved-report
+capability is delivered in this foundation slice. HLS-106 remains partial.

@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import '../src/opening-bindings.js';
+const O=globalThis.OpeningBindings;
+const binding=O.createBinding({id:'synthetic-binding',projectId:'synthetic-project',openingSegmentId:'demo-opening:0',startJamb:{segmentId:'demo-partition:0',endpoint:'b'},endJamb:{segmentId:'demo-partition:1',endpoint:'a'},sourceHash:'synthetic-source',createdAt:'2026-01-01T00:00:00Z'});
+const segments=[{id:'demo-partition:0',kind:'wall',a:[0,0],b:[4,0]},{id:'demo-opening:0',kind:'opening',a:[4,0],b:[6,0]},{id:'demo-partition:1',kind:'wall',a:[6,0],b:[10,0]}];
+const input={records:[binding],projectId:'synthetic-project',segments,sourceHash:'synthetic-source',unsupported:[]},before=structuredClone(input);
+assert.deepEqual(O.validate(undefined),[]);assert.deepEqual(O.validate(JSON.parse(JSON.stringify([binding])),{projectId:input.projectId}),[binding]);
+const pass=O.evaluate(input);assert.equal(pass.status,'pass');assert.equal(pass.checked,1);assert.equal(pass.findings[0].measured,0);assert.match(pass.findings[0].evidence.scope,/not physical verification/);assert.deepEqual(input,before);
+assert.deepEqual(O.preview({...input,binding}),{record:binding,result:pass});
+assert.equal(O.evaluate({...input,records:[]}).status,'unknown');
+assert.equal(O.evaluate({...input,projectId:undefined}).status,'unknown');
+assert.equal(O.evaluate({...input,sourceHash:''}).status,'unknown');
+assert.equal(O.evaluate({...input,segments:[...segments,{kind:'wall',a:[100,0],b:[101,0]}]}).status,'unknown');
+assert.equal(O.evaluate({...input,segments:[...segments,{id:'bad\u0000wall',kind:'wall',a:[100,0],b:[101,0]}]}).status,'unknown');
+const reversed={...binding,startJamb:{segmentId:'demo-partition:1',endpoint:'a'},endJamb:{segmentId:'demo-partition:0',endpoint:'b'}};
+assert.equal(O.evaluate({...input,records:[reversed]}).status,'fail','Explicit start/end pairing is not silently swapped');
+const reversedOpening=segments.map(s=>s.kind==='opening'?{...s,a:s.b,b:s.a}:s);assert.equal(O.evaluate({...input,records:[reversed],segments:reversedOpening}).status,'pass');
+for(const change of [{sourceHash:'changed'},{sourceHash:undefined},{segments:segments.slice(1)},{segments:[...segments,segments[0]]},{unsupported:['synthetic-transform: coordinate context unsupported']},{segments:segments.map((s,i)=>i===0?{...s,a:s.b}:s)},{segments:segments.map((s,i)=>i===1?{...s,a:[NaN,0]}:s)},{segments:[...segments,{id:'invalid-wall',kind:'wall',a:[0,0],b:[Infinity,0]}]}]){const result=O.evaluate({...input,...change});assert.equal(result.status,'unknown');assert.equal(result.checked,0);assert(result.findings[0].evidence.reasons.length);assert.deepEqual(input,before);}
+for(const change of [{segments:segments.map((s,i)=>i===0?{...s,kind:'window'}:s)},{segments:segments.map((s,i)=>i===1?{...s,kind:'wall'}:s)},{segments:segments.map((s,i)=>i===0?{...s,b:[3,0]}:s)},{segments:segments.map((s,i)=>i===2?{...s,b:[10,1]}:s)},{segments:[...segments,{id:'overlap-wall',kind:'wall',a:[4.5,0],b:[5.5,0]}]},{segments:[...segments,{id:'cross-wall',kind:'wall',a:[5,-1],b:[5,1]}]}]){const result=O.evaluate({...input,...change});assert.equal(result.status,'fail');assert.equal(result.checked,1);assert(result.findings[0].evidence.violations.length);assert.deepEqual(input,before);}
+const touching=[...segments,{id:'touching-wall',kind:'wall',a:[4,-2],b:[4,0]}];assert.equal(O.evaluate({...input,segments:touching}).status,'pass','A separate wall touching only the opening endpoint is not an interior overlap');
+const diagonal=segments.map(s=>({...s,a:[s.a[0],s.a[0]],b:[s.b[0],s.b[0]]}));assert.equal(O.evaluate({...input,segments:diagonal}).status,'pass');
+const shifted=segments.map(s=>({...s,a:[s.a[0]-10,s.a[1]-20],b:[s.b[0]-10,s.b[1]-20]}));assert.equal(O.evaluate({...input,segments:shifted}).status,'pass');
+const near=segments.map((s,i)=>i===0?{...s,b:[4-O.EPSILON/2,0]}:s);assert.equal(O.evaluate({...input,segments:near}).status,'pass');
+const far=segments.map((s,i)=>i===0?{...s,b:[4-O.EPSILON*2,0]}:s);assert.equal(O.evaluate({...input,segments:far}).status,'fail');
+for(const patch of [{id:'bad\u0000id'},{projectId:'foreign'},{openingSegmentId:'demo-partition:0'},{endJamb:binding.startJamb},{startJamb:{segmentId:'',endpoint:'a'}},{endJamb:{segmentId:'demo-partition:1',endpoint:'middle'}},{sourceHashAtCreation:'bad hash'},{createdAt:'2026-02-30T00:00:00Z'},{unknown:true}])assert.throws(()=>O.validate([{...binding,...patch}],{projectId:input.projectId}));
+assert.throws(()=>O.validate([binding,binding]));assert.throws(()=>O.validate([binding,{...binding,id:'other'}]));assert.throws(()=>O.validate(Array.from({length:1001},()=>binding)));
+assert.throws(()=>O.createBinding({...binding,sourceHash:input.sourceHash}),'Creation does not silently replace a stored source hash');
+const detached=O.preview({...input,binding});detached.record.startJamb.endpoint='a';detached.result.findings[0].evidence.opening.a[0]=999;assert.deepEqual(input,before);
+const manyConflicts=Array.from({length:O.MAX_CONFLICT_REFS+7},(_,i)=>({id:'synthetic-conflict-'+i,kind:'wall',a:[4.5,0],b:[5.5,0]}));
+const bounded=O.evaluate({...input,segments:[...segments,...manyConflicts]}).findings[0];
+assert.equal(bounded.status,'fail');assert.equal(bounded.evidence.conflictingWallCount,manyConflicts.length);assert.equal(bounded.evidence.conflictsTruncated,true);assert.equal(bounded.evidence.conflictingWallIds.length,O.MAX_CONFLICT_REFS);assert(bounded.affectedIds.length<=100);
+const unsupportedSamples=Array.from({length:15},(_,i)=>'synthetic-unsupported-'+i);const sample=O.evaluate({...input,unsupported:unsupportedSamples}).findings[0];assert.equal(sample.status,'unknown');assert.equal(sample.evidence.unsupportedCount,15);assert.equal(sample.evidence.unsupported.length,10);assert.equal(sample.evidence.unsupportedTruncated,true);
+const longSample=O.evaluate({...input,unsupported:['synthetic source: '+'x'.repeat(500)]}).findings[0];assert.equal(longSample.status,'unknown');assert.equal(longSample.evidence.unsupported[0].length,200);assert.equal(longSample.evidence.unsupportedTruncated,true);assert.equal(longSample.evidence.unsupportedCount,1);
+console.log('PASS: explicit schematic opening/jamb identity, pairing/collinearity/conflicts, stale and unsupported unknowns, strict detached schema and numerical-only evidence.');
