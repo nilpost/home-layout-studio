@@ -390,3 +390,12 @@ spans. It does not infer a host wall, snap/cut geometry or interpret door swing.
 [Integration and checker compatibility gates](OPENING_BINDINGS.md) remain required.
 The module is not loaded by the editor; no new project field, UI or saved-report
 capability is delivered in this foundation slice. HLS-106 remains partial.
+
+
+## Checker compatibility prerequisite — 2026-10-25
+
+Saved checker1.0–1.3 reports now use explicit frozen capability and exact coverage
+contracts, independent of the current emitter version. Existing1.3 output is unchanged.
+Historical import, tampered coverage and simulated future-emitter regressions protect
+legacy anchors/chains before opening-endpoint integration. No1.4 capability, opening
+editor, project field or checker output expansion is delivered in this slice.

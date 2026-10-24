@@ -165,4 +165,37 @@ const sourceReview=C.review(sourceInput);assert.equal(sourceReview.status,'pass'
 const sourceSaved=R.createReport({...options,anchoredReview:A.review(sourceInput),chainReview:sourceReview});assert.equal(sourceSaved.coverage.find(c=>c.id==='dimension-chain-totals').status,'pass');assert.equal(sourceSaved.findings.some(f=>f.code==='review-incomplete'),false,'Normal chain provenance must be retained completely');
 const sourceEvidence=sourceSaved.findings.find(f=>f.code==='chain:synthetic-source-chain').evidence.slice(1).map(s=>JSON.parse(s));assert.equal(sourceEvidence.filter(e=>e.anchorIndex!==undefined).length,3);assert.equal(sourceEvidence[0].comparison,'sum of declared source span dimensions versus declared source total');
 for(const patch of [{calibration:{...sourceInput.calibration,status:'manual'}},{sourceHash:'synthetic-new-source'},{tolerancePercent:undefined},{segments:chainSegments.slice(0,1)}]){const report=R.createReport({...options,chainReview:C.review({...sourceInput,...patch})});assert.equal(report.chains.status,'unknown');assert.equal(report.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');}
+// Persisted versions retain their exact historical coverage, independently of
+// the emitter version. Check valid histories as well as plausible matrix edits.
+const histories=[previousVersion,previousMinor,version12,chainReport];
+for(const historical of histories){
+ const serialized=JSON.stringify(historical);
+ assert.deepEqual(R.validateReports([JSON.parse(serialized)]),[historical]);
+ const roundtrip=R.validateReports([historical]);
+ roundtrip[0].coverage[0].detail='local detached edit';
+ assert.equal(JSON.stringify(historical),serialized,'Validation cannot mutate a historical report');
+ for(const mutate of [
+  r=>r.coverage.pop(),
+  r=>r.coverage.push(structuredClone(r.coverage[0])),
+  r=>[r.coverage[0],r.coverage[1]]=[r.coverage[1],r.coverage[0]],
+  r=>r.coverage[2].detail+=' Expanded coverage.',
+  r=>r.coverage[0].category='professional-code',
+  r=>r.coverage[4].status='pass',
+  r=>r.checkerVersion='schematic-1.3.1',
+  r=>r.checkerVersion='toString'
+ ]){const bad=structuredClone(historical);mutate(bad);assert.throws(()=>R.validateReports([bad]),historical.checkerVersion+' must reject altered historical contracts');}
+}
+for(const historical of [previousVersion,previousMinor]){
+ const fakeEndpoint=structuredClone(historical);fakeEndpoint.coverage[2].status='pass';assert.throws(()=>R.validateReports([fakeEndpoint]));
+ const fakeSummary=structuredClone(historical);fakeSummary.anchoredReview={checked:0,total:0,status:'unknown'};assert.throws(()=>R.validateReports([fakeSummary]));
+}
+const downgradedChain=structuredClone(chainReport);downgradedChain.checkerVersion='schematic-1.2.0';downgradedChain.coverage.pop();assert.throws(()=>R.validateReports([downgradedChain]),'A matching seven-row matrix cannot grant chain capability to 1.2');
+const fallbackSource=R.createReport({...options,geometryReport:{...geometryReport,issues:[{code:'unsupported-dimension-unit',ids:['synthetic-unit']}]},measurementAudit:[]});
+assert.equal(fallbackSource.coverage[1].status,'unknown');
+const currentFallback=structuredClone(fallbackSource);currentFallback.coverage[1].status='not-checked';assert.throws(()=>R.validateReports([currentFallback]),'1.3 must not inherit the historical dimension fallback');
+for(const version of ['schematic-1.0.0','schematic-1.1.0','schematic-1.2.0']){
+ const historical=structuredClone(fallbackSource);historical.checkerVersion=version;historical.coverage.pop();historical.coverage[1].status='not-checked';
+ if(version!=='schematic-1.2.0')historical.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';
+ assert.deepEqual(R.validateReports([historical]),[historical],'Only explicit historical versions retain their dimension fallback');
+}
 console.log('PASS: bounded chain and anchor reports, selected-scope coverage, stable comparisons, strict imports and checker 1.0 through 1.3 compatibility.');

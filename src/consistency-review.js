@@ -13,7 +13,6 @@ function finite(v){return v===null||typeof v==='number'&&Number.isFinite(v);}
 function date(v){return text(v,40)&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString()===v;}
 function stable(value){let a=2166136261,b=5381;for(let i=0;i<value.length;i++){a=Math.imul(a^value.charCodeAt(i),16777619);b=Math.imul(b,33)^value.charCodeAt(i);}return (a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
 function identity(code,ids){return 'finding-'+stable(JSON.stringify([code,[...ids].sort()]));}
-function supportsAnchors(version){return [CHECKER_VERSION,'schematic-1.2.0'].includes(version);}
 function coverage(geometryStatus,dimensionStatus,anchorStatus='not-checked',legacy=false,chainStatus='not-checked',includeChains=true){return [
  {id:'schematic-geometry',category:'automated-geometry',status:geometryStatus,detail:'Semantic linear walls, explicit opening/window spans and rectangular fixtures only; wall thickness and full topology are unmodeled.'},
  {id:'dimension-line-scale',category:'automated-geometry',status:dimensionStatus,detail:'Declared dimensions compared to dimension-line spans using the supplied calibration and tolerance; spans are not anchored to walls.'},
@@ -24,6 +23,16 @@ function coverage(geometryStatus,dimensionStatus,anchorStatus='not-checked',lega
  {id:'structural-regulatory',category:'professional-code',status:'not-checked',detail:'No structural, safety or regulatory certification; no jurisdiction, rule edition or authoritative rule set is evaluated.'},
  ...(includeChains?[{id:'dimension-chain-totals',category:'automated-geometry',status:chainStatus,detail:'User-selected contiguous endpoint-bound chains on one explicit axis only; complete source chains, cross-axis totals, rooms and levels are not modeled.'}]:[])
  ];}
+// Persisted checker contracts are independent of the current report emitter. Keep
+// these historical matrices and capabilities intact when adding another version.
+function checkerContract(anchors,chains,legacyDimensionCoverage){return Object.freeze({anchors,chains,legacyDimensionCoverage,coverage:Object.freeze(coverage('unknown','not-checked','not-checked',!anchors,'not-checked',chains).map(row=>Object.freeze(row)))});}
+const CHECKER_CONTRACTS=Object.freeze({
+ 'schematic-1.0.0':checkerContract(false,false,true),
+ 'schematic-1.1.0':checkerContract(false,false,true),
+ 'schematic-1.2.0':checkerContract(true,false,true),
+ 'schematic-1.3.0':checkerContract(true,true,false)
+});
+function contractFor(version){return typeof version==='string'&&Object.hasOwn(CHECKER_CONTRACTS,version)?CHECKER_CONTRACTS[version]:null;}
 function severity(status){return status==='fail'?'error':['warning','unknown'].includes(status)?'warning':'info';}
 function worst(statuses){return statuses.includes('fail')?'fail':statuses.some(s=>s==='warning')?'warning':statuses.includes('unknown')?'unknown':statuses.includes('pass')?'pass':'not-checked';}
 function createReport({revision,sourceHash,geometryReport=null,measurementAudit,anchoredReview,chainReview,projectId,stateToken,runAt=new Date().toISOString()}={}){
@@ -120,13 +129,13 @@ function validateReports(reports){
  for(const r of reports){
   keys(r,['schemaVersion','checkerVersion','revision','sourceHash','runAt','status','findings','coverage'],['projectId','stateToken','anchoredReview','chains']);
   for(const k of ['projectId','stateToken'])need(!Object.hasOwn(r,k)||text(r[k],200),'project or state identity');
-  need(r.schemaVersion===SCHEMA_VERSION&&[CHECKER_VERSION,'schematic-1.0.0','schematic-1.1.0','schematic-1.2.0'].includes(r.checkerVersion),'unsupported schema or checker version');
+  const contract=contractFor(r.checkerVersion);need(r.schemaVersion===SCHEMA_VERSION&&contract!==null,'unsupported schema or checker version');
   need(text(r.revision,200)&&text(r.sourceHash,200)&&date(r.runAt)&&STATUSES.includes(r.status),'report metadata');
   need(Array.isArray(r.findings)&&r.findings.length<=MAX_FINDINGS,'finding limit');
   const seen=new Set();
   for(const f of r.findings){
    keys(f,['id','code','status','severity','affectedIds','measured','expected','unit','errorPercent','evidence']);
-   need(text(f.code,supportsAnchors(r.checkerVersion)?400:300)&&strings(f.affectedIds,MAX_IDS,300)&&new Set(f.affectedIds).size===f.affectedIds.length,'finding identity');
+   need(text(f.code,contract.anchors?400:300)&&strings(f.affectedIds,MAX_IDS,300)&&new Set(f.affectedIds).size===f.affectedIds.length,'finding identity');
    need(f.id===identity(f.code,f.affectedIds)&&!seen.has(f.id),'invalid or duplicate finding ID');seen.add(f.id);
    need(STATUSES.includes(f.status)&&SEVERITIES.includes(f.severity)&&f.severity===severity(f.status),'finding status or severity');
    need(finite(f.measured)&&finite(f.expected)&&finite(f.errorPercent)&&(f.unit===null||text(f.unit,20))&&strings(f.evidence,100),'finding measurements or evidence');
@@ -136,7 +145,7 @@ function validateReports(reports){
   }
   const anchorFindings=r.findings.filter(f=>f.code.startsWith('anchor:'));
   if(r.anchoredReview!==undefined){
-   need(supportsAnchors(r.checkerVersion),'legacy checker cannot contain anchored endpoint review');keys(r.anchoredReview,['checked','total','status']);const a=r.anchoredReview;
+   need(contract.anchors,'legacy checker cannot contain anchored endpoint review');keys(r.anchoredReview,['checked','total','status']);const a=r.anchoredReview;
    need(Number.isSafeInteger(a.total)&&a.total>=0&&Number.isSafeInteger(a.checked)&&a.checked>=0&&a.checked<=a.total&&STATUSES.includes(a.status)&&anchorFindings.length<=a.total,'saved anchor summary');
    need(anchorFindings.length===a.total||r.findings.some(f=>f.code==='review-incomplete'),'omitted anchored findings require disclosure');
    if(anchorFindings.length===a.total)need(a.checked===anchorFindings.filter(f=>['pass','fail'].includes(f.status)).length,'saved verified anchor count');
@@ -145,7 +154,7 @@ function validateReports(reports){
   }else need(!anchorFindings.length,'anchored findings require summary');
   const chainFindings=r.findings.filter(f=>f.code.startsWith('chain:'));
   if(r.chains!==undefined){
-   need(r.checkerVersion===CHECKER_VERSION,'legacy checker cannot contain chain review');keys(r.chains,['total','checked','status']);const c=r.chains;
+   need(contract.chains,'legacy checker cannot contain chain review');keys(r.chains,['total','checked','status']);const c=r.chains;
    need(Number.isSafeInteger(c.total)&&c.total>=0&&Number.isSafeInteger(c.checked)&&c.checked>=0&&c.checked<=c.total&&STATUSES.includes(c.status)&&chainFindings.length<=c.total,'saved chain summary');
    need(chainFindings.length===c.total||r.findings.some(f=>f.code==='review-incomplete'),'omitted chain findings require disclosure');
    if(chainFindings.length===c.total)need(c.checked===chainFindings.filter(f=>['pass','fail'].includes(f.status)).length,'saved verified chain count');
@@ -153,19 +162,19 @@ function validateReports(reports){
    need(c.status===worst([c.status,...chainFindings.map(f=>f.status),...(c.checked<c.total||!c.total||!chainFindings.length?['unknown']:[])]),'saved chain status');
   }else need(!chainFindings.length,'chain findings require summary');
   need(r.status===worst(['unknown',...(r.anchoredReview?[r.anchoredReview.status]:[]),...(r.chains?[r.chains.status]:[]),...r.findings.map(f=>f.status)]),'overall status');
-  const expected=coverage('unknown','not-checked','not-checked',!supportsAnchors(r.checkerVersion),'not-checked',r.checkerVersion===CHECKER_VERSION);need(Array.isArray(r.coverage)&&r.coverage.length===expected.length,'coverage matrix');
+  const expected=contract.coverage;need(Array.isArray(r.coverage)&&r.coverage.length===expected.length,'coverage matrix');
   for(let i=0;i<expected.length;i++){
    const c=r.coverage[i],e=expected[i];keys(c,['id','category','status','detail']);
    need(c.id===e.id&&c.category===e.category&&c.detail===e.detail&&STATUSES.includes(c.status),'coverage definition');
-   if(i>=2&&(i!==2||!supportsAnchors(r.checkerVersion))&&i!==7)need(c.status===e.status,'unsupported checks cannot pass');
+   if(i>=2&&(i!==2||!contract.anchors)&&i!==7)need(c.status===e.status,'unsupported checks cannot pass');
   }
   const gs=!r.findings.some(f=>f.code==='geometry-unavailable')?worst(['pass',...r.findings.filter(f=>f.code.startsWith('geometry:')||f.code.startsWith('unsupported:')).map(f=>f.status)]):'unknown';
   const incomplete=r.findings.some(f=>f.code==='review-incomplete');
   if(incomplete){const f=r.findings.find(f=>f.code==='review-incomplete');need(f.status==='unknown'&&f.evidence.length>0&&r.coverage[0].status==='unknown','incomplete review must disclose unknown coverage');}
   need(r.coverage[0].status===gs||r.coverage[0].status==='unknown','schematic coverage status');
-  if(supportsAnchors(r.checkerVersion))need(r.coverage[2].status===(r.anchoredReview?(incomplete?'unknown':r.anchoredReview.status):'not-checked'),'anchored endpoint coverage status');
-  if(r.checkerVersion===CHECKER_VERSION)need(r.coverage[7].status===(r.chains?(incomplete?'unknown':r.chains.status):'not-checked'),'dimension chain coverage status');
-  const ds=r.findings.filter(isDimensionFinding),dimensionStatus=incomplete?'unknown':ds.length?worst(ds.map(f=>f.status)):'not-checked';need(r.coverage[1].status===dimensionStatus||(r.checkerVersion!==CHECKER_VERSION&&r.coverage[1].status==='not-checked'&&!r.findings.some(f=>f.code.startsWith('dimension-line:'))),'dimension coverage status');
+  if(contract.anchors)need(r.coverage[2].status===(r.anchoredReview?(incomplete?'unknown':r.anchoredReview.status):'not-checked'),'anchored endpoint coverage status');
+  if(contract.chains)need(r.coverage[7].status===(r.chains?(incomplete?'unknown':r.chains.status):'not-checked'),'dimension chain coverage status');
+  const ds=r.findings.filter(isDimensionFinding),dimensionStatus=incomplete?'unknown':ds.length?worst(ds.map(f=>f.status)):'not-checked';need(r.coverage[1].status===dimensionStatus||(contract.legacyDimensionCoverage&&r.coverage[1].status==='not-checked'&&!r.findings.some(f=>f.code.startsWith('dimension-line:'))),'dimension coverage status');
  }
  return JSON.parse(JSON.stringify(reports));
 }

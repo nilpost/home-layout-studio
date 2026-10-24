@@ -41,11 +41,13 @@ is 1e-7 drawing units, a coordinate comparison bound, not a surveyed tolerance o
 
 ## Checker compatibility gate
 
-A future checker bump must preserve all existing report versions and their exact coverage
-matrices. Current anchor support includes versions 1.2 and 1.3; chains begin at 1.3.
-Opening-endpoint support must be explicitly version-gated. Merely changing the current
-checker version would cause current-version-only chain validation to reject saved 1.3
-reports and could block startup. Preserve historical matrix wording/status, bounded
+Saved validation now uses explicit frozen contracts for existing checker versions
+1.0–1.3, independently of the current report-emitter constant. Current 1.3 output is
+unchanged. A future checker bump must preserve all existing report versions and their
+exact coverage matrices. Current anchor support includes versions 1.2 and 1.3; chains begin at 1.3.
+Opening-endpoint support must be explicitly version-gated. The former current-version-only chain validation has been replaced, with a regression
+that simulates a future emitter while importing historical reports. Version 1.4 remains
+unsupported until its complete new contract and runtime integration are implemented. Preserve historical matrix wording/status, bounded
 summaries, truncation disclosure and unknown incomplete coverage.
 
 Acceptance must cover legacy absent collections, foreign ownership, malformed/duplicate
