@@ -332,3 +332,9 @@ and unlocked. Mixed architectural/comment/photo selections reject the entire ope
 Preview shows all affected overlays, Apply creates one reversible history entry, and
 Cancel makes no change. Selection membership and project/item identity are rechecked
 before committing. Rotation, group scaling and connected architectural edits remain open.
+
+Rotation preparation now includes an isolated, tested rectangle-corner and bounding-box
+module. It is not loaded by the editor and does not enable rotation or add a persisted
+angle field. [Integration and compatibility checklist](OVERLAY_ROTATION.md) records the
+remaining domain, rendering, selection, export and acceptance work. HLS-107 rotation
+remains undelivered.
