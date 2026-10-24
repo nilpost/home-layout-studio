@@ -419,3 +419,13 @@ uniform scale around the shared pivot from the original selection snapshot and u
 the existing explicit Apply/Cancel transaction. Whole-selection eligibility, pointer
 identity, cancellation, stale context, numeric bounds and pending-input guards apply.
 No new schema/domain operation or connected architectural editing is introduced.
+
+
+## Source-edit impact preview — 2026-10-25, v0.22.0
+
+HLS-107 adds diagnostic before/draft geometry and explicitly linked measurement/opening
+impact review in the existing source editor. Saved source references are not rewritten;
+missing or renumbered references remain unresolved and changed-source evidence stays
+stale. Draft changes invalidate the preview. Existing source locks, protected labels,
+reviewed Apply/Cancel and reversible history remain in force. Automatic connected
+neighbor movement and broader architectural semantics are still incomplete.

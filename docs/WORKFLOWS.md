@@ -59,3 +59,7 @@ The group scaling handle reuses the same reviewed group-scale operation. Its dis
 grip uses effective rotated selection bounds; each drag derives from the original
 selection snapshot. Release prepares the proposal, explicit Apply saves one revision,
 and cancellation or any invalid member discards the gesture.
+
+## Source-edit impact preview
+
+Open source review or propose a numeric segment edit, then check the draft. The impact panel compares original/draft segments and lists affected explicit opening and measurement references. A changed source retains stale verification until each declaration is explicitly reviewed again. Renumbered or missing segment IDs remain unresolved. Edits to the draft invalidate the preview; check again before assessing impacts. Apply retains existing source-lock, dimension-label and transaction safeguards. This diagnostic preview does not preserve connections by moving neighbors automatically or establish room/hosted-door semantics.

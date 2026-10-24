@@ -266,3 +266,5 @@ Eligible furniture/box groups also have a canvas scaling handle at their combine
 lower-right footprint bounds. Dragging prepares a common-pivot preview; release does
 not save. Use Apply scale or Cancel scale. All selected members are guarded together,
 and numeric group controls remain available for exact input.
+
+Source review includes an impact preview of changed segment identities and explicitly linked measurement/opening records. Original and draft geometry are shown separately. Missing or renamed references stay unresolved; the preview does not move neighbors or refresh saved verification.
