@@ -237,3 +237,8 @@ from -360 to 360 degrees. Preview rotates the shape and label together, preserve
 width/depth and records the angle only on Apply. JSON backups, agent handoffs and SVG
 exports retain rotation. Existing items without an angle retain their appearance. Group
 rotation and connected architectural transforms remain unavailable.
+
+A selected furniture or box overlay has a canvas handle for centered uniform scaling.
+Drag to prepare a preview, then use Apply changes; releasing the pointer alone does not
+commit. Numeric controls remain available. The handle preserves aspect ratio and rotation;
+architectural items and groups do not use this control.

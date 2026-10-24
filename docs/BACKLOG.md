@@ -346,5 +346,17 @@ HLS-107 adds an explicit center-pivot angle for one furniture or box overlay, in
 reviewed preview/apply/cancel, reversible history and persisted JSON/handoff metadata.
 Shape, label, selection and preview transforms agree; SVG export retains the rendered
 rotation. Rotated corners support bounds findings and guarded move/scale/group operations.
-Missing angles preserve legacy appearance; invalid angles and unsupported item types reject.
+Only an explicit rotationVersion:1 marker activates the finite angle; unmarked legacy
+rotation metadata remains inert and unchanged. Invalid active angles and unsupported
+active item types reject.
 No source architecture, group rotation or connected wall/door behavior is inferred.
+
+
+## Verified development progress — 2026-10-24, v0.17.0
+
+HLS-107 adds a canvas handle for centered uniform scaling of one furniture/box overlay,
+reusing the guarded scale proposal and explicit Apply transaction. Dragging is preview-only;
+pointer cancellation discards the gesture. Rotation and aspect ratio remain unchanged.
+Group handles, group rotation/scaling and connected architecture remain open.
+Acceptance covered rotated/zoomed pointer mapping, cancellation, stale/locked/hidden
+rejection, invalid-bound protection, secondary-pointer isolation and one reversible commit.

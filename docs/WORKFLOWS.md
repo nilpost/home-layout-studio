@@ -30,3 +30,8 @@ validation, asynchronous races, project identity, undo, locks and exact overlay 
 Manual browser acceptance covers the connected controls and backup round trip. Tests do
 not establish physical layout accuracy, structural safety, code compliance or actual
 Codex/Claude service integration.
+
+A selected furniture/box overlay also exposes one center-based uniform-scale canvas
+handle. Dragging changes only the ghost; release prepares the shared proposal. Apply
+commits one reversible revision, while Cancel, Escape or pointer cancellation discards
+the gesture. Numeric controls remain available for exact input.
