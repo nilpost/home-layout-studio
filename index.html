@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
-  <link rel="stylesheet" href="src/styles.css?v=0.13.1" />
+  <link rel="stylesheet" href="src/styles.css?v=0.14.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
-  <script src="src/geometry.js?v=0.13.1" defer></script>
-  <script src="src/review-history.js?v=0.13.1" defer></script>
-  <script src="src/original-overlay.js?v=0.13.1" defer></script>
-  <script src="src/layer-items.js?v=0.13.1" defer></script>
-  <script src="src/consistency-review.js?v=0.13.1" defer></script>
-  <script src="src/correction-contract.js?v=0.13.1" defer></script>
-  <script src="src/item-adjustments.js?v=0.13.1" defer></script>
-  <script src="src/geometry-coverage.js?v=0.13.1" defer></script>
-  <script src="src/asset-records.js?v=0.13.1" defer></script>
-  <script src="src/measurement-anchors.js?v=0.13.1" defer></script>
-  <script src="src/measurement-chains.js?v=0.13.1" defer></script>
-  <script src="src/app.js?v=0.13.1" defer></script>
+  <script src="src/geometry.js?v=0.14.0" defer></script>
+  <script src="src/review-history.js?v=0.14.0" defer></script>
+  <script src="src/original-overlay.js?v=0.14.0" defer></script>
+  <script src="src/layer-items.js?v=0.14.0" defer></script>
+  <script src="src/consistency-review.js?v=0.14.0" defer></script>
+  <script src="src/correction-contract.js?v=0.14.0" defer></script>
+  <script src="src/item-adjustments.js?v=0.14.0" defer></script>
+  <script src="src/geometry-coverage.js?v=0.14.0" defer></script>
+  <script src="src/asset-records.js?v=0.14.0" defer></script>
+  <script src="src/measurement-anchors.js?v=0.14.0" defer></script>
+  <script src="src/measurement-chains.js?v=0.14.0" defer></script>
+  <script src="src/app.js?v=0.14.0" defer></script>
 </head>
 <body>
 <div class="shell" data-panel="photos">
@@ -60,7 +60,7 @@
       <label for="architecture-segment">Wall / window segment</label><select id="architecture-segment"></select><div class="prop-grid"><label>Start X<input type="number" step="any" id="segment-ax" /></label><label>Start Y<input type="number" step="any" id="segment-ay" /></label><label>End X<input type="number" step="any" id="segment-bx" /></label><label>End Y<input type="number" step="any" id="segment-by" /></label></div><button class="button full" id="propose-segment">Review coordinate change</button><button class="button full" id="edit-source">Edit architectural SVG</button><button class="button full" id="load-correction">Review agent correction</button>
       <button class="button full" id="measure-source-spans">Measure source spans</button><button class="button full" id="measure-chains">Review dimension chains</button><p class="fine muted">Bind source dimensions to explicit segment endpoints. No automatic geometry correction.</p><div class="section-label">SCALE CALIBRATION</div><label>Known span (SVG units)<input type="number" id="scale-units" min="0.001" step="any" /></label><label>Measured length (mm)<input type="number" id="scale-mm" min="0.001" step="any" /></label><button class="button full" id="save-calibration">Record scale</button><p id="scale-details" class="fine muted">Record a known span from the source plan. No scale is assumed.</p>
       <div class="section-label">SELECTION</div>
-      <div id="selection-props" class="muted fine">Select a markup or furniture item to edit its coordinates.</div>
+      <div id="selection-props" class="muted fine">Select furniture or markup to preview precise changes. Furniture and boxes support uniform scale.</div>
     </aside>
     <main class="main">
       <div class="main-bar"><div><strong id="document-title">Untitled home</strong><span class="muted"> · <span id="revision-label">v0</span></span><small id="scale-summary" class="fine muted">Scale and units not verified</small></div><div class="bar-actions"><button class="button mini" id="undo" title="Undo">↶</button><button class="button mini" id="redo" title="Redo">↷</button><button class="button mini" id="zoom-out">−</button><span id="zoom-level">100%</span><button class="button mini" id="zoom-in">+</button><button class="button mini" id="fit">Fit</button></div></div>

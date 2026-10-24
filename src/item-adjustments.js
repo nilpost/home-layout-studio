@@ -38,6 +38,20 @@ function propose(input){
  validateItem(after);
  return {operationVersion:1,context:{projectId:identity(input.projectId,'project identity'),stateToken:identity(input.stateToken,'state token'),itemId:input.item.id},before,after,patch,unitDescription:units(input.calibration)};
 }
+function proposeScale(input){
+ object(input,'uniform scale');available(input);validateItem(input.item);
+ if(!['furniture','rect'].includes(input.item.kind))throw Error('Uniform scaling supports one furniture or box overlay only.');
+ const percent=input.scalePercent;
+ if(typeof percent!=='number'||!Number.isFinite(percent)||percent<=0)throw Error('Enter a finite positive scale percentage.');
+ const factor=percent/100,item=input.item,pivot={x:item.x+item.w/2,y:item.y+item.h/2};
+ if(!Number.isFinite(factor)||factor<=0)throw Error('Scale percentage is too small or too large to represent.');
+ const w=item.w*factor,h=item.h*factor,patch={x:pivot.x-w/2,y:pivot.y-h/2,w,h};
+ for(const key of ['x','y','w','h'])number(patch[key],key);
+ number(patch.x+w,'right edge');number(patch.y+h,'bottom edge');
+ const widthFactor=w/item.w,heightFactor=h/item.h;
+ if(patch.x+w===patch.x||patch.y+h===patch.y||widthFactor<=0||heightFactor<=0||Math.abs(widthFactor/heightFactor-1)>Number.EPSILON*16)throw Error('Scale is too small to preserve a representable uniform footprint.');
+ return {...propose({...input,patch}),pivot,scalePercent:percent};
+}
 function applyProposal(proposal,current){
  object(proposal,'adjustment proposal');object(current,'current adjustment context');available(current);validateItem(current.item);
  if(proposal.operationVersion!==1)throw Error('Unsupported adjustment proposal version');
@@ -48,5 +62,5 @@ function applyProposal(proposal,current){
  if(canonical(checked.after)!==canonical(proposal.after))throw Error('Invalid adjustment preview: proposed geometry changed.');
  return copy(checked.after);
 }
-root.ItemAdjustments=Object.freeze({MAX_COORDINATE,propose,applyProposal});
+root.ItemAdjustments=Object.freeze({MAX_COORDINATE,propose,proposeScale,applyProposal});
 })(typeof window==='undefined'?globalThis:window);

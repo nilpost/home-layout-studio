@@ -221,3 +221,8 @@ Asset forms also support local maintenance schedules/history and issue resolutio
 Activity controls edit a draft; Save asset records the change and Cancel draft discards
 it. These are owner-entered records, with undo and private backup/handoff preservation,
 not automatic reminders or proof that physical maintenance occurred.
+
+One selected furniture or box overlay can be scaled proportionally about its center.
+Enter a percentage, preview the new outline and pivot, then Apply or Cancel. The same
+project/item guards, locks, undo and review recording apply. This preserves aspect ratio
+and metadata; it does not rotate items or modify connected architecture.

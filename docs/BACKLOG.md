@@ -8,7 +8,7 @@ should reference these IDs rather than establish a competing backlog.
 
 ## HLS-101 — Complete workflows directly in the site
 
-Status: planned · Priority: required before deployment
+Status: partial · Priority: required before deployment
 
 Users must be able to carry out the actions and outcomes currently handled in the
 companion chat directly in the site. An external chat must not be required to complete
@@ -32,7 +32,7 @@ transport; expose one validated operation model for both site controls and agent
 
 ## HLS-102 — Link private vault knowledge to project assets
 
-Status: planned · Priority: design now; required before deployment
+Status: partial · Priority: design now; required before deployment
 
 An item in a layout should link to a stable asset record and relevant private knowledge,
 for example an appliance's model, manual, maintenance history and unresolved issues.
@@ -78,7 +78,7 @@ avoid single-project assumptions that would require a later permission-model rew
 
 ## HLS-104 — Codex and Claude interoperability
 
-Status: planned · Priority: design now; required before deployment
+Status: partial · Priority: design now; required before deployment
 
 Both Codex and Claude must be able to understand the same project state and instructions,
 inspect its assets, propose changes and resume work across handoffs.
@@ -132,7 +132,7 @@ sharing a project must not grant access to the owner's entire vault or ChatGPT a
 
 ## HLS-106 — Run an architectural consistency review
 
-Status: planned · Priority: core development; required before deployment
+Status: partial · Priority: core development; required before deployment
 
 Provide a site-native **Review project consistency** run covering measured geometry,
 notation and architectural relationships, with a traceable report for a real project.
@@ -175,7 +175,7 @@ agent providers and all actual project evidence private.
 
 ## HLS-107 — Adjust selected items with contextual controls
 
-Status: planned · Priority: design during development; review before deployment
+Status: partial · Priority: design during development; review before deployment
 
 Selecting a door, wall or other layout item on the plan or in Layer items opens controls
 suited to that item: position, rotation, scale, length and other applicable dimensions.
@@ -306,3 +306,18 @@ undeployed gates. [Activity workflow](ASSET_RECORDS.md#local-maintenance-and-iss
 Version0.13.1 makes HLS-102 field attribution, read-only source evidence and unresolved
 reference findings readable inside the asset form. It changes presentation only; no source
 fetch, verification status change or remote permission is introduced.
+
+
+## Verified development progress — 2026-10-24, v0.14.0
+
+HLS-107 adds uniform scaling for one furniture or box overlay about its center. An
+explicit percentage, visible pivot and ghost preview use the same guarded apply/cancel
+and reversible history as precise numeric edits. Item identity, labels, linked assets and
+other metadata remain unchanged. Inputs are drawing units, with no physical accuracy
+claim. Architecture, arrows/paint, multiple selections, rotation and connected topology
+remain outside this scale control. Hidden/locked/stale proposals cannot apply.
+
+Startup now blocks editing before loading or writing a project if required editor
+components fail to load, or saved metadata fails validation. It preserves existing
+storage instead of falling through to a writable demonstration project. Reload to retry;
+no automatic reset or recovery overwrite is performed.
