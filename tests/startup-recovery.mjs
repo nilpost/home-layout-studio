@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const domains={LayoutGeometry:'geometry',ReviewHistory:'review-history',OriginalOverlay:'original-overlay',LayerItems:'layer-items',ConsistencyReview:'consistency-review',CorrectionContract:'correction-contract',ItemAdjustments:'item-adjustments',GeometryCoverage:'geometry-coverage',AssetRecords:'asset-records',MeasurementAnchors:'measurement-anchors',MeasurementChains:'measurement-chains'};
+const domains={LayoutGeometry:'geometry',ReviewHistory:'review-history',OriginalOverlay:'original-overlay',LayerItems:'layer-items',ConsistencyReview:'consistency-review',CorrectionContract:'correction-contract',OverlayFootprint:'overlay-footprint',ItemAdjustments:'item-adjustments',GeometryCoverage:'geometry-coverage',AssetRecords:'asset-records',MeasurementAnchors:'measurement-anchors',MeasurementChains:'measurement-chains'};
 // Execute the complete app IIFE and actual domain validators. Substitute only the four
 // post-load browser boundaries so rejection must occur in the real startup control flow.
 let startup=app;

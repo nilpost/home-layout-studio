@@ -1,4 +1,4 @@
-/* Rectangle rotation math only. Not wired into the editor's persisted item model. */
+/* Pure rectangle rotation corners and bounds shared by overlay operations. */
 (function(root){
 'use strict';
 const MAX_COORDINATE=1_000_000_000;

@@ -123,8 +123,11 @@ Identity metadata is a concurrency guard, not authentication or authorization.
 
 Single-overlay adjustment proposals are pure, detached before/after records. Preview
 uses only the transient SVG layer; Apply rechecks project/state/item, locks and effective
-visibility, then records one reversible change. Rotation, architectural topology and
-multi-item transforms are intentionally unsupported until their relationships exist.
+visibility, then records one reversible change. Furniture/box scaling and rotation use
+a derived center pivot. Rotation is explicitly activated by `rotationVersion: 1`; raw
+unmarked historical angle metadata remains inert. Rotated corners are shared across
+rendering, highlights, bounds and guarded edits. Multi-overlay translation is atomic;
+group rotation/scaling and connected architectural topology remain unsupported.
 The unit display does not convert provisional drawing coordinates into verified survey
 measurements. Applying an adjustment reruns and saves schematic checks when possible;
 a failed rerun is reported separately from the committed edit.

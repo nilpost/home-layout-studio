@@ -10,7 +10,7 @@ service. Private content remains on the current device until deliberate export/t
 | Import plan/reference | Import architectural SVG / Add original PDF or image | SVG replacement clears annotations; original reference alignment is visual |
 | Photos/camera views | Add reference photos / Place and aim / numeric view controls | New photos are unplaced; physical position is supplied by the user |
 | Architecture | Wall/window coordinate proposal / source editor | Explicit source review; schematic checks; preserve dimensions and locks |
-| Furniture/markups | Draw, select, precise Preview changes / Apply changes / Cancel changes | Furniture/boxes can scale about their center; overlay-only selections can translate as one reviewed group; drawing units; no rotation or connected architectural transforms |
+| Furniture/markups | Draw, select, precise Preview changes / Apply changes / Cancel changes | Furniture/boxes can scale and rotate about their center; overlay-only selections can translate as one reviewed group; drawing units; no group rotation or connected architectural transforms |
 | Comments | Pin, review, record completion, reopen | Completion is attributed to a recorded change; adding a comment does not notify an agent |
 | Layer management | Layer items, selection, hide/show, lock/unlock, reversible deletion | Locked/protected items cannot be adjusted; parent visibility still applies |
 | Source-anchored spans | Measure source spans; explicit dimension/endpoints; preview/save/cancel/remove | Selected endpoints only; user threshold; unknown until source units/calibration are verified |

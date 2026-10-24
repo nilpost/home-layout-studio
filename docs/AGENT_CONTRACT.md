@@ -95,3 +95,8 @@ Optional `measurementChains` retains explicit project-bound `spanAnchorIds` and
 `totalAnchorId`, source hash and creation metadata. It is private handoff context, not
 permission to alter or verify source geometry. Missing bindings remain unresolved.
 See [chain schema](MEASUREMENT_CHAINS.md).
+
+Furniture/box overlay rotation travels in item metadata as explicit `rotationVersion: 1`
+and finite `rotation` degrees in [-360,360]. Unmarked historical rotation metadata has no
+geometric meaning. Review and undo use the same item/state guards; adapters must retain
+the activation marker and local dimensions, and must not infer angles from legacy fields.

@@ -1,3 +1,5 @@
+import '../src/overlay-footprint.js';
+import '../src/item-adjustments.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
@@ -14,7 +16,7 @@ const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const clone=value=>JSON.parse(JSON.stringify(value));
 function functionCode(name){const line=app.split('\n').find(line=>line.startsWith('function '+name+'(')||line.startsWith('async function '+name+'('));assert.ok(line,'Missing production function '+name);return line;}
 function fixture(){return {schemaVersion:1,projectId:'project-a',stateToken:'token-a',revision:'v0',name:'Fabricated A',note:'',baseSvg:'<svg/>',items:[],comments:[],photos:[],original:null,objectSettings:{},changeLog:[],layers:{photos:true}};}
-function sandbox(extra={}){const notices=[];return vm.createContext({state:fixture(),clone,crypto:webcrypto,Blob,Date,Set,Map,history:[],future:[],LayerItems:globalThis.LayerItems,ReviewHistory:globalThis.ReviewHistory,AssetRecords:globalThis.AssetRecords,MeasurementAnchors:globalThis.MeasurementAnchors,MeasurementChains,ConsistencyReview:{validateReports(){}},OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},saveLocal(){},notify:message=>notices.push(message),notices,...extra});}
+function sandbox(extra={}){const notices=[];return vm.createContext({state:fixture(),clone,crypto:webcrypto,Blob,Date,Set,Map,history:[],future:[],LayerItems:globalThis.LayerItems,ReviewHistory:globalThis.ReviewHistory,AssetRecords:globalThis.AssetRecords,MeasurementAnchors:globalThis.MeasurementAnchors,MeasurementChains,OverlayFootprint,ItemAdjustments,ConsistencyReview:{validateReports(){}},OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},saveLocal(){},notify:message=>notices.push(message),notices,...extra});}
 function load(context,...names){vm.runInContext(names.map(functionCode).join('\n'),context);}
 function deferred(){let resolve;const promise=new Promise(done=>resolve=done);return {promise,resolve};}
 

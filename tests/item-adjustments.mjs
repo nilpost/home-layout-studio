@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import '../src/overlay-footprint.js';
 import '../src/item-adjustments.js';
 const A=globalThis.ItemAdjustments;
 const item={id:'synthetic-item',kind:'furniture',x:10,y:20,w:30,h:40,label:'Synthetic box',assetId:'synthetic-asset'};
@@ -16,7 +17,7 @@ const codex=A.propose({...context,patch:structuredClone(patch)}),claude=A.propos
 assert.deepEqual(codex,claude,'Adapters share identical validated operations');
 assert.deepEqual(A.applyProposal(codex,context),A.applyProposal(claude,context));
 assert.match(A.propose({...context,patch:{x:0},calibration:{drawingUnits:10,realMillimetres:25,status:'manual'}}).unitDescription,/provisional recorded calibration: 1 drawing unit = 2.5 mm/);
-for(const bad of [{x:NaN},{y:Infinity},{w:0},{h:-1},{x:'3'},{rotation:90},{id:'replacement'},{label:'x'.repeat(81)},{x:A.MAX_COORDINATE+1},{}]){
+for(const bad of [{x:NaN},{y:Infinity},{w:0},{h:-1},{x:'3'},{rotation:361},{id:'replacement'},{label:'x'.repeat(81)},{x:A.MAX_COORDINATE+1},{}]){
  assert.throws(()=>A.propose({...context,patch:bad}));assert.deepEqual(context,snapshot);
 }
 for(const restriction of [{locked:true},{hidden:true}]){
@@ -87,4 +88,64 @@ assert.throws(()=>A.proposeTranslation({...group,items:[item,paintOverflow],sele
 const rectOverflow={...item,x:A.MAX_COORDINATE-1};assert.throws(()=>A.proposeTranslation({...group,items:[rectOverflow,groupItems[1]],selectedRefs:['item:'+item.id,'item:synthetic-arrow'],deltaX:0,deltaY:0}));
 const detachedGroup=structuredClone(translated);detachedGroup.members[2].after.points[0][0]=888;assert.deepEqual(group,groupBefore);
 assert.throws(()=>A.proposeTranslation({...group,deltaX:Number.MIN_VALUE}),'Unrepresentable motion must not partially move the group');
-console.log('PASS: single-overlay preview/scaling and atomic group translation, bounds, metadata, locks/visibility, exact selection/state guards, tampering and detached serialization.');
+for(const rotation of [0,90,-90,180,45,22.5,360,-360]){
+ const proposal=A.proposeRotate({...context,rotation});
+ assert.deepEqual(proposal.patch,{rotation,rotationVersion:1});assert.equal(proposal.after.rotation,rotation);assert.equal(proposal.after.rotationVersion,1);
+ for(const key of ['x','y','w','h','id','label','assetId'])assert.equal(proposal.after[key],item[key]);
+ assert.deepEqual(proposal.pivot,{x:item.x+item.w/2,y:item.y+item.h/2});
+ assert.deepEqual(A.applyProposal(JSON.parse(JSON.stringify(proposal)),context),proposal.after);assert.deepEqual(context,snapshot);
+}
+assert.equal(A.validateRotation(item),0);assert(!Object.hasOwn(A.propose({...context,patch:{x:12}}).after,'rotation'));
+for(const rotation of [NaN,Infinity,'90',null,361,-361,undefined])assert.throws(()=>A.proposeRotate({...context,rotation}));
+assert.throws(()=>A.propose({...context,patch:{rotation:undefined}}));
+for(const kind of ['arrow','paint']){
+ const unsupported=groupItems.find(i=>i.kind===kind);
+ assert.equal(A.validateRotation({...unsupported,rotation:'Historical unrelated metadata'}),0);
+ assert.throws(()=>A.validateRotation({...unsupported,rotation:0,rotationVersion:1}));
+ assert.throws(()=>A.proposeRotate({...context,item:unsupported,rotation:90}));
+ assert.throws(()=>A.propose({...context,item:unsupported,patch:{rotation:90}}));
+}
+for(const restriction of [{locked:true},{hidden:true}])assert.throws(()=>A.proposeRotate({...context,...restriction,rotation:90}));
+const rotateProposal=A.proposeRotate({...context,rotation:45});
+assert.throws(()=>A.applyProposal(rotateProposal,{...context,stateToken:'different'}));
+assert.throws(()=>A.applyProposal(rotateProposal,{...context,item:{...item,label:'Changed'}}));
+const tamperedRotation=structuredClone(rotateProposal);tamperedRotation.after.rotation=46;assert.throws(()=>A.applyProposal(tamperedRotation,context));
+const rotatedItem={...item,rotation:45,rotationVersion:1},rotatedContext={...context,item:rotatedItem};
+assert.equal(A.propose({...rotatedContext,patch:{x:20}}).after.rotation,45);
+const rotatedScale=A.proposeScale({...rotatedContext,scalePercent:200});assert.equal(rotatedScale.after.rotation,45);assert.equal(rotatedScale.after.w,item.w*2);
+assert.deepEqual(globalThis.OverlayFootprint.rectCorners(rotatedScale.after),globalThis.OverlayFootprint.rectCorners({...rotatedScale.after,rotation:45}));
+const rotatedGroup={...group,items:[rotatedItem,...groupItems.slice(1)]};assert.equal(A.applyTranslation(A.proposeTranslation(rotatedGroup),rotatedGroup)[0].rotation,45);
+const nearBoundary={...item,x:A.MAX_COORDINATE-25,rotation:0,w:20,h:100};
+assert.throws(()=>A.proposeRotate({...context,item:nearBoundary,rotation:90}));
+const rotatedBoundary={...item,x:A.MAX_COORDINATE-40,rotation:90,rotationVersion:1,w:20,h:50};
+assert.throws(()=>A.propose({...context,item:rotatedBoundary,patch:{x:A.MAX_COORDINATE-20}}));
+assert.throws(()=>A.proposeScale({...context,item:rotatedBoundary,scalePercent:200}));
+assert.throws(()=>A.proposeTranslation({...group,items:[rotatedBoundary,groupItems[1]],selectedRefs:['item:'+item.id,'item:synthetic-arrow'],deltaX:30,deltaY:0}));
+// Rotated extents, rather than the unrotated local box, govern new transformed edits.
+const rotatedFits={...item,x:A.MAX_COORDINATE-80,y:0,w:100,h:20,rotation:90,rotationVersion:1};
+assert.equal(A.proposeScale({...context,item:rotatedFits,scalePercent:100}).after.rotation,90);
+assert.equal(A.proposeTranslation({...group,items:[rotatedFits,groupItems[1]],selectedRefs:['item:'+item.id,'item:synthetic-arrow'],deltaX:0,deltaY:1}).members[0].after.rotation,90);
+const legacyExtreme={...item,x:A.MAX_COORDINATE-5,w:20};
+assert.equal(A.validateRotation(legacyExtreme),0);
+assert.equal(A.propose({...context,item:legacyExtreme,patch:{label:'Legacy remains editable'}}).after.label,'Legacy remains editable');
+assert.equal(A.propose({...context,item:legacyExtreme,patch:{y:21}}).after.y,21);
+assert.throws(()=>A.proposeRotate({...context,item:legacyExtreme,rotation:0}),'Explicit new rotation still needs a supported full footprint');
+assert.throws(()=>A.propose({...context,item:{...legacyExtreme,rotation:0,rotationVersion:1},patch:{label:'Active item needs full bounds'}}));
+assert.throws(()=>A.propose({...context,item:{...item,w:Number.MIN_VALUE,rotation:0,rotationVersion:1},patch:{label:'Active item needs a nondegenerate footprint'}}));
+for(const historicalRotation of ['Vendor label',999,null,{oldMeaning:'Unrelated source metadata'}]){
+ const historical={...item,rotation:historicalRotation};assert.equal(A.validateRotation(historical),0);
+ const moved=A.propose({...context,item:historical,patch:{x:13}}).after;
+ assert.deepEqual(moved.rotation,historicalRotation);assert(!Object.hasOwn(moved,'rotationVersion'));
+ const scaled=A.proposeScale({...context,item:historical,scalePercent:50}).after;
+ assert.deepEqual(scaled.rotation,historicalRotation);assert(!Object.hasOwn(scaled,'rotationVersion'));
+ const groupInput={...group,items:[historical,...groupItems.slice(1)]},groupAfter=A.applyTranslation(A.proposeTranslation(groupInput),groupInput);
+ assert.deepEqual(groupAfter[0].rotation,historicalRotation);assert(!Object.hasOwn(groupAfter[0],'rotationVersion'));
+ const activated=A.proposeRotate({...context,item:historical,rotation:22.5}).after;
+ assert.equal(activated.rotation,22.5);assert.equal(activated.rotationVersion,1);
+}
+for(const patch of [{rotation:90},{rotationVersion:1},{rotation:90,rotationVersion:2},{rotation:undefined,rotationVersion:1}])assert.throws(()=>A.propose({...context,patch}));
+for(const invalid of [{rotationVersion:0,rotation:0},{rotationVersion:2,rotation:90},{rotationVersion:'1',rotation:90},{rotationVersion:1,rotation:361},{rotationVersion:1,rotation:'90'},{rotationVersion:1}])assert.throws(()=>A.validateRotation({...item,...invalid}));
+assert.equal(A.propose({...context,patch:{rotation:90,rotationVersion:1}}).after.rotation,90);
+assert.equal(A.propose({...rotatedContext,patch:{rotation:-90}}).after.rotationVersion,1);
+assert.deepEqual(context,snapshot);assert.deepEqual(group,groupBefore);
+console.log('PASS: guarded rotation, rotated move/scale/group bounds, legacy unrotated compatibility, single/group transforms, metadata, stale selection and detached serialization.');

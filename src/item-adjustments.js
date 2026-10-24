@@ -2,17 +2,29 @@
 (function(root){
 'use strict';
 const MAX_COORDINATE=1_000_000_000;
-const fields={furniture:['x','y','w','h','label'],rect:['x','y','w','h'],arrow:['x','y','x2','y2'],paint:['x','y']};
+const fields={furniture:['x','y','w','h','label','rotation','rotationVersion'],rect:['x','y','w','h','rotation','rotationVersion'],arrow:['x','y','x2','y2'],paint:['x','y']};
 function copy(value){return JSON.parse(JSON.stringify(value));}
 function object(value,label){if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid '+label);return value;}
 function identity(value,label){if(typeof value!=='string'||!value.trim()||value.length>300)throw Error('Invalid '+label);return value;}
 function number(value,key){if(typeof value!=='number'||!Number.isFinite(value)||Math.abs(value)>MAX_COORDINATE)throw Error('Invalid '+key+': enter a finite number within '+MAX_COORDINATE+' drawing units.');if(['w','h'].includes(key)&&value<=0)throw Error('Invalid '+key+': size must be positive.');}
 function canonical(value){if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}';return JSON.stringify(value);}
 function available({locked,hidden}){if(locked)throw Error('Item is locked. Unlock it before adjusting.');if(hidden)throw Error('Item is hidden. Show it before adjusting.');}
+function validateRotation(item){
+ object(item,'item');
+ // Older backups permitted arbitrary metadata. Only explicit reviewed activation gives
+ // the angle geometric meaning; retain unrelated historical rotation values verbatim.
+ if(!Object.hasOwn(item,'rotationVersion'))return 0;
+ if(item.rotationVersion!==1)throw Error('Unsupported overlay rotation version.');
+ if(!['furniture','rect'].includes(item.kind))throw Error('Active rotation is supported only on furniture and box overlays.');
+ if(typeof item.rotation!=='number'||!Number.isFinite(item.rotation)||Math.abs(item.rotation)>360)throw Error('Rotation must be a finite number from -360 to 360 degrees.');
+ return item.rotation;
+}
+function rotationFootprint(item){if(!root.OverlayFootprint||typeof root.OverlayFootprint.rectCorners!=='function')throw Error('Rotation geometry component is unavailable. Reload the editor before rotating.');return root.OverlayFootprint.rectCorners(item);}
 function validateItem(item){
  object(item,'item');identity(item.id,'item identity');
  if(!Object.hasOwn(fields,item.kind))throw Error('Unsupported item: only single furniture and markup overlays can be adjusted.');
- for(const key of fields[item.kind].filter(k=>k!=='label'))number(item[key],key);
+ for(const key of fields[item.kind].filter(k=>!['label','rotation','rotationVersion'].includes(k)))number(item[key],key);
+ validateRotation(item);
  if(item.kind==='furniture'&&item.label!==undefined&&(typeof item.label!=='string'||item.label.length>80))throw Error('Invalid furniture label');
  if(item.kind==='paint'&&(!Array.isArray(item.points)||item.points.length<2||item.points.length>6000||item.points.some(p=>!Array.isArray(p)||p.length!==2||p.some(n=>typeof n!=='number'||!Number.isFinite(n)||Math.abs(n)>MAX_COORDINATE))))throw Error('Invalid paint geometry');
  if(item.kind==='paint'&&(!Number.isFinite(item.width)||item.width<1||item.width>20||typeof item.color!=='string'||!/^#[0-9a-f]{6}$/i.test(item.color)))throw Error('Invalid paint style');
@@ -27,15 +39,20 @@ function units(calibration){
 function propose(input){
  object(input,'adjustment');available(input);validateItem(input.item);object(input.patch,'adjustment patch');
  const keys=Object.keys(input.patch);if(!keys.length)throw Error('Choose at least one supported adjustment.');
+ if(Object.hasOwn(input.patch,'rotationVersion')&&(!Object.hasOwn(input.patch,'rotation')||input.patch.rotationVersion!==1))throw Error('Rotation activation requires an explicit angle and rotationVersion 1.');
+ if(Object.hasOwn(input.patch,'rotation')&&!(Object.hasOwn(input.item,'rotationVersion')&&input.item.rotationVersion===1)&&input.patch.rotationVersion!==1)throw Error('Review explicit rotation activation before changing a historical metadata field.');
  const allowed=fields[input.item.kind];
  for(const key of keys){
   if(!allowed.includes(key))throw Error('Unsupported adjustment: '+key);
   if(key==='label'){if(typeof input.patch.label!=='string'||input.patch.label.length>80)throw Error('Invalid furniture label: use at most 80 characters.');}
+  else if(key==='rotation')validateRotation({...input.item,...input.patch});
+  else if(key==='rotationVersion'){if(input.patch.rotationVersion!==1)throw Error('Unsupported overlay rotation version.');}
   else number(input.patch[key],key);
  }
  const before=copy(input.item),after=copy(input.item),patch=copy(input.patch);
  for(const key of keys)after[key]=patch[key];
  validateItem(after);
+ if(Object.hasOwn(after,'rotationVersion')&&after.rotationVersion===1)rotationFootprint(after);
  return {operationVersion:1,context:{projectId:identity(input.projectId,'project identity'),stateToken:identity(input.stateToken,'state token'),itemId:input.item.id},before,after,patch,unitDescription:units(input.calibration)};
 }
 function proposeScale(input){
@@ -47,10 +64,17 @@ function proposeScale(input){
  if(!Number.isFinite(factor)||factor<=0)throw Error('Scale percentage is too small or too large to represent.');
  const w=item.w*factor,h=item.h*factor,patch={x:pivot.x-w/2,y:pivot.y-h/2,w,h};
  for(const key of ['x','y','w','h'])number(patch[key],key);
- number(patch.x+w,'right edge');number(patch.y+h,'bottom edge');
+ if(validateRotation(item)===0){number(patch.x+w,'right edge');number(patch.y+h,'bottom edge');}
  const widthFactor=w/item.w,heightFactor=h/item.h;
  if(patch.x+w===patch.x||patch.y+h===patch.y||widthFactor<=0||heightFactor<=0||Math.abs(widthFactor/heightFactor-1)>Number.EPSILON*16)throw Error('Scale is too small to preserve a representable uniform footprint.');
  return {...propose({...input,patch}),pivot,scalePercent:percent};
+}
+function proposeRotate(input){
+ object(input,'rotation');available(input);validateItem(input.item);
+ if(!['furniture','rect'].includes(input.item.kind))throw Error('Rotation supports one furniture or box overlay only.');
+ if(input.rotation===undefined)throw Error('Enter a rotation angle before previewing.');
+ const proposal=propose({...input,patch:{rotation:input.rotation,rotationVersion:1}}),item=input.item;
+ return {...proposal,pivot:{x:item.x+item.w/2,y:item.y+item.h/2}};
 }
 function applyProposal(proposal,current){
  object(proposal,'adjustment proposal');object(current,'current adjustment context');available(current);validateItem(current.item);
@@ -70,7 +94,7 @@ function refs(value,label,{selection=false}={}){
  return [...value];
 }
 function translationFootprint(item){
- const points=item.kind==='paint'?item.points.map(p=>[item.x+p[0],item.y+p[1]]):item.kind==='arrow'?[[item.x,item.y],[item.x2,item.y2]]:[[item.x,item.y],[item.x+item.w,item.y+item.h]];
+ const points=item.kind==='paint'?item.points.map(p=>[item.x+p[0],item.y+p[1]]):item.kind==='arrow'?[[item.x,item.y],[item.x2,item.y2]]:Object.hasOwn(item,'rotationVersion')&&item.rotationVersion===1?rotationFootprint(item):[[item.x,item.y],[item.x+item.w,item.y+item.h]];
  for(const [x,y]of points){number(x,'translated footprint X');number(y,'translated footprint Y');}
 }
 function proposeTranslation(input){
@@ -107,5 +131,5 @@ function applyTranslation(proposal,current){
  }
  return checked.members.map(member=>copy(member.after));
 }
-root.ItemAdjustments=Object.freeze({MAX_COORDINATE,propose,proposeScale,applyProposal,proposeTranslation,applyTranslation});
+root.ItemAdjustments=Object.freeze({MAX_COORDINATE,validateRotation,propose,proposeScale,proposeRotate,applyProposal,proposeTranslation,applyTranslation});
 })(typeof window==='undefined'?globalThis:window);

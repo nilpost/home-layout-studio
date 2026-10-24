@@ -338,3 +338,13 @@ module. It is not loaded by the editor and does not enable rotation or add a per
 angle field. [Integration and compatibility checklist](OVERLAY_ROTATION.md) records the
 remaining domain, rendering, selection, export and acceptance work. HLS-107 rotation
 remains undelivered.
+
+
+## Verified development progress — 2026-10-24, v0.16.0
+
+HLS-107 adds an explicit center-pivot angle for one furniture or box overlay, including
+reviewed preview/apply/cancel, reversible history and persisted JSON/handoff metadata.
+Shape, label, selection and preview transforms agree; SVG export retains the rendered
+rotation. Rotated corners support bounds findings and guarded move/scale/group operations.
+Missing angles preserve legacy appearance; invalid angles and unsupported item types reject.
+No source architecture, group rotation or connected wall/door behavior is inferred.

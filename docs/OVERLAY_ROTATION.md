@@ -1,8 +1,9 @@
 # Overlay rotation math foundation
 
-Status: isolated engineering foundation. `overlay-footprint.js` is not loaded by the
-application; persisted item rotation, rotation controls and rotated rendering are not
-delivered by this increment. HLS-107 rotation remains planned.
+Status: integrated for single furniture and box overlays in v0.16.0. Reviewed rotation
+uses `rotationVersion: 1` with a finite `rotation` angle. Missing markers retain the old
+appearance even if unrelated historical angle-like metadata is present. Source architecture,
+group rotation and connected topology remain outside this feature.
 
 `OverlayFootprint.rectCorners({x,y,w,h,rotation=0})` returns four detached `[x,y]` corner
 pairs in original local top-left, top-right, bottom-right, bottom-left order, transformed
@@ -26,9 +27,9 @@ reject. Extremely small dimensions can therefore reject even when mathematically
 This numeric supported range is not a survey tolerance, scale calibration or construction
 allowance. Reflections/negative dimensions are not rotation and reject.
 
-## Required integration before claiming rotation support
+## Integration and acceptance contract
 
-1. Introduce an optional persisted item angle defaulting to zero only for furniture and
+1. Use an explicitly activated persisted item angle, defaulting to zero appearance for furniture and
    box overlays. Validate it consistently on normal edits, private import, save/restore
    and correction adapters. Preserve legacy backups without an angle and original source
    uploads. Do not silently migrate an unrelated metadata field into geometric meaning.
@@ -56,3 +57,13 @@ Swapping width and height at quarter turns changes an axis-aligned footprint; it
 preserve label orientation or express general rotation and must not be presented as such.
 This foundation supplies no wall/door topology, group rotation, architectural source edit,
 physical placement inference or safety/compliance verification.
+
+## Versioned activation
+
+Only an own `rotationVersion: 1` field activates the own finite `rotation` value for
+furniture and boxes. Unmarked historical metadata is retained and inert during ordinary
+move, scale and group operations. Reviewed rotation Apply writes the marker and angle
+with a reversible before/after history record. Unsupported explicit versions, active
+unsupported kinds, missing active angles or invalid angle values reject. All active
+footprints, including explicit zero, use the shared numeric corner bounds; unmarked
+legacy documents retain prior validation limits.

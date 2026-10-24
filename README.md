@@ -230,4 +230,10 @@ and metadata; it does not rotate items or modify connected architecture.
 Multiple overlay selections can move together using explicit X/Y offsets. Preview shows
 every member; Apply records one undoable change. If any member is stale, hidden, locked
 or unsupported, the whole proposal is rejected. Architecture and photo/comment selections
-are excluded; rotation and group scaling remain unavailable.
+are excluded; group rotation and group scaling remain unavailable.
+
+One furniture or box overlay can also rotate about its center using an explicit angle
+from -360 to 360 degrees. Preview rotates the shape and label together, preserves local
+width/depth and records the angle only on Apply. JSON backups, agent handoffs and SVG
+exports retain rotation. Existing items without an angle retain their appearance. Group
+rotation and connected architectural transforms remain unavailable.
