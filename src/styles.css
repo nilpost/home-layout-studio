@@ -34,3 +34,7 @@
 #selection-props section>label{display:block;margin-top:12px}#selection-props section>label input{display:block;margin-top:5px}#selection-props section>button{display:block}.item-scale-handle{fill:#fff;stroke:#008c9e;stroke-width:2;vector-effect:non-scaling-stroke;cursor:nwse-resize;pointer-events:all}.item-scale-handle:hover{fill:#def3f4}
 
 .group-scale-controls,.group-rotation-controls{border-top:1px solid var(--stroke);margin-top:16px;padding-top:16px}.group-scale-controls p,.group-rotation-controls p{overflow-wrap:anywhere}
+
+#opening-dialog label{display:block;font-size:12px;margin:12px 0 5px}#opening-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#opening-preview{white-space:pre-wrap;overflow-wrap:anywhere}
+
+#opening-mini-panel{position:sticky;top:0;z-index:1;background:#fff;border:1px solid var(--stroke);border-radius:8px;padding:8px;margin:12px 0}#opening-mini-panel[hidden]{display:none}#opening-mini-preview{display:block;width:100%;height:180px;background:#f7faf9;border-radius:5px}#opening-mini-caption{margin:4px 0 0}#opening-source-details[hidden]{display:none}

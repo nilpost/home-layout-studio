@@ -1,9 +1,10 @@
 # Explicit opening endpoint bindings
 
-The isolated `OpeningBindings` domain models a declared opening segment associated
+The `OpeningBindings` domain models a declared opening segment associated
 with two explicitly chosen wall endpoints. It does not alter geometry, snap endpoints,
-cut walls, attach door leaves or infer hinges/swing/clearance. It is not loaded by the
-editor yet; UI, project persistence and saved-report integration remain undelivered.
+cut walls, attach door leaves or infer hinges/swing/clearance. The editor supports explicit authoring, private project persistence and source-bound
+saved consistency findings. This is limited schematic endpoint association, not a
+complete hosted-door or room model.
 
 ## Foundation contract
 
@@ -26,31 +27,30 @@ degenerate or unsupported geometry remains unknown. Unsupported extraction can h
 conflicting wall, so it conservatively prevents a pass. The numerical equality epsilon
 is 1e-7 drawing units, a coordinate comparison bound, not a surveyed tolerance or physical proof.
 
-## Required runtime integration
+## Runtime behavior
 
-1. Load the domain before app startup and require it before saved-project access/writes.
-2. Add an optional legacy-compatible empty project collection; validate nonempty ownership,
-   detached import, private backup and explicit manual handoff preservation.
-3. Add explicit opening and two wall-endpoint selection, preview/highlight all three,
-   stale/context/source guards, reversible Save/remove and cancellation without writes.
-4. Preserve bindings through reviewed source edits; changed source hashes require review.
-   Guard full-SVG replacement while bindings remain. Undo restores exact records/source.
-5. Integrate bounded stable findings and a separate limited endpoint coverage row in saved
+1. The domain loads before app startup and is required before saved-project access/writes.
+2. The optional legacy-compatible project collection defaults to empty; nonempty ownership,
+   detached import, private backup and explicit manual handoff preservation are validated.
+3. Choose an explicit opening and two wall endpoints, preview/highlight all three,
+   then Save or remove reversibly. Input/state/source guards reject stale drafts; Cancel writes nothing.
+4. Bindings survive reviewed source edits; changed source hashes require explicit reconfirmation.
+   Full-SVG replacement is blocked while bindings remain. Undo restores exact records/source.
+5. Bounded stable findings and a separate limited endpoint coverage row are saved in
    reports. Broader room/door/clearance/survey/regulatory coverage remains unchecked.
-6. Run legacy, transactional and browser acceptance before claiming a user-facing feature.
+6. Schematic associations may be saved with failed or unknown checks; saving is a reviewed declaration, not a pass or a geometry correction.
 
-## Checker compatibility gate
+## Checker compatibility
 
 Saved validation now uses explicit frozen contracts for existing checker versions
-1.0–1.3, independently of the current report-emitter constant. Current 1.3 output is
-unchanged. A future checker bump must preserve all existing report versions and their
+1.0–1.4, independently of the current report-emitter constant. Historical 1.3 output remains unchanged. A future checker bump must preserve all existing report versions and their
 exact coverage matrices. Current anchor support includes versions 1.2 and 1.3; chains begin at 1.3.
 Opening-endpoint support must be explicitly version-gated. The former current-version-only chain validation has been replaced, with a regression
-that simulates a future emitter while importing historical reports. Version 1.4 remains
-unsupported until its complete new contract and runtime integration are implemented. Preserve historical matrix wording/status, bounded
+that simulates a future emitter while importing historical reports. Version 1.4 adds the separate opening-jamb endpoint row and bounded source evidence.
+Legacy rows and capability envelopes remain exact; old reports remain importable. Preserve historical matrix wording/status, bounded
 summaries, truncation disclosure and unknown incomplete coverage.
 
-Acceptance must cover legacy absent collections, foreign ownership, malformed/duplicate
+Acceptance covers legacy absent collections, foreign ownership, malformed/duplicate
 records, numerical bounds, reverse/wrong endpoint association, stale/missing/unsupported
 source evidence, failed Save/remove rollback, exact Undo/redo, JSON/handoff and every
 historical checker import. Use fabricated geometry; preserve real projects before any

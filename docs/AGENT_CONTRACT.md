@@ -112,3 +112,7 @@ Group rotation proposals carry a reviewed relative angle and derived pivot. Appl
 recomputes every final member center/angle, rejects inactive historical angle fields
 and verifies the whole current selection before returning replacements. This does not
 turn the handoff format into an authenticated live-provider adapter.
+
+Manual handoff envelopes retain the detached `openingBindings` collection alongside
+source identities and current consistency evidence. These declarations do not authorize
+geometry corrections; stale source associations require explicit reviewed reconfirmation.

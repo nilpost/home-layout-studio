@@ -399,3 +399,14 @@ contracts, independent of the current emitter version. Existing1.3 output is unc
 Historical import, tampered coverage and simulated future-emitter regressions protect
 legacy anchors/chains before opening-endpoint integration. No1.4 capability, opening
 editor, project field or checker output expansion is delivered in this slice.
+
+
+## Runtime opening associations — 2026-10-25, v0.20.0
+
+HLS-106 adds explicit source opening-to-two-wall-endpoint authoring, all-three preview,
+guarded Save/remove/Cancel, private JSON/manual handoff and reversible history. Source
+changes leave records stale until explicit reconfirmation; missing/unsupported evidence
+stays unknown. Saved checker1.4 reports add bounded source evidence and a separate
+limited endpoint coverage row while retaining exact1.0–1.3 import compatibility.
+The operation changes declarations only; geometry/labels remain unchanged. Rooms,
+hosted doors/swings/clearance, physical survey and connected editing remain unmodeled.

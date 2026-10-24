@@ -5,11 +5,11 @@ import {webcrypto} from 'node:crypto';
 
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const domains={LayoutGeometry:'geometry',ReviewHistory:'review-history',OriginalOverlay:'original-overlay',LayerItems:'layer-items',ConsistencyReview:'consistency-review',CorrectionContract:'correction-contract',OverlayFootprint:'overlay-footprint',ItemAdjustments:'item-adjustments',GeometryCoverage:'geometry-coverage',AssetRecords:'asset-records',MeasurementAnchors:'measurement-anchors',MeasurementChains:'measurement-chains'};
+const domains={LayoutGeometry:'geometry',ReviewHistory:'review-history',OriginalOverlay:'original-overlay',LayerItems:'layer-items',ConsistencyReview:'consistency-review',CorrectionContract:'correction-contract',OverlayFootprint:'overlay-footprint',ItemAdjustments:'item-adjustments',GeometryCoverage:'geometry-coverage',AssetRecords:'asset-records',MeasurementAnchors:'measurement-anchors',MeasurementChains:'measurement-chains',OpeningBindings:'opening-bindings'};
 // Execute the complete app IIFE and actual domain validators. Substitute only the four
 // post-load browser boundaries so rejection must occur in the real startup control flow.
 let startup=app;
-for(const [name,body]of Object.entries({migrateObjectIds:'metrics.migrations++;',wire:"metrics.wires++;document.getElementById('save-project').onclick=()=>metrics.exports++;",chooseTool:'metrics.tools++;',render:'metrics.renders++;metrics.loadedName=state.name;metrics.loadedAssets=JSON.stringify(state.assets||[]);'})){
+for(const [name,body]of Object.entries({migrateObjectIds:'metrics.migrations++;',wire:"metrics.wires++;document.getElementById('save-project').onclick=()=>metrics.exports++;",chooseTool:'metrics.tools++;',render:'metrics.renders++;metrics.loadedName=state.name;metrics.loadedAssets=JSON.stringify(state.assets||[]);metrics.loadedOpenings=JSON.stringify(state.openingBindings||[]);'})){
  const start=startup.search(new RegExp('^function '+name+'\\(','m'));assert(start>=0,'Missing startup boundary '+name);
  const newline=startup.indexOf('\n',start),line=startup.slice(start,newline),end=line.endsWith('{')?startup.indexOf('\n}',start)+2:newline;
  assert(end>start,'Malformed startup boundary '+name);
@@ -50,6 +50,7 @@ function assertBlocked(result,saved,explanation){
  assert.match(result.elements.get('message').textContent,/untouched|preserv|no stored project or media has been cleared/i);
 }
 const validSaved=JSON.stringify(fixture());
+const validOpeningSaved=JSON.stringify(fixture({openingBindings:[{id:'opening-a',projectId:'synthetic-project',openingSegmentId:'opening:0',startJamb:{segmentId:'wall-a:0',endpoint:'b'},endJamb:{segmentId:'wall-b:0',endpoint:'a'},sourceHashAtCreation:'synthetic-source'}]}));
 for(const name of Object.keys(domains)){
  const result=boot({missing:name,saved:validSaved});assertBlocked(result,validSaved,new RegExp(name));
  assert.equal(result.metrics.reads,0,'Missing components must block before reading project storage');
@@ -61,16 +62,19 @@ const invalidSaved=[
  JSON.stringify(fixture({assets:[{id:'foreign-asset',projectId:'foreign-project',name:'Synthetic foreign record'}]})),
  JSON.stringify(fixture({assets:[{id:'synthetic-asset',projectId:'synthetic-project',name:'Synthetic record',manufacturer:123}]})),
  JSON.stringify(fixture({baseSvg:'<html/>'})),
+ JSON.stringify(fixture({openingBindings:[{id:'opening-a',projectId:'foreign-project',openingSegmentId:'opening:0',startJamb:{segmentId:'wall-a:0',endpoint:'b'},endJamb:{segmentId:'wall-b:0',endpoint:'a'},sourceHashAtCreation:'synthetic-source'}]})),
+ JSON.stringify(fixture({projectId:undefined,openingBindings:[{id:'opening-a',projectId:'synthetic-project',openingSegmentId:'opening:0',startJamb:{segmentId:'wall-a:0',endpoint:'b'},endJamb:{segmentId:'wall-b:0',endpoint:'a'},sourceHashAtCreation:'synthetic-source'}]})),
  JSON.stringify(fixture({measurementAnchors:[{id:'orphan',projectId:'foreign-project',dimensionId:'synthetic-dimension',start:{segmentId:'synthetic-wall:0',endpoint:'a'},end:{segmentId:'synthetic-wall:0',endpoint:'b'},sourceHashAtCreation:'synthetic-hash'}]}))
 ];
 for(const saved of invalidSaved){const result=boot({saved});assertBlocked(result,saved,/saved project|could not be opened|unavailable/i);assert.equal(result.metrics.reads,1);}
 assertBlocked(boot({saved:validSaved,readFailure:true}),validSaved,/storage read unavailable/i);
-for(const saved of [null,validSaved]){
+for(const saved of [null,validSaved,validOpeningSaved]){
  const result=boot({saved});
  for(const metric of ['migrations','wires','tools','renders'])assert.equal(result.metrics[metric],1,'Healthy startup reaches '+metric);
  assert.equal(result.metrics.loadedName,saved?'Synthetic saved project':'Untitled home');
  assert.equal(result.stored,saved);assert.equal(result.metrics.writes,0);assert.equal(result.metrics.removals,0);assert.equal(result.metrics.mediaOperations,0);
  assert.equal(result.elements.get('save-project').disabled,false);
+ assert.equal(result.metrics.loadedOpenings,saved===validOpeningSaved?JSON.stringify(JSON.parse(saved).openingBindings):'[]','Startup retains explicit opening records without writing storage');
  result.elements.get('save-project').onclick();assert.equal(result.metrics.exports,1,'Healthy startup wires actions');
 }
 console.log('PASS: full startup control flow blocks every missing domain and invalid saved project before wiring/migration/writes, preserves storage/media, and permits valid saved or empty-demo startup.');

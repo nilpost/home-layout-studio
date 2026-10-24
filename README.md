@@ -256,7 +256,8 @@ rotation metadata require an individually reviewed rotation activation first. Ea
 group operation derives its center again; use Undo to restore an arbitrary rotation
 exactly, since the opposite angle can use a different bounds center for irregular groups.
 
-An isolated [opening endpoint binding foundation](docs/OPENING_BINDINGS.md) validates
-explicit schematic opening-to-two-wall-endpoint associations using fabricated tests.
-It is not loaded by the editor; authoring, project collection persistence and saved
-report integration remain future work. It performs no wall cutting or source changes.
+Explicit [opening endpoint associations](docs/OPENING_BINDINGS.md) can now be authored
+in the editor. Choose an opening segment and two wall endpoints, preview all three,
+then save or cancel. Records and source-bound checker findings survive private backup,
+manual handoff and Undo. Changed or unsupported source geometry stays unknown; this
+operation does not snap/cut walls, attach doors or verify physical construction.

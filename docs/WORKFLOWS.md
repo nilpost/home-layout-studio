@@ -48,3 +48,9 @@ bounds center. Preview/apply/cancel uses the same all-member guards and one hist
 transaction. Inactive historical angle metadata blocks this operation until individual
 reviewed activation; no silent field reinterpretation occurs. Every subsequent proposal
 derives a fresh pivot. Use Undo for an exact reversal.
+
+Opening endpoint associations support explicit source opening/two-wall endpoint selection,
+three-segment preview, guarded Save/remove, Cancel and Undo. Source changes require explicit
+reconfirmation; stale, missing or unsupported geometry remains unknown. Saved checker1.4
+findings retain source evidence, and private JSON/manual handoffs retain records. This
+workflow never alters source geometry or establishes door hosting, swing or clearance.

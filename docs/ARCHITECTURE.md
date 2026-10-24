@@ -202,3 +202,11 @@ after checking current endpoint topology and source authority. Removing an ancho
 its chain reference visibly unresolved rather than silently selecting another binding.
 Saved reports, private backup and manual handoffs retain these relationships; full source
 replacement is blocked while chains exist. No geometry inference or remote access is added.
+
+OpeningBindings is a required startup domain and an optional empty legacy project
+collection. Nonempty records require enclosing project ownership. Explicit source hashes
+and three segment references are retained through guarded authoring, import, backup,
+manual handoff and Undo. Full source replacement is blocked while bindings remain;
+reviewed source edits retain declarations with stale evidence. Checker1.4 uses a new
+limited endpoint row and source-context evidence, preserving exact1.0–1.3 contracts.
+No endpoint snapping, wall cutting or hosted-door geometry is performed.

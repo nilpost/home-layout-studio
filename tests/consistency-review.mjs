@@ -3,6 +3,7 @@ import '../src/geometry.js';
 import '../src/consistency-review.js';
 import '../src/measurement-anchors.js';
 import '../src/measurement-chains.js';
+import '../src/opening-bindings.js';
 const R=globalThis.ConsistencyReview,G=globalThis.LayoutGeometry;
 const square=[[[0,0],[100,0]],[[100,0],[100,100]],[[100,100],[0,100]],[[0,100],[0,0]]].map(([a,b],i)=>({id:'wall-'+i,kind:'wall',a,b}));
 const dimension={id:'dimension-1',a:[0,0],b:[100,0],value:100,unit:'mm',unitStatus:'verified'};
@@ -94,12 +95,12 @@ assert.equal(shortened.findings.find(f=>f.code.startsWith('unsupported:')).evide
 assert.equal(shortened.findings.some(f=>f.code==='review-incomplete'),true);
 assert.equal(shortened.coverage[0].status,'unknown');assert.equal(shortened.coverage[1].status,'unknown');
 const invalidComplete=structuredClone(large);invalidComplete.coverage[1].status='pass';assert.throws(()=>R.validateReports([invalidComplete]));
-const previousVersion=structuredClone(first);previousVersion.checkerVersion='schematic-1.0.0';previousVersion.coverage=previousVersion.coverage.filter(c=>c.id!=='dimension-chain-totals');previousVersion.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';assert.deepEqual(R.validateReports([previousVersion]),[previousVersion]);
+const previousVersion=structuredClone(first);previousVersion.checkerVersion='schematic-1.0.0';previousVersion.coverage=previousVersion.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));previousVersion.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';assert.deepEqual(R.validateReports([previousVersion]),[previousVersion]);
 const A=globalThis.MeasurementAnchors;
 const binding=A.createBinding({id:'synthetic-anchor',projectId:options.projectId,dimensionId:dimension.id,start:{segmentId:square[0].id,endpoint:'a'},end:{segmentId:square[0].id,endpoint:'b'},sourceHash:options.sourceHash});
 const anchoredInput={anchors:[binding],projectId:options.projectId,segments:square,dimensions:[dimension],calibration:{drawingUnits:1,realMillimetres:1,status:'verified'},tolerancePercent:1,sourceHash:options.sourceHash};
 const anchoredRaw=A.review(anchoredInput),anchored=R.createReport({...options,anchoredReview:anchoredRaw});
-assert.equal(anchored.checkerVersion,'schematic-1.3.0');
+assert.equal(anchored.checkerVersion,'schematic-1.4.0');
 assert.deepEqual(anchored.anchoredReview,{checked:1,total:1,status:'pass'});
 assert.equal(anchored.coverage[2].status,'pass');assert.match(anchored.coverage[2].detail,/endpoint spans only/);assert.match(anchored.coverage[2].detail,/chains.*not modeled/);
 assert.equal(anchored.status,'unknown','Passing endpoint spans do not certify the full project');
@@ -135,7 +136,7 @@ const legacyAnchored=structuredClone(anchored);legacyAnchored.checkerVersion='sc
 const chainFinding={chainId:'synthetic-chain',code:'chain-total-within-tolerance',status:'pass',severity:'info',affectedIds:['synthetic-chain','synthetic-anchor','synthetic-anchor-2','synthetic-total-dimension'],measured:200,expected:200,unit:'mm',errorPercent:0,evidence:{axis:'x',members:['synthetic-anchor','synthetic-anchor-2'],sourceHash:options.sourceHash,tolerancePercent:1,scope:'Explicit selected contiguous chain only'}};
 const chainRaw={findings:[chainFinding],total:1,checked:1,status:'pass'};
 const chainReport=R.createReport({...options,anchoredReview:anchoredRaw,chainReview:chainRaw});
-assert.equal(chainReport.checkerVersion,'schematic-1.3.0');assert.deepEqual(chainReport.chains,{total:1,checked:1,status:'pass'});
+assert.equal(chainReport.checkerVersion,'schematic-1.4.0');assert.deepEqual(chainReport.chains,{total:1,checked:1,status:'pass'});
 const chainRow=chainReport.coverage.find(c=>c.id==='dimension-chain-totals');assert.equal(chainRow.status,'pass');assert.match(chainRow.detail,/one explicit axis only/);assert.match(chainRow.detail,/rooms and levels are not modeled/);
 assert.equal(chainReport.coverage.find(c=>c.id==='anchored-dimension-chains').status,'pass','Endpoint coverage remains independently represented');
 assert.equal(chainReport.status,'unknown','A passing selected chain does not certify source-wide chains or physical accuracy');
@@ -145,7 +146,7 @@ assert.equal(mismatchChain.coverage.find(c=>c.id==='dimension-chain-totals').sta
 const unknownChain=R.createReport({...options,chainReview:{total:1,checked:0,status:'unknown',findings:[{...chainFinding,code:'stale-chain',status:'unknown',severity:'warning',measured:null,errorPercent:null,evidence:{reasons:['stale-chain'],axis:'x'}}]}});assert.equal(unknownChain.chains.status,'unknown');assert.equal(unknownChain.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');
 const emptyChains=R.createReport({...options,chainReview:{findings:[],total:0,checked:0,status:'unknown'}});assert.equal(emptyChains.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');
 assert.equal(first.coverage.find(c=>c.id==='dimension-chain-totals').status,'not-checked');
-const version12=structuredClone(anchored);version12.checkerVersion='schematic-1.2.0';version12.coverage=version12.coverage.filter(c=>c.id!=='dimension-chain-totals');assert.deepEqual(R.validateReports([version12]),[version12]);
+const version12=structuredClone(anchored);version12.checkerVersion='schematic-1.2.0';version12.coverage=version12.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));assert.deepEqual(R.validateReports([version12]),[version12]);
 const legacyWithChains=structuredClone(chainReport);legacyWithChains.checkerVersion='schematic-1.2.0';assert.throws(()=>R.validateReports([legacyWithChains]));
 const manyChainFindings=Array.from({length:6000},(_,i)=>({...chainFinding,chainId:'synthetic-chain-'+i,affectedIds:['synthetic-chain-'+i]}));
 const manyChainInput={...largeOptions,chainReview:{findings:manyChainFindings,total:6000,checked:6000,status:'pass'}};
@@ -167,7 +168,8 @@ const sourceEvidence=sourceSaved.findings.find(f=>f.code==='chain:synthetic-sour
 for(const patch of [{calibration:{...sourceInput.calibration,status:'manual'}},{sourceHash:'synthetic-new-source'},{tolerancePercent:undefined},{segments:chainSegments.slice(0,1)}]){const report=R.createReport({...options,chainReview:C.review({...sourceInput,...patch})});assert.equal(report.chains.status,'unknown');assert.equal(report.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');}
 // Persisted versions retain their exact historical coverage, independently of
 // the emitter version. Check valid histories as well as plausible matrix edits.
-const histories=[previousVersion,previousMinor,version12,chainReport];
+const version13=structuredClone(chainReport);version13.checkerVersion='schematic-1.3.0';version13.coverage=version13.coverage.filter(c=>c.id!=='opening-jamb-bindings');
+const histories=[previousVersion,previousMinor,version12,version13,chainReport];
 for(const historical of histories){
  const serialized=JSON.stringify(historical);
  assert.deepEqual(R.validateReports([JSON.parse(serialized)]),[historical]);
@@ -189,13 +191,51 @@ for(const historical of [previousVersion,previousMinor]){
  const fakeEndpoint=structuredClone(historical);fakeEndpoint.coverage[2].status='pass';assert.throws(()=>R.validateReports([fakeEndpoint]));
  const fakeSummary=structuredClone(historical);fakeSummary.anchoredReview={checked:0,total:0,status:'unknown'};assert.throws(()=>R.validateReports([fakeSummary]));
 }
-const downgradedChain=structuredClone(chainReport);downgradedChain.checkerVersion='schematic-1.2.0';downgradedChain.coverage.pop();assert.throws(()=>R.validateReports([downgradedChain]),'A matching seven-row matrix cannot grant chain capability to 1.2');
+const downgradedChain=structuredClone(chainReport);downgradedChain.checkerVersion='schematic-1.2.0';downgradedChain.coverage=downgradedChain.coverage.slice(0,7);assert.throws(()=>R.validateReports([downgradedChain]),'A matching seven-row matrix cannot grant chain capability to 1.2');
 const fallbackSource=R.createReport({...options,geometryReport:{...geometryReport,issues:[{code:'unsupported-dimension-unit',ids:['synthetic-unit']}]},measurementAudit:[]});
 assert.equal(fallbackSource.coverage[1].status,'unknown');
-const currentFallback=structuredClone(fallbackSource);currentFallback.coverage[1].status='not-checked';assert.throws(()=>R.validateReports([currentFallback]),'1.3 must not inherit the historical dimension fallback');
+const currentFallback=structuredClone(fallbackSource);currentFallback.coverage[1].status='not-checked';assert.throws(()=>R.validateReports([currentFallback]),'Current checker must not inherit the historical dimension fallback');
 for(const version of ['schematic-1.0.0','schematic-1.1.0','schematic-1.2.0']){
- const historical=structuredClone(fallbackSource);historical.checkerVersion=version;historical.coverage.pop();historical.coverage[1].status='not-checked';
+ const historical=structuredClone(fallbackSource);historical.checkerVersion=version;historical.coverage=historical.coverage.slice(0,7);historical.coverage[1].status='not-checked';
  if(version!=='schematic-1.2.0')historical.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';
  assert.deepEqual(R.validateReports([historical]),[historical],'Only explicit historical versions retain their dimension fallback');
 }
-console.log('PASS: bounded chain and anchor reports, selected-scope coverage, stable comparisons, strict imports and checker 1.0 through 1.3 compatibility.');
+const O=globalThis.OpeningBindings;
+const openingSegments=[{id:'synthetic-left',kind:'wall',a:[0,0],b:[4,0]},{id:'synthetic-opening',kind:'opening',a:[4,0],b:[6,0]},{id:'synthetic-right',kind:'wall',a:[6,0],b:[10,0]}];
+const openingBinding=O.createBinding({id:'synthetic-binding',projectId:options.projectId,sourceHash:options.sourceHash,openingSegmentId:openingSegments[1].id,startJamb:{segmentId:openingSegments[0].id,endpoint:'b'},endJamb:{segmentId:openingSegments[2].id,endpoint:'a'}});
+const openingInput={records:[openingBinding],projectId:options.projectId,sourceHash:options.sourceHash,segments:openingSegments};
+const openingRaw=O.evaluate(openingInput),openingReport=R.createReport({...options,openingReview:openingRaw});
+assert.equal(openingReport.checkerVersion,'schematic-1.4.0');assert.deepEqual(openingReport.openings,{total:1,checked:1,status:'pass'});
+assert.equal(openingReport.status,'unknown');assert.equal(openingReport.coverage.length,9);assert.equal(openingReport.coverage[8].id,'opening-jamb-bindings');assert.equal(openingReport.coverage[8].status,'pass');
+assert.equal(openingReport.coverage[3].status,'not-checked');assert.match(openingReport.coverage[8].detail,/not physical verification/);
+const savedOpening=openingReport.findings.find(f=>f.code==='opening:synthetic-binding');assert.equal(savedOpening.measured,0);assert.equal(savedOpening.expected,0);assert.equal(savedOpening.unit,'drawing-units');assert.equal(savedOpening.errorPercent,null);
+assert.equal(JSON.parse(savedOpening.evidence[1]).openingSourceContext.bindingSourceHash,options.sourceHash);assert.equal(JSON.parse(savedOpening.evidence[2]).opening.segmentId,openingSegments[1].id);
+assert.deepEqual(R.validateReports(JSON.parse(JSON.stringify([openingReport]))),[openingReport]);
+const openingBefore=JSON.stringify(openingRaw);const detachedOpening=R.createReport({...options,openingReview:openingRaw});detachedOpening.findings.find(f=>f.code===savedOpening.code).evidence[1]='changed detached copy';assert.equal(JSON.stringify(openingRaw),openingBefore);
+for(const patch of [{sourceHash:'synthetic-changed'},{segments:openingSegments.slice(1)},{unsupported:['synthetic unsupported curve']},{projectId:undefined}]){
+ const report=R.createReport({...options,openingReview:O.evaluate({...openingInput,...patch})});assert.equal(report.openings.status,'unknown');assert.equal(report.openings.checked,0);assert.equal(report.coverage[8].status,'unknown');assert.deepEqual(R.validateReports([report]),[report]);
+}
+const openingConflict=R.createReport({...options,openingReview:O.evaluate({...openingInput,segments:[...openingSegments,{id:'synthetic-crossing',kind:'wall',a:[5,-1],b:[5,1]}]})});
+assert.equal(openingConflict.openings.status,'fail');assert.equal(openingConflict.openings.checked,1);assert.equal(openingConflict.findings.find(f=>f.code===savedOpening.code).measured,0,'Wall conflict can fail despite aligned endpoints');assert.ok(R.compareReports(openingReport,openingConflict).changed.includes(savedOpening.id));
+const emptyOpening=R.createReport({...options,openingReview:O.evaluate({...openingInput,records:[]})});assert.equal(emptyOpening.openings.status,'unknown');assert.equal(emptyOpening.coverage[8].status,'unknown');assert.equal(first.coverage[8].status,'not-checked');
+for(const mutate of [
+ r=>r.openings.checked=0,r=>r.openings.total=2,r=>r.openings.status='fail',r=>r.openings.extra=true,r=>delete r.openings,r=>r.findings=r.findings.filter(f=>!f.code.startsWith('opening:')),
+ r=>r.coverage[8].detail='Physical opening certified',r=>r.coverage[8].status='unknown',r=>r.coverage[3].status='pass',r=>r.checkerVersion='schematic-1.5.0',
+ r=>r.findings.find(f=>f.code===savedOpening.code).measured=1,
+ r=>r.findings.find(f=>f.code===savedOpening.code).expected=1,
+ r=>r.findings.find(f=>f.code===savedOpening.code).evidence=[],
+ r=>{const f=r.findings.find(f=>f.code===savedOpening.code),e=JSON.parse(f.evidence[1]);e.openingSourceContext.epsilonDrawingUnits=1;f.evidence[1]=JSON.stringify(e);},
+ r=>{const f=r.findings.find(f=>f.code===savedOpening.code),e=JSON.parse(f.evidence[1]);e.openingSourceContext.currentSourceHash='synthetic-other';f.evidence[1]=JSON.stringify(e);}
+]){const bad=structuredClone(openingReport);mutate(bad);assert.throws(()=>R.validateReports([bad]),'Saved opening evidence/summary/coverage must remain coherent');}
+for(const old of histories.filter(r=>r.checkerVersion!=='schematic-1.4.0')){
+ const bad=structuredClone(old);bad.openings={total:0,checked:0,status:'unknown'};assert.throws(()=>R.validateReports([bad]),'Historical checker cannot gain opening capabilities');
+}
+for(const raw of [{...openingRaw,checked:0},{...openingRaw,total:2},{...openingRaw,status:'unknown'},{...openingRaw,extra:1},{...openingRaw,findings:[{...openingRaw.findings[0],expected:1}]},{...openingRaw,findings:[{...openingRaw.findings[0],evidence:{}}]}])assert.throws(()=>R.createReport({...options,openingReview:raw}));
+const richOpening=R.createReport({...options,openingReview:{...openingRaw,findings:[{...openingRaw.findings[0],evidence:{...openingRaw.findings[0].evidence,note:'x'.repeat(3000)}}]}});
+assert.equal(richOpening.openings.status,'unknown');assert.equal(richOpening.coverage[8].status,'unknown');assert.ok(richOpening.findings.some(f=>f.code==='review-incomplete'));
+const clippedPass=structuredClone(richOpening);clippedPass.openings.status='pass';assert.throws(()=>R.validateReports([clippedPass]),'Truncated source evidence cannot support an opening summary pass');
+const cyclicEvidence={...openingRaw.findings[0].evidence};cyclicEvidence.loop=cyclicEvidence;assert.throws(()=>R.createReport({...options,openingReview:{...openingRaw,findings:[{...openingRaw.findings[0],evidence:cyclicEvidence}]}}));
+for(const badValue of [Infinity,undefined,()=>{},new Date()])assert.throws(()=>R.createReport({...options,openingReview:{...openingRaw,findings:[{...openingRaw.findings[0],evidence:{...openingRaw.findings[0].evidence,extra:badValue}}]}}));
+const manyOpeningRaw={findings:Array.from({length:1000},(_,i)=>({...openingRaw.findings[0],bindingId:'synthetic-binding-'+i})),total:1000,checked:1000,status:'pass'};
+const clippedOpenings=R.createReport({...largeOptions,openingReview:manyOpeningRaw});assert.ok(clippedOpenings.findings.length<=5000);assert.equal(clippedOpenings.openings.status,'unknown');assert.equal(clippedOpenings.coverage[8].status,'unknown');assert.ok(clippedOpenings.findings.find(f=>f.code==='review-incomplete').evidence.some(e=>e.includes('Opening endpoint results')));assert.deepEqual(R.validateReports([clippedOpenings]),[clippedOpenings]);
+console.log('PASS: bounded chain and anchor reports, selected-scope coverage, stable comparisons, strict imports and opening source evidence and checker 1.0 through 1.4 compatibility.');
