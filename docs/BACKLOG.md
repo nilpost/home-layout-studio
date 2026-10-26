@@ -450,3 +450,15 @@ measurement/opening references stay attached with stale verification after sourc
 changes. Preview/Cancel do not save; Apply remains guarded and reversible. This
 does not infer connections between separate shapes or alter general path/polygon
 editing. Broader architectural editing remains partial.
+
+
+## Native polygon vertex edits — 2026-10-26, v0.24.0
+
+Numeric native-polygon edge edits preserve point count, attributes, edge identities
+and implicit closure, including edits to the final edge between last and first vertices.
+Changed adjacent edges appear in source impact review; saved measurement/opening
+references remain attached but stale. Repeated closing vertices and consecutive
+duplicates reject before and after edits; no normalization, merging or reordering
+occurs. Ambiguous owner IDs reject. Existing reviewed Apply/Cancel/Undo remains.
+This does not establish room boundaries, infer separate-shape connections or verify
+physical geometry. HLS-107 remains partial.

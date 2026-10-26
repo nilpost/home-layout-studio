@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
-  <link rel="stylesheet" href="src/styles.css?v=0.23.0" />
+  <link rel="stylesheet" href="src/styles.css?v=0.24.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
-  <script src="src/geometry.js?v=0.23.0" defer></script>
-  <script src="src/review-history.js?v=0.23.0" defer></script>
-  <script src="src/original-overlay.js?v=0.23.0" defer></script>
-  <script src="src/layer-items.js?v=0.23.0" defer></script>
-  <script src="src/consistency-review.js?v=0.23.0" defer></script>
-  <script src="src/correction-contract.js?v=0.23.0" defer></script>
-  <script src="src/overlay-footprint.js?v=0.23.0" defer></script>
-  <script src="src/item-adjustments.js?v=0.23.0" defer></script>
-  <script src="src/geometry-coverage.js?v=0.23.0" defer></script>
-  <script src="src/asset-records.js?v=0.23.0" defer></script>
-  <script src="src/measurement-anchors.js?v=0.23.0" defer></script>
-  <script src="src/measurement-chains.js?v=0.23.0" defer></script>
-  <script src="src/opening-bindings.js?v=0.23.0" defer></script>
-  <script src="src/app.js?v=0.23.0" defer></script>
+  <script src="src/geometry.js?v=0.24.0" defer></script>
+  <script src="src/review-history.js?v=0.24.0" defer></script>
+  <script src="src/original-overlay.js?v=0.24.0" defer></script>
+  <script src="src/layer-items.js?v=0.24.0" defer></script>
+  <script src="src/consistency-review.js?v=0.24.0" defer></script>
+  <script src="src/correction-contract.js?v=0.24.0" defer></script>
+  <script src="src/overlay-footprint.js?v=0.24.0" defer></script>
+  <script src="src/item-adjustments.js?v=0.24.0" defer></script>
+  <script src="src/geometry-coverage.js?v=0.24.0" defer></script>
+  <script src="src/asset-records.js?v=0.24.0" defer></script>
+  <script src="src/measurement-anchors.js?v=0.24.0" defer></script>
+  <script src="src/measurement-chains.js?v=0.24.0" defer></script>
+  <script src="src/opening-bindings.js?v=0.24.0" defer></script>
+  <script src="src/app.js?v=0.24.0" defer></script>
 </head>
 <body>
 <div class="shell" data-panel="photos">
@@ -84,7 +84,7 @@
 <input type="file" id="svg-file" accept=".svg,image/svg+xml" hidden />
 <dialog id="comment-dialog"><form method="dialog" class="dialog-content"><h3>Add location comment</h3><label class="form-label" for="comment-text">Correction or observation</label><textarea id="comment-text" rows="4" required maxlength="1500" placeholder="e.g. This should be a sliding door."></textarea><div class="dialog-actions"><button type="button" id="cancel-comment" class="button">Cancel</button><button value="save" class="button primary">Save comment</button></div></form></dialog>
 <input type="file" id="correction-file" accept=".json,application/json" hidden />
-<dialog id="source-dialog" class="wide-dialog"><h2>Edit architectural source</h2><p>Use class="wall" or "partition" for walls, class="glass" for windows, data-kind="opening" for door opening spans, and class="fixed" or "kitchen" for rectangular fixtures. Linear paths, lines, polylines and rectangles are checked. Curves and transforms are reported as unsupported. Preserve original dimension labels.</p><textarea id="source-text" rows="16" aria-label="Architectural SVG source" spellcheck="false"></textarea><fieldset id="addressed-comments"><legend>Comments addressed by this revision</legend><div id="source-comments"></div><label>Change summary<textarea id="source-summary" rows="2" placeholder="Describe what changed and any approximate geometry"></textarea></label></fieldset><section id="source-impact" aria-label="Source edit impact"><h3>Proposed change impact</h3><p id="source-impact-status" class="fine" role="status"></p><svg id="source-impact-diagram" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Current source, draft source and unchanged linked neighbors" preserveAspectRatio="xMidYMid meet" hidden></svg><p class="fine muted">Amber dashed: current · Teal: draft · Gray: unchanged linked neighbors. Explicit references only; missing or renumbered identities are unresolved. Polyline edits retain shared vertices; separate source shapes are not moved automatically.</p><div id="source-impact-list"></div></section><pre id="source-results"></pre><div class="dialog-actions"><button class="button" id="source-cancel">Cancel</button><button class="button" id="source-check">Check proposed geometry</button><button class="button primary" id="source-apply">Apply reviewed revision</button></div></dialog>
+<dialog id="source-dialog" class="wide-dialog"><h2>Edit architectural source</h2><p>Use class="wall" or "partition" for walls, class="glass" for windows, data-kind="opening" for door opening spans, and class="fixed" or "kitchen" for rectangular fixtures. Linear paths, lines, polylines and rectangles are checked. Curves and transforms are reported as unsupported. Preserve original dimension labels.</p><textarea id="source-text" rows="16" aria-label="Architectural SVG source" spellcheck="false"></textarea><fieldset id="addressed-comments"><legend>Comments addressed by this revision</legend><div id="source-comments"></div><label>Change summary<textarea id="source-summary" rows="2" placeholder="Describe what changed and any approximate geometry"></textarea></label></fieldset><section id="source-impact" aria-label="Source edit impact"><h3>Proposed change impact</h3><p id="source-impact-status" class="fine" role="status"></p><svg id="source-impact-diagram" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Current source, draft source and unchanged linked neighbors" preserveAspectRatio="xMidYMid meet" hidden></svg><p class="fine muted">Amber dashed: current · Teal: draft · Gray: unchanged linked neighbors. Explicit references only; missing or renumbered identities are unresolved. Polyline and polygon edits retain shared vertices; separate source shapes are not moved automatically.</p><div id="source-impact-list"></div></section><pre id="source-results"></pre><div class="dialog-actions"><button class="button" id="source-cancel">Cancel</button><button class="button" id="source-check">Check proposed geometry</button><button class="button primary" id="source-apply">Apply reviewed revision</button></div></dialog>
 <dialog id="check-dialog" class="wide-dialog"><h2>Project consistency review</h2><p class="fine muted">Schematic checks only. Unmodeled relationships remain unchecked; this review does not certify construction, safety or as-built accuracy.</p><label for="saved-review">Saved runs</label><select id="saved-review"></select><p id="review-status" role="status"></p><div class="dialog-actions"><button class="button" id="rerun-review">Run current revision</button><button class="button" id="export-review">Export private report</button></div><div id="review-comparison" class="fine muted"></div><div id="review-findings"></div><details><summary>Coverage and measurements</summary><pre id="check-results"></pre></details><button class="button" id="checks-close">Close</button></dialog>
 <dialog id="handoff-dialog" class="wide-dialog"><h2>Private correction handoff</h2><p>Review the exact text below. Copy it into your private project chat, or send to the current conversation when the ChatGPT host bridge is available. No files or chat history are retrieved automatically.</p><label><input type="checkbox" id="include-source" /> Include private architectural SVG in this handoff</label><textarea id="handoff-text" rows="15" aria-label="Correction handoff text"></textarea><div class="dialog-actions"><button class="button" id="handoff-close">Close</button><button class="button" id="copy-handoff">Copy for private chat</button><button class="button primary" id="send-host">Send to current ChatGPT chat</button></div></dialog>
 <dialog id="review-comment-dialog" class="wide-dialog"><h2 id="review-comment-title">Review comment</h2><p id="review-comment-body"></p><p id="review-comment-status" class="fine muted"></p><label for="comment-resolution">Change made / resolution note</label><textarea id="comment-resolution" rows="3" maxlength="3000"></textarea><div id="comment-resolution-history"></div><div class="dialog-actions"><button class="button" id="close-review-comment">Cancel</button><button class="button" id="reopen-comment">Reopen</button><button class="button primary" id="complete-comment">Record completed change</button></div></dialog>

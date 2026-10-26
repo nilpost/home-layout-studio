@@ -79,3 +79,10 @@ An element ID that shadows a polyline segment reference is blocked before previe
 This deliberately conservative check can also block a native line with a colon-suffixed
 ID beside a decorative polyline whose ID is that prefix. Review the source identities
 explicitly; the editor does not choose an owner or rewrite references automatically.
+
+For a native polygon, edge indices retain their original identities, including the
+implicit final edge. Editing that edge updates the last and first stored vertices;
+review both adjacent edges before Apply. The polygon must have at least three finite
+vertices with no repeated closing point or consecutive duplicate vertices, including
+the wraparound pair. Edits creating those conditions are blocked without rewriting
+the source. This preserves polygon connectivity; it does not define or verify a room.
