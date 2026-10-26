@@ -462,3 +462,15 @@ duplicates reject before and after edits; no normalization, merging or reorderin
 occurs. Ambiguous owner IDs reject. Existing reviewed Apply/Cancel/Undo remains.
 This does not establish room boundaries, infer separate-shape connections or verify
 physical geometry. HLS-107 remains partial.
+
+
+## Absolute linear path edits — 2026-10-26, v0.25.0
+
+Numeric edits of supported native paths preserve syntactic shared vertices, independent
+subpaths, closing edges and globally ordered edge identities. Supported commands are
+absolute M/L/H/V/Z; the editor fully validates the command stream and proves its model
+against extracted endpoints before changing a vertex. Supported paths serialize as
+M/L/Z with the same edge order/count and native attributes. Relative commands, curves,
+unmatched text, degenerate edges and ambiguous owners reject rather than using the
+previous disconnected-segment fallback. Saved references remain attached but stale.
+This is a bounded editing subset; general path and cross-shape topology remain open.

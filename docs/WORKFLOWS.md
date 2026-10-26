@@ -86,3 +86,12 @@ review both adjacent edges before Apply. The polygon must have at least three fi
 vertices with no repeated closing point or consecutive duplicate vertices, including
 the wraparound pair. Edits creating those conditions are blocked without rewriting
 the source. This preserves polygon connectivity; it does not define or verify a room.
+
+Native path numeric edits support absolute M, L, H, V and Z commands, including
+independent subpaths and implicit lines after a move. The editor proves the complete
+command/vertex model against extracted edge IDs and endpoints first. Shared vertices
+change only within their written subpath; coincident points in another move subpath
+stay independent. Supported paths serialize with M/L/Z and keep edge order/count,
+attributes and reference IDs. Relative commands, curves, unconsumed syntax and
+degenerate/duplicate closing edges require explicit source review and are blocked
+from numeric editing. Stored declarations remain stale until reviewed again.
