@@ -63,3 +63,8 @@ and cancellation or any invalid member discards the gesture.
 ## Source-edit impact preview
 
 Open source review or propose a numeric segment edit, then check the draft. The impact panel compares original/draft segments and lists affected explicit opening and measurement references. A changed source retains stale verification until each declaration is explicitly reviewed again. Renumbered or missing segment IDs remain unresolved. Edits to the draft invalidate the preview; check again before assessing impacts. Apply retains existing source-lock, dimension-label and transaction safeguards. This diagnostic preview does not preserve connections by moving neighbors automatically or establish room/hosted-door semantics.
+
+Numeric source edits retain native line identities and attributes, keeping existing
+endpoint declarations attached. Choose the segment again if its source or project
+state changes. Stored declarations retain their original source hash and still need
+explicit reconfirmation after Apply; this does not repair earlier orphaned references.

@@ -429,3 +429,13 @@ missing or renumbered references remain unresolved and changed-source evidence s
 stale. Draft changes invalidate the preview. Existing source locks, protected labels,
 reviewed Apply/Cancel and reversible history remain in force. Automatic connected
 neighbor movement and broader architectural semantics are still incomplete.
+
+
+## Stable native line edits — 2026-10-25, v0.22.1
+
+Numeric edits of native source lines retain their SVG element, stable segment ID,
+attributes and explicit measurement/opening references. Selection is bound to the
+current project, state and source; missing or ambiguous selections reject. Existing
+source review and reversible Apply protections remain. Saved source hashes still
+become stale and require explicit reconfirmation; no historical orphan is remapped
+and no neighbor is moved automatically. Nonlinear/multipart editing is unchanged.
