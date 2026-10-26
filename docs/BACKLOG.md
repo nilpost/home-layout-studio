@@ -439,3 +439,14 @@ current project, state and source; missing or ambiguous selections reject. Exist
 source review and reversible Apply protections remain. Saved source hashes still
 become stale and require explicit reconfirmation; no historical orphan is remapped
 and no neighbor is moved automatically. Nonlinear/multipart editing is unchanged.
+
+
+## Native polyline vertex edits — 2026-10-26, v0.23.0
+
+Numeric segment edits on native source polylines retain their element, point count,
+segment identities and attributes. Editing an endpoint updates its shared vertex,
+so adjacent segments stay connected and appear in source impact review. Explicit
+measurement/opening references stay attached with stale verification after source
+changes. Preview/Cancel do not save; Apply remains guarded and reversible. This
+does not infer connections between separate shapes or alter general path/polygon
+editing. Broader architectural editing remains partial.

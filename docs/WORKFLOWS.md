@@ -68,3 +68,14 @@ Numeric source edits retain native line identities and attributes, keeping exist
 endpoint declarations attached. Choose the segment again if its source or project
 state changes. Stored declarations retain their original source hash and still need
 explicit reconfirmation after Apply; this does not repair earlier orphaned references.
+
+For a native polyline, numeric segment endpoints edit the corresponding vertices
+without changing point count or segment IDs. Adjacent segments sharing those vertices
+move too; inspect every changed segment in the impact preview before Apply. Separate
+SVG shapes are not automatically joined. Attributes and all other vertices remain
+intact; source-bound declarations still need explicit reconfirmation after editing.
+
+An element ID that shadows a polyline segment reference is blocked before preview.
+This deliberately conservative check can also block a native line with a colon-suffixed
+ID beside a decorative polyline whose ID is that prefix. Review the source identities
+explicitly; the editor does not choose an owner or rewrite references automatically.
