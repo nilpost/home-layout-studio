@@ -474,3 +474,19 @@ M/L/Z with the same edge order/count and native attributes. Relative commands, c
 unmatched text, degenerate edges and ambiguous owners reject rather than using the
 previous disconnected-segment fallback. Saved references remain attached but stale.
 This is a bounded editing subset; general path and cross-shape topology remain open.
+
+
+## Legacy path input integrity — 2026-10-27, v0.25.1
+
+The schematic path extractor now consumes its input lexically instead of skipping
+unmatched prefix, interior or suffix characters. Malformed source paths become
+unsupported evidence through existing review coverage. Valid absolute and relative
+linear commands retain coordinates, ordering and zero-based identities. Saved
+historical reports remain importable and are not rewritten. This fixes path-input
+integrity; broader architectural and physical verification remains incomplete.
+
+Checker1.4.1 identifies the corrected engine; saved1.0–1.4.0 reports retain their
+exact import contracts and history but require rerun for current checks even when
+source/state are unchanged. Saved-review UI and exported freshness reflect that
+distinction. Nonempty extracted paths also require an initial M/m; this is a bounded
+lexer/initial-command fix, not a claim of full SVG grammar validation.

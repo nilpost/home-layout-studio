@@ -95,3 +95,9 @@ stay independent. Supported paths serialize with M/L/Z and keep edge order/count
 attributes and reference IDs. Relative commands, curves, unconsumed syntax and
 degenerate/duplicate closing edges require explicit source review and are blocked
 from numeric editing. Stored declarations remain stale until reviewed again.
+
+Geometry review rejects unrecognized path characters and malformed separators,
+nonempty paths without an initial M/m, and nonfinite results. Valid absolute/relative
+linear paths retain their original segment identities. Checker1.4.1 reports identify
+these checks. Older saved checker runs remain readable and unchanged but are marked
+for rerun; matching project/source state alone does not make an older engine current.

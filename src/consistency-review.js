@@ -1,7 +1,7 @@
 /* Provider-neutral, bounded schematic review records. No source documents are stored. */
 (function(root){
 'use strict';
-const SCHEMA_VERSION=1,CHECKER_VERSION='schematic-1.4.0';
+const SCHEMA_VERSION=1,CHECKER_VERSION='schematic-1.4.1';
 const STATUSES=['pass','fail','warning','unknown','not-checked'],SEVERITIES=['info','warning','error'];
 const MAX_REPORTS=50,MAX_FINDINGS=5000,MAX_TEXT=2000,MAX_IDS=100;
 function object(v){return v!==null&&typeof v==='object'&&!Array.isArray(v)&&[Object.prototype,null].includes(Object.getPrototypeOf(v));}
@@ -32,7 +32,8 @@ const CHECKER_CONTRACTS=Object.freeze({
  'schematic-1.1.0':checkerContract(false,false,true),
  'schematic-1.2.0':checkerContract(true,false,true),
  'schematic-1.3.0':checkerContract(true,true,false),
- 'schematic-1.4.0':checkerContract(true,true,false,true)
+ 'schematic-1.4.0':checkerContract(true,true,false,true),
+ 'schematic-1.4.1':checkerContract(true,true,false,true)
 });
 function contractFor(version){return typeof version==='string'&&Object.hasOwn(CHECKER_CONTRACTS,version)?CHECKER_CONTRACTS[version]:null;}
 function severity(status){return status==='fail'?'error':['warning','unknown'].includes(status)?'warning':'info';}
@@ -234,7 +235,7 @@ function validateReports(reports){
  }
  return JSON.parse(JSON.stringify(reports));
 }
-function isStale(report,{revision,sourceHash,projectId,stateToken}={}){validateReports([report]);need(text(revision,200)&&text(sourceHash,200),'current revision and source hash required');return report.revision!==revision||report.sourceHash!==sourceHash||['projectId','stateToken'].some(k=>Object.hasOwn(report,k)&&report[k]!==({projectId,stateToken})[k]);}
+function isStale(report,{revision,sourceHash,projectId,stateToken}={}){validateReports([report]);need(text(revision,200)&&text(sourceHash,200),'current revision and source hash required');return report.checkerVersion!==CHECKER_VERSION||report.revision!==revision||report.sourceHash!==sourceHash||['projectId','stateToken'].some(k=>Object.hasOwn(report,k)&&report[k]!==({projectId,stateToken})[k]);}
 function signature(f){return JSON.stringify(Object.keys(f).sort().map(k=>[k,k==='affectedIds'?[...f[k]].sort():f[k]]));}
 function compareReports(previous,current){
  [previous,current]=validateReports([previous,current]);
