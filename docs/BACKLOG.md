@@ -501,7 +501,22 @@ or numerically unrepresentable input remains unknown. Round-cap bounds alone are
 used to infer a collision. No physical tolerance or passage clearance is established.
 
 The foundation is not loaded by the editor and does not alter current checker output,
-saved reports, project schema or source geometry. Joins, curves, style extraction,
+saved reports, project schema or source geometry. General joined paths, curves, style extraction,
 transforms and runtime review integration remain open. Independent tests/review and
 supported browser acceptance are required before exposing new review capabilities.
 See [supported model and integration gates](STROKE_FOOTPRINT.md).
+
+
+## Local right-angle join bound preparation — 2026-10-30
+
+HLS-106 preparation extends the isolated stroke module with explicit local right-angle
+join envelopes and conservative separation checks. Raw adjacent-point triples, resolved
+join styles/widths, common drawing frames and provenance are required. Miter, bevel and
+round joins are enclosed locally; no connectivity or whole-path geometry is inferred.
+
+Only strictly disjoint enclosing bounds establish drawing separation. Touching or
+intersecting bounds remain unknown, never proof of collision or contact. Results retain
+local scope and conservative quality; caller-supplied provenance is not verification.
+The editor, current checker and saved report/schema contracts are unchanged. Arbitrary
+angles, full paths/caps, SVG/CSS resolution, curves and browser acceptance remain open.
+[Model, numerical limits and integration gates](STROKE_FOOTPRINT.md).

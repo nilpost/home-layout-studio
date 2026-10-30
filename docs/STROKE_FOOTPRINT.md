@@ -1,7 +1,7 @@
 # Drawing-space line stroke foundation
 
 `src/stroke-footprint.js` exposes pure deterministic `StrokeFootprint.line`, `.point`
-and `.compare` functions. It is **not loaded by the editor**. There is no SVG/CSS
+and `.compare` functions, plus conservative `.join` and `.boundSeparation` helpers. It is **not loaded by the editor**. There is no SVG/CSS
 adapter, UI, project/schema migration, saved checker capability or deployment change.
 It prepares a bounded part of HLS-106; it does not complete door/opening review.
 
@@ -28,18 +28,18 @@ and `vectorEffect:'none'` are accepted. Width must be an explicitly resolved pos
 number; omitted CSS/SVG defaults are never supplied. Unknown extra fields reject rather
 than silently discarding a dash, transform, clipping or other rendering condition.
 
-Only finite nondegenerate horizontal/vertical **single lines** are supported, in either
+The exact footprint API supports only finite nondegenerate horizontal/vertical **single lines**, in either
 endpoint order. Butt/square caps produce analytical rectangles. Round caps produce
 analytical capsules (the segment Minkowski-summed with a radius `width/2` disk).
-Diagonal/curved/zero-length paths, joins, dashes, clipping, unresolved paint/style,
+Diagonal/curved/zero-length paths, complete joined paths, dashes, clipping, unresolved paint/style,
 transforms and non-scaling strokes remain unsupported. Fully transparent or otherwise
 conditionally painted strokes must be excluded or resolved by a future adapter; this
 input contract describes an explicitly painted stroke, not arbitrary SVG visibility.
 
 ## Results and diagnostics
 
-All functions return either `status:'supported'` or `status:'unknown'` with a reason
-and scope `drawing-line-stroke`; invalid inputs do not throw to callers. Inputs are
+The exact line functions return either `status:'supported'` or `status:'unknown'`
+with a reason and scope `drawing-line-stroke`; invalid inputs do not throw to callers. Inputs are
 never modified. Callers must retain unknown results as incomplete coverage.
 
 `line` returns shape kind (`rectangle`/`capsule`), axis, explicit cap/width, frame ID,
@@ -87,9 +87,10 @@ limits, extent loss, near tangency and frozen-input preservation.
 
 Before runtime use, a separate reviewed adapter must resolve actual SVG/CSS cascade,
 visibility, stroke scaling, transforms, clipping, dashes and provenance, and retain every
-unsupported case. Multiple paths/joins and miter limits require their own geometry:
+unsupported case. Whole joined paths and arbitrary join angles require their own geometry:
 conservative join bounds can prove separation when disjoint, but intersecting bounds
-cannot prove collision. This module does not offer join bounds or infer connections.
+cannot prove collision. The local right-angle helper below never infers connections or
+models whole joined paths.
 Door curves, hosted openings, swing envelopes, passage clearances, units/calibration,
 physical/project tolerances and source accuracy need separate evidence and acceptance.
 
@@ -98,3 +99,71 @@ legacy round-trip tests. Browser rendering and complete preview/Cancel/Apply/Und
 acceptance remain future gates; isolated math tests do not verify the UI. Neither line
 contact nor separation certifies construction, structural safety, as-built conditions,
 regulatory compliance or physical door clearance.
+
+
+## Explicit local right-angle join bounds
+
+```js
+const corner = {
+  kind: 'orthogonal-join',
+  points: [[-4, 0], [0, 0], [0, 6]], // incoming endpoint, vertex, outgoing endpoint
+  frame: {id: 'example-frame', units: 'drawing', transform: 'none'},
+  style: {resolved: true, width: 2, join: 'miter', miterLimit: 4, vectorEffect: 'none'},
+  provenance: {geometry: 'explicit synthetic adjacent triple', style: 'explicit join style'}
+};
+StrokeFootprint.join(corner);
+StrokeFootprint.boundSeparation(corner, stroke);
+```
+
+All three outer array indices and both coordinates of each point must be own, present
+numeric values. There must be two nonzero axis-aligned legs on different axes: exactly
+a right-angle turn. Collinear continuation, U-turn, zero-length/diagonal legs, curves,
+inferred adjacency and transformed coordinates are unknown. Reversing the triple or
+any of the eight axis turn orientations leaves the same enclosing square.
+
+The style requires explicit `resolved`, positive `width`, `join` and `vectorEffect`.
+Supported join values are `miter`, `bevel` and `round`. Miter additionally requires an
+explicit finite **nonnegative** `miterLimit`; zero is accepted. Bevel/round styles omit
+that field (unexpected fields remain unknown). The supported miter-limit profile is
+0 through 1,000,000,000; larger finite values are conservative unknowns, not a claim
+that they are invalid SVG. The style meaning and miter-limit fallback follow
+[W3C SVG2 stroke painting](https://www.w3.org/TR/SVG2/painting.html#StrokeMiterlimitProperty).
+No CSS/SVG default or renderer configuration is supplied by this module.
+
+`join` returns `scope:'drawing-local-join'`, `quality:'conservative-bound'`,
+`kind:'local-join-square-bound'`, a copied vertex/provenance, explicit width/join/style
+limit when applicable, frame ID and `bounds`. The square is the vertex plus/minus
+halfwidth on both axes. At a right angle the outer miter tip is offset by halfwidth
+on each axis; bevel endpoints and the round arc also remain inside that square.
+Miter-limit bevel fallback remains enclosed too. This is a **local join envelope**,
+not an exact join shape, complete leg body, endpoint cap or whole path footprint.
+It does not classify which join shape a particular miter limit produces.
+
+`boundSeparation` accepts **raw descriptors only**, with at least one local join; the
+other operand may be a supported raw line or local join. It rebuilds every bound,
+validates resolved styles/provenance and requires matching explicit frames. Mutating
+an earlier output cannot influence a later result; passing an output as a descriptor
+is unknown. Exact `line`/`point`/`compare` likewise reject join descriptors or bounds.
+
+Strictly disjoint enclosing boxes can return `relation:'separate'` with scope
+`drawing-bound-separation`, quality `conservative-bound`, ordered `operandScopes` and copied `operandProvenance`,
+exact represented `axisGaps` and `separationLowerBound`. The lower bound is the maximum
+positive axis gap; unlike a rounded Euclidean estimate it is an exact conservative
+lower bound in drawing units. Touching or intersecting bounds return **unknown**
+(`bounds-intersect-or-touch`), never contact, collision or interior overlap. In
+particular, an empty rounded/beveled corner can still have overlapping boxes.
+Numerical precision/range failures remain unknown under the existing exact-arithmetic
+guards. These helpers add no epsilon or physical/project tolerance.
+
+**Scope matters:** a line can intersect a far leg of the declared corner while remaining
+strictly outside its vertex square. The helper may prove local-join-region separation
+in that case, while the whole joined path still collides. Returned operand scopes and
+coverage make that distinction explicit. Callers must not turn this result into a
+whole-path, door-swing, passage, physical clearance or saved checker pass.
+
+Fabricated regressions cover all eight turns and reversal for every join style,
+explicit zero/low/high miter limits, sparse/inherited coordinates, degenerate and
+unsupported geometry/styles, exact numeric extents, bound tangency/false positives,
+frame mismatch, far-leg scope, frozen inputs and output tampering. Runtime SVG/style
+extraction, whole-path/cap union, arbitrary-angle joins, saved checker contracts and
+browser acceptance remain separate gates.

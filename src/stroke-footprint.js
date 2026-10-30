@@ -67,5 +67,40 @@ function compare(inputA,inputB){
   return radialResult(gap(ab[0],ab[2],bb[0],bb[2]),gap(ab[1],ab[3],bb[1],bb[3]),r,a.frameId,'interior-overlap');
  }catch(e){return unknown(e.message||'unsupported-input');}
 }
-root.StrokeFootprint=Object.freeze({MAX_COORDINATE,MIN_NORMAL,line,point,compare});
+// A local right-angle join envelope deliberately says nothing about either whole
+// leg or its endpoint cap. At 90 degrees miter/bevel/round (including miter-limit
+// fallback) all lie inside this vertex-centered halfwidth square.
+function joinUnknown(reason,scope='drawing-local-join'){return {status:'unknown',reason,scope,quality:'conservative-bound'};}
+function buildJoin(input){
+ if(!record(input)||!keys(input,['kind','points','frame','style','provenance'])||input.kind!=='orthogonal-join')throw Error('unsupported-join-input');
+ const f=input.frame,s=input.style,p=input.provenance,points=input.points;
+ if(!record(f)||!keys(f,['id','units','transform'])||!text(f.id)||f.units!=='drawing'||f.transform!=='none')throw Error('unresolved-frame');
+ if(!record(s)||!['miter','bevel','round'].includes(s.join))throw Error('unresolved-join-style');
+ const styleKeys=['resolved','width','join','vectorEffect',...(s.join==='miter'?['miterLimit']:[])];
+ if(!keys(s,styleKeys)||s.resolved!==true||s.vectorEffect!=='none')throw Error('unresolved-join-style');
+ if(s.join==='miter'&&(!coordinate(s.miterLimit)||s.miterLimit<0))throw Error('unsupported-miter-limit');
+ if(!record(p)||!keys(p,['geometry','style'])||!text(p.geometry)||!text(p.style))throw Error('missing-provenance');
+ if(!Array.isArray(points)||points.length!==3||![0,1,2].every(i=>Object.hasOwn(points,i)&&pointPair(points[i]))||!coordinate(s.width)||s.width<=0)throw Error('numeric-range');
+ const [a,v,b]=points;
+ const axis=point=>point[0]===v[0]&&point[1]!==v[1]?'vertical':point[1]===v[1]&&point[0]!==v[0]?'horizontal':null;
+ const first=axis(a),second=axis(b);if(!first||!second||first===second)throw Error('unsupported-join-geometry');
+ for(const [point,direction]of [[a,first],[b,second]]){const i=direction==='horizontal'?0:1;if(exactSum(point[i],-v[i])===0)throw Error('numeric-precision');}
+ const r=s.width/2;if(!normal(r)||r<=0||r*2!==s.width)throw Error('numeric-precision');
+ const bounds=[exactSum(v[0],-r),exactSum(v[1],-r),exactSum(v[0],r),exactSum(v[1],r)];
+ if(!bounds.every(coordinate)||bounds[0]>=bounds[2]||bounds[1]>=bounds[3])throw Error('numeric-precision');
+ return {bounds,frameId:f.id,vertex:v.slice(),width:s.width,join:s.join,...(s.join==='miter'?{miterLimit:s.miterLimit}:{}),provenance:{geometry:p.geometry,style:p.style}};
+}
+function join(input){try{const f=buildJoin(input);return {status:'supported',scope:'drawing-local-join',quality:'conservative-bound',kind:'local-join-square-bound',...f,coverage:'Local join only; excludes leg bodies and endpoint caps. Bound intersection does not prove contact or overlap.'};}catch(e){return joinUnknown(e.message||'unsupported-join-input');}}
+function boundSeparation(inputA,inputB){
+ const scope='drawing-bound-separation';
+ try{
+  if(inputA?.kind!=='orthogonal-join'&&inputB?.kind!=='orthogonal-join')throw Error('join-required');
+  const buildRaw=input=>input?.kind==='orthogonal-join'?{...buildJoin(input),operandScope:'drawing-local-join'}:{...build(input),operandScope:'drawing-line-stroke'},a=buildRaw(inputA),b=buildRaw(inputB);
+  if(a.frameId!==b.frameId)throw Error('frame-mismatch');
+  const dx=gap(a.bounds[0],a.bounds[2],b.bounds[0],b.bounds[2]),dy=gap(a.bounds[1],a.bounds[3],b.bounds[1],b.bounds[3]);
+  if(dx===0&&dy===0)return joinUnknown('bounds-intersect-or-touch',scope);
+  return {status:'supported',scope,quality:'conservative-bound',relation:'separate',frameId:a.frameId,operandScopes:[a.operandScope,b.operandScope],operandProvenance:[{...a.provenance},{...b.provenance}],axisGaps:{x:dx,y:dy},separationLowerBound:Math.max(dx,dy),proof:'Strictly disjoint enclosing bounds; exact axis gap is a drawing-distance lower bound.',coverage:'Only the supplied local join region and line footprint/local join region; not whole joined paths.'};
+ }catch(e){return joinUnknown(e.message||'unsupported-bound-input',scope);}
+}
+root.StrokeFootprint=Object.freeze({MAX_COORDINATE,MIN_NORMAL,line,point,compare,join,boundSeparation});
 })(typeof window==='undefined'?globalThis:window);
