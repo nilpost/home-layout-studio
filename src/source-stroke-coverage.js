@@ -4,6 +4,7 @@
 const SVG='http://www.w3.org/2000/svg',NUM='[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?',numberRE=new RegExp('^(?:'+NUM+')$');
 const inherited=['stroke','stroke-width','stroke-linecap','stroke-opacity'];
 const core=[...inherited,'vector-effect','opacity'];
+const initialValues={opacity:{value:'1',specURI:'https://www.w3.org/TR/css-color-4/#transparency'},'vector-effect':{value:'none',specURI:'https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty'}};
 // These fully parsed declarations are evidence of an unsupported inherited stroke
 // condition, never supported values or declarations that a later rule can erase.
 const localHazards=['stroke-dasharray','stroke-dashoffset'];
@@ -40,7 +41,7 @@ function geometry(node,a,id){
 }
 function inspect(input,context){
  const owners=[],globalFindings=[],identityFindings=[],nodes=[],ids=new Map(),rules=[];let inventoryComplete=true,rootNode=input?.nodeType===9?input.documentElement:input,order=0;
- const result=()=>{const counts={candidates:owners.length,supported:0,unknown:0,excluded:0};for(const o of owners)counts[o.status]++;return {status:'inspected',inventoryComplete,strokeSupportComplete:inventoryComplete&&globalFindings.length===0&&counts.unknown===0&&identityFindings.length===0,counts,source:{sourceId:context?.sourceId??null,sourceHash:context?.sourceHash??null,frameId:context?.frameId??null},owners,globalFindings:[...new Set(globalFindings)],identityFindings,limitations:['Declared closed XML source model only; not computed browser CSS or verified XML/CSS parsing.','Complete inventory is distinct from complete stroke support.','No SVG defaults, IDs, source geometry, permissions or physical facts are invented.']};};
+ const result=()=>{const counts={candidates:owners.length,supported:0,unknown:0,excluded:0};for(const o of owners)counts[o.status]++;return {status:'inspected',inventoryComplete,strokeSupportComplete:inventoryComplete&&globalFindings.length===0&&counts.unknown===0&&identityFindings.length===0,counts,source:{sourceId:context?.sourceId??null,sourceHash:context?.sourceHash??null,frameId:context?.frameId??null},owners,globalFindings:[...new Set(globalFindings)],identityFindings,limitations:['Declared closed XML source model only; not computed browser CSS or verified XML/CSS parsing.','Complete inventory is distinct from complete stroke support.','Only normative opacity/vector-effect initial values are modeled with explicit evidence; no source attributes, IDs, geometry, permissions or physical facts are invented.']};};
  if(!rootNode||rootNode.nodeType!==1||rootNode.localName!=='svg'||rootNode.namespaceURI!==SVG){inventoryComplete=false;globalFindings.push('invalid-svg-root');return result();}
  if(!context||typeof context!=='object'||Array.isArray(context)||Reflect.ownKeys(context).length!==4||!['sourceId','sourceHash','frameId','closedSource'].every(k=>Object.hasOwn(context,k))||!text(context.sourceId)||!text(context.sourceHash)||!text(context.frameId)||context.closedSource!==true)globalFindings.push('missing-explicit-closed-source-frame');
  if(!root.StrokeFootprint?.line||!root.LayoutGeometry?.linearPath)globalFindings.push('missing-foundation-module');
@@ -68,6 +69,9 @@ function inspect(input,context){
    if(localHazards.includes(property))winners.hazards.push(evidence);
    else if(core.includes(property))winners[property]=evidence;
   }
+  // These properties are not inherited. Absence is distinct from an explicit
+  // unsupported winner; do not use initial values to recover from parse errors.
+  if(!globalFindings.length)for(const [property,initial]of Object.entries(initialValues))if(!Object.hasOwn(winners,property))winners[property]={...initial,source:'svg-initial-value',property,nodeIndex:entry.index,inherited:false};
   cache.set(entry,winners);return winners;
  }
  function resolve(entry,property){for(const candidate of [entry,...entry.ancestors]){const value=ownStyle(candidate)[property];if(value)return {...value,inherited:candidate!==entry};if(!inherited.includes(property))break;}return null;}

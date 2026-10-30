@@ -82,12 +82,26 @@ Required inherited properties are `stroke`, `stroke-width`, `stroke-linecap` and
 `stroke-opacity`. Stroke paint is restricted to opaque three/six-digit hex, black or
 white; explicit `stroke:none` can be a documented non-stroked exclusion. Width must be
 unitless and positive, cap explicit butt/square/round, and stroke opacity explicitly 1.
-The candidate must have its **own winning `vector-effect:none`** declaration; it is
-not inherited. That property is non-inherited in
-[W3C SVG2 vector effects](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty).
+The candidate must resolve its own `vector-effect:none` value; it is not inherited.
 Every paint ancestor, including root/group/owner, additionally needs its own resolved
-`opacity:1`. These opacity/vector conditions are intentionally narrower than SVG's
-initial/default behavior; the adapter does not invent missing core style values.
+`opacity:1`. A declared winning value retains presentation/rule/inline provenance.
+
+Only when the fully parsed own cascade contains **no declaration** for one of these
+two properties, and there are no global source/context findings, the adapter models
+that property's normative initial value with explicit evidence: `source:'svg-initial-value'`,
+`property`, string `value`, `specURI`, `nodeIndex` and `inherited:false`.
+[W3C SVG2 vector effects](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
+specifies initial `none` and non-inheritance; [CSS Color opacity](https://www.w3.org/TR/css-color-4/#transparency)
+specifies initial `1` and non-inheritance. Group opacity still affects compositing;
+each ancestor is checked independently, so a translucent group cannot be erased by
+a child's initial opacity. Explicit ancestor vector-effect hazards also remain unknown.
+
+This is evidence within the closed declared-source model, not a computed browser value
+or proof that external styles are absent. No DOM attribute is inserted. An explicit
+unsupported, malformed or CSS-wide winning value is never replaced by an initial value;
+parse errors never recover through defaults. Missing stroke paint, width, cap and stroke
+opacity still remain unknown. All global/local identity, geometry, dash and ancestor
+hazards continue to prevent support, even where initial evidence is available.
 
 The module ignores a documented group of footprint-irrelevant declarations for its
 single-line subset: fill/fill-opacity, color, font family/size/weight, text-anchor and
@@ -130,7 +144,7 @@ names retain exact case; CSS property names are case-insensitive.
 This narrow model means ordinary existing sources can produce **all unknown** results.
 That is incomplete adapter coverage, not a reason to rewrite a plan, add defaults or
 change source styles merely to obtain a pass. A future reviewed adapter may resolve
-more standard CSS/default cases with explicit provenance.
+further standard CSS/default cases with explicit provenance.
 
 ## Unsupported context and exclusions
 
@@ -151,7 +165,8 @@ behind an exclusion. No source item is deleted or declared physically verified.
 
 Run `node tests/source-stroke-coverage.mjs`. Tests use **fabricated DOM-shaped trees**;
 they verify this read-only seam, not browser parsing/conformance. Cases cover normal
-cascade/inheritance, explicit vector/opacity boundaries, all-ID shadows/duplicates,
+cascade/inheritance, declared versus normative initial vector/opacity evidence and
+non-inheritance boundaries, all-ID shadows/duplicates,
 whole-owner accounting, unsupported curves/use/multi-edge caps, full numeric/CSS
 consumption, lexical injection and Unicode-whitespace guards, document hazards,
 namespace handling, limits and input immutability. Dash-attribution regressions verify

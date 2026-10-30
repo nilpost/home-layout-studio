@@ -563,3 +563,13 @@ can retain existing support. No dash values or defaults are implemented. Other u
 properties, unparsed selectors/rules and external/ambient context remain global unknowns.
 Inventory and support completeness remain separate; runtime and saved checker contracts
 are unchanged. [Attribution model and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Explicit initial-value provenance — 2026-10-30
+
+Within the isolated closed-source model, absent own opacity/vector-effect declarations
+now produce explicit normative initial-value evidence (1/none), including specification
+URI and source node. Explicit unsupported values, malformed syntax and source/context
+hazards remain unknown. Ancestor opacity still gates support; inherited stroke paint,
+width, cap and stroke opacity remain required. No source attributes, runtime integration
+or saved checker/schema changes are introduced. [Evidence and limits](SOURCE_STROKE_COVERAGE.md).
