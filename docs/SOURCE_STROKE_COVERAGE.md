@@ -78,10 +78,10 @@ Property evidence records attribute/inline/rule origin, tree indices, selector/o
 where relevant and whether the property was inherited. The presentation-attribute
 ordering follows [W3C SVG2 styling](https://www.w3.org/TR/SVG2/styling.html#PresentationAttributes).
 
-Required inherited properties are `stroke`, `stroke-width`, `stroke-linecap` and
+Inherited properties are `stroke`, `stroke-width`, `stroke-linecap` and
 `stroke-opacity`. Stroke paint is restricted to opaque three/six-digit hex, black or
 white; explicit `stroke:none` can be a documented non-stroked exclusion. Width must be
-unitless and positive, cap explicit butt/square/round, and stroke opacity explicitly 1.
+unitless and positive, cap explicit butt/square/round, and stroke opacity must resolve to 1.
 The candidate must resolve its own `vector-effect:none` value; it is not inherited.
 Every paint ancestor, including root/group/owner, additionally needs its own resolved
 `opacity:1`. A declared winning value retains presentation/rule/inline provenance.
@@ -99,9 +99,29 @@ a child's initial opacity. Explicit ancestor vector-effect hazards also remain u
 This is evidence within the closed declared-source model, not a computed browser value
 or proof that external styles are absent. No DOM attribute is inserted. An explicit
 unsupported, malformed or CSS-wide winning value is never replaced by an initial value;
-parse errors never recover through defaults. Missing stroke paint, width, cap and stroke
-opacity still remain unknown. All global/local identity, geometry, dash and ancestor
+parse errors never recover through defaults. Missing stroke paint, width and cap
+still remain unknown. All global/local identity, geometry, dash and ancestor
 hazards continue to prevent support, even where initial evidence is available.
+
+### Inherited stroke-opacity initial provenance
+
+[W3C SVG2 stroke opacity](https://www.w3.org/TR/SVG2/painting.html#StrokeOpacityProperty)
+specifies an initial value of `1` and inheritance. Unlike opacity/vector-effect,
+`stroke-opacity` never receives a per-node own initial value. Its full supported
+ancestor chain is parsed first; the nearest explicit declaration retains its original
+property/value/source/node provenance and inherited flag. Unsupported or CSS-wide
+winning declarations remain unknown, including at the root, rather than falling back.
+A nearer own declaration can override a farther ancestor according to normal inheritance.
+
+Only when the property has **no explicit declaration anywhere on the complete chain**,
+with no global findings or accumulated owner/context hazards, does the adapter report
+`svg-initial-value` evidence for `1`. `specURI` identifies the SVG2 property definition;
+`nodeIndex` identifies the root origin; `inherited:true` identifies receipt below the
+root; and `inheritanceChain` lists node indices in root-to-owner order. This is a
+conditional source-model fact, not insertion of source attributes, a computed browser
+style or physical proof. Malformed ancestor parsing, external styles, local dash
+hazards, unsupported geometry, translucent groups and other existing gates still
+prevent support. No stroke paint, width or cap initial values are introduced.
 
 The module ignores a documented group of footprint-irrelevant declarations for its
 single-line subset: fill/fill-opacity, color, font family/size/weight, text-anchor and
@@ -166,7 +186,8 @@ behind an exclusion. No source item is deleted or declared physically verified.
 Run `node tests/source-stroke-coverage.mjs`. Tests use **fabricated DOM-shaped trees**;
 they verify this read-only seam, not browser parsing/conformance. Cases cover normal
 cascade/inheritance, declared versus normative initial vector/opacity evidence and
-non-inheritance boundaries, all-ID shadows/duplicates,
+non-inheritance boundaries, root-origin inherited stroke-opacity absence/nearest
+explicit winner/chain parsing and context gates, all-ID shadows/duplicates,
 whole-owner accounting, unsupported curves/use/multi-edge caps, full numeric/CSS
 consumption, lexical injection and Unicode-whitespace guards, document hazards,
 namespace handling, limits and input immutability. Dash-attribution regressions verify

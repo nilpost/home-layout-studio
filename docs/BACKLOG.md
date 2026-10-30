@@ -573,3 +573,13 @@ URI and source node. Explicit unsupported values, malformed syntax and source/co
 hazards remain unknown. Ancestor opacity still gates support; inherited stroke paint,
 width, cap and stroke opacity remain required. No source attributes, runtime integration
 or saved checker/schema changes are introduced. [Evidence and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Inherited stroke-opacity initial provenance — 2026-10-30
+
+The isolated source adapter now records normative stroke-opacity1 only after parsing
+the entire supported ancestor chain and proving no explicit declaration exists. Evidence
+identifies root origin and inheritance to the owner. Nearest explicit declarations keep
+their provenance; unsupported winners and context/hazard failures remain unknown. No
+paint, width or cap defaults, source writes, runtime or saved checker changes are added.
+[Inheritance evidence and limitations](SOURCE_STROKE_COVERAGE.md).
