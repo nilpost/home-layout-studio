@@ -1,7 +1,7 @@
 # Drawing-space line stroke foundation
 
 `src/stroke-footprint.js` exposes pure deterministic `StrokeFootprint.line`, `.point`
-and `.compare` functions, plus conservative `.join` and `.boundSeparation` helpers. It is **not loaded by the editor**. There is no SVG/CSS
+and `.compare` functions, plus conservative local-join and single-cubic helpers. It is **not loaded by the editor**. There is no SVG/CSS
 adapter, UI, project/schema migration, saved checker capability or deployment change.
 It prepares a bounded part of HLS-106; it does not complete door/opening review.
 
@@ -167,3 +167,78 @@ unsupported geometry/styles, exact numeric extents, bound tangency/false positiv
 frame mismatch, far-leg scope, frozen inputs and output tampering. Runtime SVG/style
 extraction, whole-path/cap union, arbitrary-angle joins, saved checker contracts and
 browser acceptance remain separate gates.
+
+## One regular cubic: conservative envelope only
+
+```js
+const curve = {
+  kind: 'single-cubic',
+  points: [[0, 0], [2, 4], [6, 4], [8, 0]],
+  frame: {id: 'example-frame', units: 'drawing', transform: 'none'},
+  style: {resolved: true, width: 2, cap: 'square', vectorEffect: 'none'},
+  provenance: {geometry: 'synthetic single cubic controls', style: 'explicit cubic style'}
+};
+StrokeFootprint.cubic(curve);
+StrokeFootprint.cubicBoundSeparation(curve, stroke);
+```
+
+Four dense own point pairs describe exactly one cubic Bezier segment: start, first
+control, second control, end. The frame, style, provenance and numerical profile are
+explicit as above; cap must be butt/round/square. Joins, adjacent path segments,
+transforms, non-scaling strokes and unresolved/extra styles are unknown.
+
+A deliberately narrow regularity profile is required:
+
+- On at least one axis, all four controls must be monotone nondecreasing or monotone
+  nonincreasing, and the axis must be nonconstant. All three adjacent comparisons are
+  checked; endpoint order or overall extents alone are insufficient.
+- The first control must differ from the start, and the second control must differ
+  from the end, so both endpoint tangents are nonzero. Equal middle controls are
+  permitted when the other requirements hold.
+
+The derivative is three times a weighted sum of the three adjacent control differences.
+Inside the segment, its Bernstein weights are strictly positive. On the supported
+monotone nonconstant axis, all differences have the same weak sign and at least one
+is nonzero; that derivative component is therefore nonzero in the interior. The
+endpoint conditions complete the regularity proof. Unsupported loops, cusp-like or
+backtracking profiles stay unknown; the module does not attempt a general cubic
+regularity test. Some otherwise valid regular curves deliberately remain unsupported.
+
+`cubic` returns `scope:'drawing-single-cubic-stroke'`, quality `conservative-bound`,
+kind `single-cubic-control-hull-bound`, frame/provenance, explicit width/cap,
+`controlBounds`, inflated `bounds` and the supporting `monotoneAxes`. All arrays and
+provenance are fresh copies. This is an enclosing box, never an exact curve footprint.
+
+A cubic lies in its control-point convex hull and hence in that hull's axis-aligned
+box. The box is inflated by the **full stroke width** on every side. Stroke-body
+points are at most halfwidth from the curve. Butt/round cap offsets are also bounded
+by halfwidth; a square-cap corner is at most `sqrt(2)*halfwidth`, less than fullwidth.
+Thus the deliberately loose envelope encloses the whole single regular cubic and its
+supported endpoint caps. No adjacent segment, join, complete path, filled region or
+door sweep is included. ExactSum guards require represented control differences and
+inflated extents; halfwidth must remain positive and normal even though the envelope
+uses fullwidth. Precision loss is unknown, not a claim of separation.
+
+`cubicBoundSeparation` is a new raw-descriptor helper, leaving the existing join
+`boundSeparation` behavior unchanged. It requires at least one supported raw cubic;
+the other operand may be a supported raw line or another single cubic. Local joins
+and precomputed/tampered outputs are not accepted. It rebuilds both inputs and requires
+identical explicit frame IDs. A strictly disjoint pair of enclosing bounds can return
+`relation:'separate'`, scope `drawing-cubic-bound-separation`, conservative quality,
+ordered operand scopes/copied provenance, exact represented axis gaps and their maximum
+as a conservative drawing-distance lower bound. Touching/intersecting bounds are
+**unknown**, never proof of tangency, collision or interior overlap. A loose control
+box can overlap even when the actual curve stroke is separated.
+
+Old exact line APIs and the local join API still reject cubic descriptors. Neither
+helper expands saved checker capabilities or runtime coverage. A single-cubic result
+must not be promoted to a whole-path, connected doorway, passage or physical clearance
+pass. SVG/CSS/style extraction, arbitrary regularity, adjacent joins/path unions,
+source calibration, saved report contracts and browser acceptance remain separate gates.
+
+Fabricated tests exercise analytic-profile rejection, repeated middle controls,
+reflections/reversal, sampled body and endpoint-cap enclosure, tiny normal coordinates,
+sparse/inherited coordinates, unresolved styles/frames, strict bounds separation,
+bounds false positives, precision limits, frozen inputs and output tampering. Samples
+supplement the analytic enclosure proof; they are not a substitute for that proof or
+browser rendering acceptance.

@@ -102,5 +102,38 @@ function boundSeparation(inputA,inputB){
   return {status:'supported',scope,quality:'conservative-bound',relation:'separate',frameId:a.frameId,operandScopes:[a.operandScope,b.operandScope],operandProvenance:[{...a.provenance},{...b.provenance}],axisGaps:{x:dx,y:dy},separationLowerBound:Math.max(dx,dy),proof:'Strictly disjoint enclosing bounds; exact axis gap is a drawing-distance lower bound.',coverage:'Only the supplied local join region and line footprint/local join region; not whole joined paths.'};
  }catch(e){return joinUnknown(e.message||'unsupported-bound-input',scope);}
 }
-root.StrokeFootprint=Object.freeze({MAX_COORDINATE,MIN_NORMAL,line,point,compare,join,boundSeparation});
+// Convex-hull control bounds inflated by a full stroke width enclose one regular
+// cubic and every supported endpoint cap. This is deliberately not an exact curve.
+function cubicUnknown(reason,scope='drawing-single-cubic-stroke'){return {status:'unknown',reason,scope,quality:'conservative-bound'};}
+function buildCubic(input){
+ if(!record(input)||!keys(input,['kind','points','frame','style','provenance'])||input.kind!=='single-cubic')throw Error('unsupported-cubic-input');
+ const f=input.frame,s=input.style,p=input.provenance,points=input.points;
+ if(!record(f)||!keys(f,['id','units','transform'])||!text(f.id)||f.units!=='drawing'||f.transform!=='none')throw Error('unresolved-frame');
+ if(!record(s)||!keys(s,['resolved','width','cap','vectorEffect'])||s.resolved!==true||!['butt','square','round'].includes(s.cap)||s.vectorEffect!=='none')throw Error('unresolved-style');
+ if(!record(p)||!keys(p,['geometry','style'])||!text(p.geometry)||!text(p.style))throw Error('missing-provenance');
+ if(!Array.isArray(points)||points.length!==4||![0,1,2,3].every(i=>Object.hasOwn(points,i)&&pointPair(points[i]))||!coordinate(s.width)||s.width<=0)throw Error('numeric-range');
+ const r=s.width/2;if(!normal(r)||r<=0||r*2!==s.width)throw Error('numeric-precision');
+ for(let i=1;i<4;i++)for(let axis=0;axis<2;axis++)exactSum(points[i][axis],-points[i-1][axis]);
+ const same=(a,b)=>a[0]===b[0]&&a[1]===b[1];if(same(points[0],points[1])||same(points[2],points[3]))throw Error('unsupported-cubic-regularity');
+ const monotoneAxes=[];
+ for(let axis=0;axis<2;axis++){const c=points.map(p=>p[axis]),ascending=c[0]<=c[1]&&c[1]<=c[2]&&c[2]<=c[3],descending=c[0]>=c[1]&&c[1]>=c[2]&&c[2]>=c[3];if((ascending||descending)&&c[0]!==c[3])monotoneAxes.push(axis===0?'x':'y');}
+ if(!monotoneAxes.length)throw Error('unsupported-cubic-regularity');
+ const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),controlBounds=[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)],w=s.width;
+ const bounds=[exactSum(controlBounds[0],-w),exactSum(controlBounds[1],-w),exactSum(controlBounds[2],w),exactSum(controlBounds[3],w)];
+ if(!bounds.every(coordinate)||bounds[0]>=bounds[2]||bounds[1]>=bounds[3])throw Error('numeric-precision');
+ return {bounds,controlBounds,frameId:f.id,width:w,cap:s.cap,monotoneAxes,provenance:{geometry:p.geometry,style:p.style}};
+}
+function cubic(input){try{return {status:'supported',scope:'drawing-single-cubic-stroke',quality:'conservative-bound',kind:'single-cubic-control-hull-bound',...buildCubic(input),coverage:'Whole one regular cubic plus endpoint caps only; excludes adjacent segments, joins, whole paths and door sweeps.'};}catch(e){return cubicUnknown(e.message||'unsupported-cubic-input');}}
+function cubicBoundSeparation(inputA,inputB){
+ const scope='drawing-cubic-bound-separation';
+ try{
+  if(inputA?.kind!=='single-cubic'&&inputB?.kind!=='single-cubic')throw Error('cubic-required');
+  const buildRaw=input=>input?.kind==='single-cubic'?{...buildCubic(input),operandScope:'drawing-single-cubic-stroke'}:{...build(input),operandScope:'drawing-line-stroke'},a=buildRaw(inputA),b=buildRaw(inputB);
+  if(a.frameId!==b.frameId)throw Error('frame-mismatch');
+  const dx=gap(a.bounds[0],a.bounds[2],b.bounds[0],b.bounds[2]),dy=gap(a.bounds[1],a.bounds[3],b.bounds[1],b.bounds[3]);
+  if(dx===0&&dy===0)return cubicUnknown('bounds-intersect-or-touch',scope);
+  return {status:'supported',scope,quality:'conservative-bound',relation:'separate',frameId:a.frameId,operandScopes:[a.operandScope,b.operandScope],operandProvenance:[{...a.provenance},{...b.provenance}],axisGaps:{x:dx,y:dy},separationLowerBound:Math.max(dx,dy),proof:'Strictly disjoint enclosing bounds; exact axis gap is a drawing-distance lower bound.',coverage:'Only the supplied single cubic plus caps and line/single cubic plus caps; excludes adjacent joins, complete paths and door sweeps.'};
+ }catch(e){return cubicUnknown(e.message||'unsupported-cubic-bound-input',scope);}
+}
+root.StrokeFootprint=Object.freeze({MAX_COORDINATE,MIN_NORMAL,line,point,compare,join,boundSeparation,cubic,cubicBoundSeparation});
 })(typeof window==='undefined'?globalThis:window);

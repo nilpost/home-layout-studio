@@ -520,3 +520,18 @@ local scope and conservative quality; caller-supplied provenance is not verifica
 The editor, current checker and saved report/schema contracts are unchanged. Arbitrary
 angles, full paths/caps, SVG/CSS resolution, curves and browser acceptance remain open.
 [Model, numerical limits and integration gates](STROKE_FOOTPRINT.md).
+
+
+## Single-cubic envelope preparation — 2026-10-30
+
+HLS-106 preparation adds an isolated conservative envelope for one narrowly supported
+regular cubic curve plus explicit endpoint caps. Caller-supplied control points, common
+frame, resolved style and provenance are required. A monotone nonconstant control axis
+and nonzero endpoint tangents justify the supported regularity profile. The control
+bounds are deliberately inflated conservatively, not treated as an exact curve outline.
+
+A new separation helper proves only strictly disjoint bounds. Touching/intersecting
+bounds and unsupported curves remain unknown. Adjacent joins, whole paths, door sweeps,
+SVG/CSS resolution, physical clearance and browser acceptance remain outside this scope.
+The editor and saved checker/schema contracts are unchanged; the module is not loaded
+at runtime. [Proof, supported profile and remaining gates](STROKE_FOOTPRINT.md).
