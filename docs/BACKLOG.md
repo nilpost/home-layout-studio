@@ -490,3 +490,18 @@ exact import contracts and history but require rerun for current checks even whe
 source/state are unchanged. Saved-review UI and exported freshness reflect that
 distinction. Nonempty extracted paths also require an initial M/m; this is a bounded
 lexer/initial-command fix, not a claim of full SVG grammar validation.
+
+
+## Stroke footprint foundation — 2026-10-30
+
+HLS-106 preparation adds an isolated analytical line-stroke diagnostic, distinct from
+centerline topology. It requires explicit resolved drawing-unit styles and a common
+coordinate frame; supported axis-aligned lines use butt, square or round caps. Unsupported
+or numerically unrepresentable input remains unknown. Round-cap bounds alone are not
+used to infer a collision. No physical tolerance or passage clearance is established.
+
+The foundation is not loaded by the editor and does not alter current checker output,
+saved reports, project schema or source geometry. Joins, curves, style extraction,
+transforms and runtime review integration remain open. Independent tests/review and
+supported browser acceptance are required before exposing new review capabilities.
+See [supported model and integration gates](STROKE_FOOTPRINT.md).
