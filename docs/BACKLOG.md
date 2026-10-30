@@ -535,3 +535,20 @@ bounds and unsupported curves remain unknown. Adjacent joins, whole paths, door 
 SVG/CSS resolution, physical clearance and browser acceptance remain outside this scope.
 The editor and saved checker/schema contracts are unchanged; the module is not loaded
 at runtime. [Proof, supported profile and remaining gates](STROKE_FOOTPRINT.md).
+
+
+## Read-only source stroke coverage preparation — 2026-10-30
+
+HLS-106 preparation now inventories an already parsed SVG tree before adapting a narrow
+native-line/single-edge-path subset to the isolated stroke calculations. Original IDs,
+derived references, style provenance and every unsupported candidate remain accounted
+for; complete inventory and complete stroke support are separate results. No source
+sanitization, ID generation or mutation occurs.
+
+The closed declared-source style subset covers bounded normal cascade and inheritance.
+External/dynamic/unresolved CSS, ambiguity, transforms, clipping, dashes, missing styles
+and multi-edge path topology remain unknown. Endpoint caps are never copied onto every
+path edge. Ordinary sources can legitimately have all-unknown stroke coverage; changing
+a plan to force support is not acceptance. Real browser XML/CSS conformance, runtime
+integration and saved checker/schema changes remain separate gates. No new site workflow
+is activated. [Model, evidence and limits](SOURCE_STROKE_COVERAGE.md).
