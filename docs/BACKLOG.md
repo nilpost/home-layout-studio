@@ -552,3 +552,14 @@ path edge. Ordinary sources can legitimately have all-unknown stroke coverage; c
 a plan to force support is not acceptance. Real browser XML/CSS conformance, runtime
 integration and saved checker/schema changes remain separate gates. No new site workflow
 is activated. [Model, evidence and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Local unsupported dash attribution — 2026-10-30
+
+The isolated source adapter now retains completely parsed `stroke-dasharray` and
+`stroke-dashoffset` declarations as local hazard provenance. Matching owners and their
+descendants remain unknown, including after overriding declarations; unaffected siblings
+can retain existing support. No dash values or defaults are implemented. Other unknown
+properties, unparsed selectors/rules and external/ambient context remain global unknowns.
+Inventory and support completeness remain separate; runtime and saved checker contracts
+are unchanged. [Attribution model and limits](SOURCE_STROKE_COVERAGE.md).

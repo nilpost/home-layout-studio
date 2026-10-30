@@ -101,6 +101,28 @@ strings, functions, bracketed values/selectors, escapes, at-rules, importance, c
 or conditional selectors, malformed rules/declarations, geometry CSS and unknown
 properties are unsupported. Unhandled stylesheet rules conservatively make the whole
 source's candidate support unknown rather than guessing which owner they affect.
+The only parsed-but-unsupported property exception is `stroke-dasharray` or
+`stroke-dashoffset` in a completely consumed simple-selector rule. These declarations
+are **local hazards**, not supported dash values. For each directly painted candidate examined for support, matching declarations on
+the owner or its SVG ancestors retain hazard evidence in `styleHazards`: original declaration property/value, source
+kind, matched node index, stylesheet node/selector/order when applicable, and an
+`ancestorContext` flag relative to the candidate. Inline and presentation dash hazards
+also retain their source evidence. Definition-content exclusions precede style
+resolution and may carry no hazard evidence. Any such hazard keeps the candidate unknown while
+unrelated siblings can remain supported; an unmatched simple rule is not global harm.
+
+All matching dash declarations are retained conservatively, including ones a normal
+cascade could override. `none`, zero, invalid-looking values and later inline/ID overrides
+never erase an unsupported hazard. Ancestor propagation deliberately overapproximates
+the effects; it does not claim to resolve dash inheritance or CSS-wide keywords. Both
+properties are inherited in [W3C SVG2 stroke dashing](https://www.w3.org/TR/SVG2/painting.html#StrokeDashing).
+No dash
+value/default is implemented. In a stylesheet, an unparsed rule, unsupported selector, other unsupported
+property, importance or function/quoted syntax still prevents support globally,
+including when it occurs beside a local dash declaration. External/ambient context
+also remains global. Unsupported inline input remains local to the affected
+owner/ancestor context, as described below.
+
 Unsupported inline syntax makes the affected owner/descendant context unknown. Class
 matching uses ASCII whitespace, so NBSP does not become a class separator. XML attribute
 names retain exact case; CSS property names are case-insensitive.
@@ -132,7 +154,9 @@ they verify this read-only seam, not browser parsing/conformance. Cases cover no
 cascade/inheritance, explicit vector/opacity boundaries, all-ID shadows/duplicates,
 whole-owner accounting, unsupported curves/use/multi-edge caps, full numeric/CSS
 consumption, lexical injection and Unicode-whitespace guards, document hazards,
-namespace handling, limits and input immutability.
+namespace handling, limits and input immutability. Dash-attribution regressions verify
+matched and ancestor provenance, unaffected sibling support, conservative handling of
+cascade overrides, unparsed/global fallback and immutable source/output isolation.
 
 Source hashes/frame assertions, actual XML/CSS parser behavior, style integration,
 whole paths/joins/curves, live rendering and browser preview/Cancel/Apply/Undo remain

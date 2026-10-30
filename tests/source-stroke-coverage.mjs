@@ -54,3 +54,32 @@ assert.equal(inspect(svg([]),{...context,closedSource:false}).strokeSupportCompl
 const exposedExternal=svg([line()]);exposedExternal.styleSheets=[{href:'https://example.invalid/fixture.css'}];assert.equal(owner(inspect(exposedExternal),'line-a').status,'unknown');assert(inspect(exposedExternal).globalFindings.includes('exposed-external-stylesheet'));
 const knownStyle=el('style',{},[],'line{stroke-width:4}'),knownSheetDoc=svg([knownStyle,line()]);knownSheetDoc.styleSheets=[{href:null,ownerNode:knownStyle,disabled:false,media:{mediaText:''}}];assert.equal(owner(inspect(knownSheetDoc),'line-a').descriptor.style.width,4);knownSheetDoc.styleSheets[0].disabled=true;assert.equal(owner(inspect(knownSheetDoc),'line-a').status,'unknown');
 const hiddenSheet=svg([line()]);hiddenSheet.styleSheets=[{href:null,ownerNode:el('style',{},[],'line{stroke-width:4}') }];assert.equal(owner(inspect(hiddenSheet),'line-a').status,'unknown');
+
+// Fully parsed dash declarations are local hazards, never supported dash values.
+// All matching declarations are retained: normal cascade overrides cannot prove
+// unsupported effects absent. Unparsed or other unsupported CSS remains global.
+for(const property of ['stroke-dasharray','stroke-dashoffset']){
+ const tree=svg([el('style',{id:'dash-sheet'},[],'.dashed{'+property+':4}'),line('affected',{class:'dashed'}),line('unaffected')]);
+ const initial=snapshot(tree),report=inspect(tree),affected=owner(report,'affected');
+ assert.deepEqual(report.globalFindings,[]);assert.equal(report.inventoryComplete,true);assert.equal(report.strokeSupportComplete,false);
+ assert.equal(affected.status,'unknown');assert.equal(owner(report,'unaffected').status,'supported');assert.equal(affected.descriptor,undefined);
+ assert.deepEqual(affected.styleHazards,[{value:'4',source:'stylesheet-rule',nodeIndex:2,stylesheetNodeIndex:1,selector:'.dashed',property,specificity:10,order:0,ancestorContext:false}]);
+ assert(affected.reasons.includes('unsupported-local-stroke-style:'+property));assert.deepEqual(snapshot(tree),initial);
+ affected.styleHazards[0].value='tampered';assert.equal(owner(inspect(tree),'affected').styleHazards[0].value,'4');
+ const inheritedTree=svg([el('style',{},[],'.dashed{'+property+':4}'),el('g',{id:'dash-group',class:'dashed',opacity:'1'},[line('descendant',{style:property+':none'})]),line('sibling')]);
+ const inheritedReport=inspect(inheritedTree),descendant=owner(inheritedReport,'descendant');assert.equal(descendant.status,'unknown');assert.equal(owner(inheritedReport,'sibling').status,'supported');
+ assert(descendant.styleHazards.some(h=>h.source==='stylesheet-rule'&&h.nodeIndex===2&&h.ancestorContext));assert(descendant.styleHazards.some(h=>h.source==='inline-style'&&h.nodeIndex===3&&!h.ancestorContext));
+ for(const value of ['none','0','4 2','invalid-but-lexed'])assert.equal(owner(inspect(svg([el('style',{},[],'.dashed{'+property+':'+value+'}'),line('value',{class:'dashed'})])),'value').status,'unknown');
+ const overrides=inspect(svg([el('style',{},[],'.dashed{'+property+':4} #overridden{'+property+':none}'),line('overridden',{class:'dashed',style:property+':0'})]));
+ assert.equal(owner(overrides,'overridden').status,'unknown');assert.equal(owner(overrides,'overridden').styleHazards.length,3);
+ const attribute=owner(inspect(svg([line('attribute',{[property]:'none'})])),'attribute');assert.equal(attribute.status,'unknown');assert.equal(attribute.styleHazards[0].source,'presentation-attribute');assert.equal(attribute.styleHazards[0].property,property);
+ const attrGroup=inspect(svg([el('g',{opacity:'1',[property]:'0'},[line('attr-child')]),line('attr-sibling')]));assert.equal(owner(attrGroup,'attr-child').status,'unknown');assert.equal(owner(attrGroup,'attr-child').styleHazards[0].ancestorContext,true);assert.equal(owner(attrGroup,'attr-sibling').status,'supported');
+ const unused=inspect(svg([el('style',{},[],'.unused{'+property+':4}'),line()]));assert.equal(unused.strokeSupportComplete,true);assert.equal(owner(unused,'line-a').styleHazards.length,0);
+ for(const css of ['.dashed{'+property+':4; x:2}', '.dashed{'+property+':4} ???', '.dashed{'+property+':4} line:hover{stroke-width:2}', '.dashed{'+property+':4!important}', '.dashed{'+property+':var(--dash)}', '.dashed{'+property+':"4"}', '.unused{unknown-property:2}']){
+  const failed=inspect(svg([el('style',{},[],css),line('safe')]));assert.equal(owner(failed,'safe').status,'unknown');assert(failed.globalFindings.length>0);
+ }
+ const malformedInline=inspect(svg([el('g',{opacity:'1',style:property+':4; malformed'},[line('bad-inline')]),line('good-inline')]));assert.equal(owner(malformedInline,'bad-inline').status,'unknown');assert.equal(owner(malformedInline,'good-inline').status,'supported');
+}
+const rootDash=inspect(svg([el('style',{},[],'svg{stroke-dasharray:4}'),line()]));assert.equal(owner(rootDash,'line-a').status,'unknown');assert.equal(owner(rootDash,'line-a').styleHazards[0].ancestorContext,true);
+const tagDash=inspect(svg([el('style',{},[],'line{stroke-dasharray:4}'),line('tag-a'),line('tag-b')]));assert.equal(tagDash.counts.unknown,2);
+console.log('Local dash hazard attribution: matched/ancestor provenance, unaffected siblings, conservative override handling and global fallback pass.');
