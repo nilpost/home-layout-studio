@@ -25,3 +25,18 @@
 .layer-item-row{grid-template-columns:16px minmax(0,1fr) repeat(3,22px)}.layer-item-row>input{width:13px;accent-color:#148897;margin:4px 0}.layer-item-state{grid-column:2/-1}
 
 .sidebar,#layer-item-list{overflow-anchor:none}
+
+#assets-dialog label{display:block;font-size:12px;margin-block:8px}#asset-select{width:100%;padding:9px;border:1px solid var(--stroke);border-radius:7px}.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}#assets-dialog pre{overflow-wrap:anywhere;white-space:pre-wrap}#asset-import-preview[hidden]{display:none}@media(max-width:600px){.asset-grid{grid-template-columns:1fr}}
+
+#measurement-dialog label{display:block;font-size:12px;margin:12px 0 5px}#measurement-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#measurement-preview{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Contextual adjustment controls and the single reviewed scale grip. */
+#selection-props section>label{display:block;margin-top:12px}#selection-props section>label input{display:block;margin-top:5px}#selection-props section>button{display:block}.item-scale-handle{fill:#fff;stroke:#008c9e;stroke-width:2;vector-effect:non-scaling-stroke;cursor:nwse-resize;pointer-events:all}.item-scale-handle:hover{fill:#def3f4}
+
+.group-scale-controls,.group-rotation-controls{border-top:1px solid var(--stroke);margin-top:16px;padding-top:16px}.group-scale-controls p,.group-rotation-controls p{overflow-wrap:anywhere}
+
+#opening-dialog label{display:block;font-size:12px;margin:12px 0 5px}#opening-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#opening-preview{white-space:pre-wrap;overflow-wrap:anywhere}
+
+#opening-mini-panel{position:sticky;top:0;z-index:1;background:#fff;border:1px solid var(--stroke);border-radius:8px;padding:8px;margin:12px 0}#opening-mini-panel[hidden]{display:none}#opening-mini-preview{display:block;width:100%;height:180px;background:#f7faf9;border-radius:5px}#opening-mini-caption{margin:4px 0 0}#opening-source-details[hidden]{display:none}
+
+#source-impact{border:1px solid var(--stroke);border-radius:8px;padding:12px;margin-top:12px}#source-impact-diagram{width:100%;height:200px;display:block;background:#f7faf9}#source-impact-diagram[hidden]{display:none}#source-impact-list{max-height:200px;overflow:auto;overflow-wrap:anywhere}#source-impact-list p{margin:6px 0}

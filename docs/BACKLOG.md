@@ -8,7 +8,7 @@ should reference these IDs rather than establish a competing backlog.
 
 ## HLS-101 — Complete workflows directly in the site
 
-Status: planned · Priority: required before deployment
+Status: partial · Priority: required before deployment
 
 Users must be able to carry out the actions and outcomes currently handled in the
 companion chat directly in the site. An external chat must not be required to complete
@@ -32,7 +32,7 @@ transport; expose one validated operation model for both site controls and agent
 
 ## HLS-102 — Link private vault knowledge to project assets
 
-Status: planned · Priority: design now; required before deployment
+Status: partial · Priority: design now; required before deployment
 
 An item in a layout should link to a stable asset record and relevant private knowledge,
 for example an appliance's model, manual, maintenance history and unresolved issues.
@@ -78,7 +78,7 @@ avoid single-project assumptions that would require a later permission-model rew
 
 ## HLS-104 — Codex and Claude interoperability
 
-Status: planned · Priority: design now; required before deployment
+Status: partial · Priority: design now; required before deployment
 
 Both Codex and Claude must be able to understand the same project state and instructions,
 inspect its assets, propose changes and resume work across handoffs.
@@ -132,7 +132,7 @@ sharing a project must not grant access to the owner's entire vault or ChatGPT a
 
 ## HLS-106 — Run an architectural consistency review
 
-Status: planned · Priority: core development; required before deployment
+Status: partial · Priority: core development; required before deployment
 
 Provide a site-native **Review project consistency** run covering measured geometry,
 notation and architectural relationships, with a traceable report for a real project.
@@ -175,7 +175,7 @@ agent providers and all actual project evidence private.
 
 ## HLS-107 — Adjust selected items with contextual controls
 
-Status: planned · Priority: design during development; review before deployment
+Status: partial · Priority: design during development; review before deployment
 
 Selecting a door, wall or other layout item on the plan or in Layer items opens controls
 suited to that item: position, rotation, scale, length and other applicable dimensions.
@@ -207,3 +207,421 @@ Before deployment, review HLS-101 through HLS-107 and record evidence or an expl
 user-approved deferral for every acceptance criterion. Begin with the shared data model,
 private storage/authorization design and agent contracts because these requirements
 rely on them. This backlog does not authorize a deployment, DNS change or new access grant.
+
+## Verified development progress — 2026-10-24, v0.9.0
+
+These are partial deliveries, not acceptance of every criterion or permission to deploy.
+
+| Requirement | Implemented slice | Remaining gate |
+| --- | --- | --- |
+| HLS-101 | [Workflow inventory](WORKFLOWS.md), source review, private backups, saved checks and overlay preview/apply/cancel | Site-native instruction execution, asset management and complete workflow acceptance |
+| HLS-102 | Stable project/source/item identities retained | Asset entity, read-only authorized vault references, field provenance and attachment access |
+| HLS-103 | Local project identity and state isolation | Owner-selected hosting/login/storage, server authorization and denial/recovery tests |
+| HLS-104 | [Version 1 manual correction contract](AGENT_CONTRACT.md), common parser and reviewed apply path; fabricated Codex/Claude equivalence | Live authenticated adapters, complete asset format and reciprocal live-provider verification |
+| HLS-105 | Dependency boundaries documented | Authenticated portal, invitation lifecycle, verified email, roles and revocation |
+| HLS-106 | Saved checker-version/revision/source/state-bound runs, coverage matrix, comparison, stale highlights, private backup/report export | Anchored dimensions, project tolerances, room/door relationships, source/survey/professional review |
+| HLS-107 | Exact numeric single-overlay preview/apply/cancel; lock/visibility/state guards; reversible history and rerun checks | Architectural relationships, connected neighbors, rotation, handles, group transforms and physical-unit editing |
+
+Integrity repairs cover asynchronous export snapshots, concurrent import rejection,
+undo-branch correction identity, stylesheet/root lock dependencies, semantic dimension
+labels and atomic history capacity rejection. Audit history is not silently pruned:
+at the 2,000-record schema boundary, a transaction requiring another record is rejected
+without persisting an unreadable project. A full-history archive/continuation workflow
+remains future work. Saved consistency runs retain the latest 50 across same-project
+undo/redo; backups contain the retained evidence. Standalone report export wraps the
+versioned `report` with `staleAtExport` metadata.
+
+
+## Verified development progress — 2026-10-24, v0.10.0
+
+HLS-102 now has a local private asset manager with stable project-bound records,
+selected-item links, manufacturer/model/room/notes, per-field authority, read-only
+source revision/hash/status references, and imported maintenance/issues. Deliberate
+asset JSON import previews orphan/stale/unverified findings before Apply; edits,
+deletions and imports share undoable history. Private project backup/restore and
+manual provider handoffs preserve asset identities and evidence. See
+[asset schema and import boundary](ASSET_RECORDS.md). No vault/remote connector or
+attachment retrieval has been deployed. Maintenance/issue authoring beyond imported
+records remains future UI work; server permissions remain mandatory before hosting.
+
+HLS-106 excludes semantic shapes and dimension spans whose stylesheet, root, ancestor
+or nested viewport changes require unsupported coordinate mapping. The source evidence
+is visible. Stylesheet coverage is interpreted once per extraction. Large valid review
+outputs are bounded with an explicit incomplete/unknown disclosure rather than aborting
+or claiming complete coverage. Checker 1.1 imports prior 1.0 records.
+
+Full SVG replacement keeps the annotation ID counter, preventing orphan links from
+reattaching to unrelated new objects. If an asset still links any architectural base
+item, full SVG replacement is rejected until those links are explicitly removed (or a
+reviewed same-source edit is used). This conservative boundary avoids guessing whether
+similarly named IDs in a different plan represent the same object. All other deployment
+gates and incomplete architectural relationships above still apply.
+
+
+Version 0.10.1 adds executable quota-failure regressions and explicit storage-write
+acceptance for transactional edits, imports, history navigation, drags, migration/reset
+and review recording. Display refresh failures after persistence retain committed state.
+This strengthens HLS-101 backup/persistence integrity without claiming remote storage
+or eliminating browser quota limits.
+
+
+## Verified development progress — 2026-10-24, v0.11.0
+
+HLS-106 now supports explicit source-dimension bindings to stable segment endpoints,
+measured/declared comparison, a user-chosen project tolerance, readable preview,
+reviewed save/cancel and reversible removal. Source hash changes invalidate verification
+until the binding is explicitly reviewed again. Missing/duplicate geometry, absent
+tolerance, unsupported units and provisional calibration remain unknown. Source facts
+are not marked verified by this UI. Checks can pass/fail only from verified input metadata
+and an explicit tolerance; numerical previews may still be shown provisionally.
+
+Bindings, tolerance and evidence travel in private backups/provider handoffs. Full SVG
+replacement refuses active bindings to avoid accidentally reusing endpoint identities.
+Checker 1.2 reports selected-endpoint coverage separately, keeps unbound dimensions
+unknown, and retains checker1.0/1.1 reports. [Binding format](MEASUREMENT_ANCHORS.md).
+This is a partial endpoint-span delivery; chains/totals, axes/levels, rooms, hosted doors,
+physical calibration, source tracing and professional/regulatory review remain open.
+
+
+## Verified development progress — 2026-10-24, v0.12.0
+
+HLS-106 adds explicitly selected single-axis dimension-chain totals: 2–8 ordered endpoint
+bindings and a separate total, contiguous and monotonic on one horizontal/vertical axis.
+Declared values are compared after metric conversion using the explicit project threshold.
+Preview/save/cancel/remove, undo and private backup/manual handoff are supported. Missing,
+stale, ambiguous, noncollinear or provisional inputs remain unknown; source labels and
+geometry are unchanged. Broader multi-axis/level, rooms and hosted door relationships,
+source verification and survey/professional review remain open. [Chain model](MEASUREMENT_CHAINS.md).
+
+
+## Verified development progress — 2026-10-24, v0.13.0
+
+HLS-102 now supports site-native authoring of local maintenance schedules/history and
+open/resolved issues, with explicit draft/save/cancel, stable activity IDs and reversible
+asset revisions. Field provenance and read-only source records are preserved. Dates
+are user-entered metadata; no reminder delivery, source write-back or physical verification
+is implied. Remote source/attachment connectors and authenticated permissions remain
+undeployed gates. [Activity workflow](ASSET_RECORDS.md#local-maintenance-and-issues).
+
+Version0.13.1 makes HLS-102 field attribution, read-only source evidence and unresolved
+reference findings readable inside the asset form. It changes presentation only; no source
+fetch, verification status change or remote permission is introduced.
+
+
+## Verified development progress — 2026-10-24, v0.14.0
+
+HLS-107 adds uniform scaling for one furniture or box overlay about its center. An
+explicit percentage, visible pivot and ghost preview use the same guarded apply/cancel
+and reversible history as precise numeric edits. Item identity, labels, linked assets and
+other metadata remain unchanged. Inputs are drawing units, with no physical accuracy
+claim. Architecture, arrows/paint, multiple selections, rotation and connected topology
+remain outside this scale control. Hidden/locked/stale proposals cannot apply.
+
+Startup now blocks editing before loading or writing a project if required editor
+components fail to load, or saved metadata fails validation. It preserves existing
+storage instead of falling through to a writable demonstration project. Reload to retry;
+no automatic reset or recovery overwrite is performed.
+
+
+## Verified development progress — 2026-10-24, v0.15.0
+
+HLS-107 adds numeric translation of 2–100 selected overlays as one reviewed group.
+Furniture/boxes move by their origins, arrows move both endpoints, and paint moves its
+origin while retaining stroke points. Every selected item must remain present, visible
+and unlocked. Mixed architectural/comment/photo selections reject the entire operation.
+Preview shows all affected overlays, Apply creates one reversible history entry, and
+Cancel makes no change. Selection membership and project/item identity are rechecked
+before committing. Rotation, group scaling and connected architectural edits remain open.
+
+Rotation preparation now includes an isolated, tested rectangle-corner and bounding-box
+module. It is not loaded by the editor and does not enable rotation or add a persisted
+angle field. [Integration and compatibility checklist](OVERLAY_ROTATION.md) records the
+remaining domain, rendering, selection, export and acceptance work. HLS-107 rotation
+remains undelivered.
+
+
+## Verified development progress — 2026-10-24, v0.16.0
+
+HLS-107 adds an explicit center-pivot angle for one furniture or box overlay, including
+reviewed preview/apply/cancel, reversible history and persisted JSON/handoff metadata.
+Shape, label, selection and preview transforms agree; SVG export retains the rendered
+rotation. Rotated corners support bounds findings and guarded move/scale/group operations.
+Only an explicit rotationVersion:1 marker activates the finite angle; unmarked legacy
+rotation metadata remains inert and unchanged. Invalid active angles and unsupported
+active item types reject.
+No source architecture, group rotation or connected wall/door behavior is inferred.
+
+
+## Verified development progress — 2026-10-24, v0.17.0
+
+HLS-107 adds a canvas handle for centered uniform scaling of one furniture/box overlay,
+reusing the guarded scale proposal and explicit Apply transaction. Dragging is preview-only;
+pointer cancellation discards the gesture. Rotation and aspect ratio remain unchanged.
+Group handles, group rotation/scaling and connected architecture remain open.
+Acceptance covered rotated/zoomed pointer mapping, cancellation, stale/locked/hidden
+rejection, invalid-bound protection, secondary-pointer isolation and one reversible commit.
+
+
+## Verified development progress — 2026-10-25, v0.18.0
+
+HLS-107 adds reviewed group uniform scaling for 2–100 furniture/box overlays around
+a shared center derived from complete effective rotated bounds. The operation scales
+local dimensions and relative centers together, preserving angle, proportions, labels
+and source/asset metadata. Every member is checked before the whole selection can apply.
+Preview and Cancel do not change saved geometry; Apply is one reversible transaction.
+Arrows/paint, group rotation/handles and connected architecture remain outside this slice.
+
+
+## Verified development progress — 2026-10-25, v0.19.0
+
+HLS-107 adds reviewed relative group rotation for 2–100 furniture/box overlays about
+the current effective rotated-bounds center. Item centers rotate around the common
+pivot and active angles add the delta; local dimensions and proportions remain intact.
+Inactive historical rotation fields require individual reviewed activation before a
+group operation. Apply validates the complete selection and records one undoable change.
+Arrows/paint, group handles and connected architecture remain outside this slice.
+
+
+## Architectural foundation — 2026-10-25
+
+HLS-106 preparation adds an isolated opening-to-wall-endpoint declaration validator
+and conservative numerical checks for explicit endpoint alignment and conflicting wall
+spans. It does not infer a host wall, snap/cut geometry or interpret door swing.
+[Integration and checker compatibility gates](OPENING_BINDINGS.md) remain required.
+The module is not loaded by the editor; no new project field, UI or saved-report
+capability is delivered in this foundation slice. HLS-106 remains partial.
+
+
+## Checker compatibility prerequisite — 2026-10-25
+
+Saved checker1.0–1.3 reports now use explicit frozen capability and exact coverage
+contracts, independent of the current emitter version. Existing1.3 output is unchanged.
+Historical import, tampered coverage and simulated future-emitter regressions protect
+legacy anchors/chains before opening-endpoint integration. No1.4 capability, opening
+editor, project field or checker output expansion is delivered in this slice.
+
+
+## Runtime opening associations — 2026-10-25, v0.20.0
+
+HLS-106 adds explicit source opening-to-two-wall-endpoint authoring, all-three preview,
+guarded Save/remove/Cancel, private JSON/manual handoff and reversible history. Source
+changes leave records stale until explicit reconfirmation; missing/unsupported evidence
+stays unknown. Saved checker1.4 reports add bounded source evidence and a separate
+limited endpoint coverage row while retaining exact1.0–1.3 import compatibility.
+The operation changes declarations only; geometry/labels remain unchanged. Rooms,
+hosted doors/swings/clearance, physical survey and connected editing remain unmodeled.
+
+
+## Group scaling handle — 2026-10-25, v0.21.0
+
+HLS-107 adds a canvas handle for 2–100 eligible furniture/box overlays. It previews
+uniform scale around the shared pivot from the original selection snapshot and uses
+the existing explicit Apply/Cancel transaction. Whole-selection eligibility, pointer
+identity, cancellation, stale context, numeric bounds and pending-input guards apply.
+No new schema/domain operation or connected architectural editing is introduced.
+
+
+## Source-edit impact preview — 2026-10-25, v0.22.0
+
+HLS-107 adds diagnostic before/draft geometry and explicitly linked measurement/opening
+impact review in the existing source editor. Saved source references are not rewritten;
+missing or renumbered references remain unresolved and changed-source evidence stays
+stale. Draft changes invalidate the preview. Existing source locks, protected labels,
+reviewed Apply/Cancel and reversible history remain in force. Automatic connected
+neighbor movement and broader architectural semantics are still incomplete.
+
+
+## Stable native line edits — 2026-10-25, v0.22.1
+
+Numeric edits of native source lines retain their SVG element, stable segment ID,
+attributes and explicit measurement/opening references. Selection is bound to the
+current project, state and source; missing or ambiguous selections reject. Existing
+source review and reversible Apply protections remain. Saved source hashes still
+become stale and require explicit reconfirmation; no historical orphan is remapped
+and no neighbor is moved automatically. Nonlinear/multipart editing is unchanged.
+
+
+## Native polyline vertex edits — 2026-10-26, v0.23.0
+
+Numeric segment edits on native source polylines retain their element, point count,
+segment identities and attributes. Editing an endpoint updates its shared vertex,
+so adjacent segments stay connected and appear in source impact review. Explicit
+measurement/opening references stay attached with stale verification after source
+changes. Preview/Cancel do not save; Apply remains guarded and reversible. This
+does not infer connections between separate shapes or alter general path/polygon
+editing. Broader architectural editing remains partial.
+
+
+## Native polygon vertex edits — 2026-10-26, v0.24.0
+
+Numeric native-polygon edge edits preserve point count, attributes, edge identities
+and implicit closure, including edits to the final edge between last and first vertices.
+Changed adjacent edges appear in source impact review; saved measurement/opening
+references remain attached but stale. Repeated closing vertices and consecutive
+duplicates reject before and after edits; no normalization, merging or reordering
+occurs. Ambiguous owner IDs reject. Existing reviewed Apply/Cancel/Undo remains.
+This does not establish room boundaries, infer separate-shape connections or verify
+physical geometry. HLS-107 remains partial.
+
+
+## Absolute linear path edits — 2026-10-26, v0.25.0
+
+Numeric edits of supported native paths preserve syntactic shared vertices, independent
+subpaths, closing edges and globally ordered edge identities. Supported commands are
+absolute M/L/H/V/Z; the editor fully validates the command stream and proves its model
+against extracted endpoints before changing a vertex. Supported paths serialize as
+M/L/Z with the same edge order/count and native attributes. Relative commands, curves,
+unmatched text, degenerate edges and ambiguous owners reject rather than using the
+previous disconnected-segment fallback. Saved references remain attached but stale.
+This is a bounded editing subset; general path and cross-shape topology remain open.
+
+
+## Legacy path input integrity — 2026-10-27, v0.25.1
+
+The schematic path extractor now consumes its input lexically instead of skipping
+unmatched prefix, interior or suffix characters. Malformed source paths become
+unsupported evidence through existing review coverage. Valid absolute and relative
+linear commands retain coordinates, ordering and zero-based identities. Saved
+historical reports remain importable and are not rewritten. This fixes path-input
+integrity; broader architectural and physical verification remains incomplete.
+
+Checker1.4.1 identifies the corrected engine; saved1.0–1.4.0 reports retain their
+exact import contracts and history but require rerun for current checks even when
+source/state are unchanged. Saved-review UI and exported freshness reflect that
+distinction. Nonempty extracted paths also require an initial M/m; this is a bounded
+lexer/initial-command fix, not a claim of full SVG grammar validation.
+
+
+## Stroke footprint foundation — 2026-10-30
+
+HLS-106 preparation adds an isolated analytical line-stroke diagnostic, distinct from
+centerline topology. It requires explicit resolved drawing-unit styles and a common
+coordinate frame; supported axis-aligned lines use butt, square or round caps. Unsupported
+or numerically unrepresentable input remains unknown. Round-cap bounds alone are not
+used to infer a collision. No physical tolerance or passage clearance is established.
+
+The foundation is not loaded by the editor and does not alter current checker output,
+saved reports, project schema or source geometry. General joined paths, curves, style extraction,
+transforms and runtime review integration remain open. Independent tests/review and
+supported browser acceptance are required before exposing new review capabilities.
+See [supported model and integration gates](STROKE_FOOTPRINT.md).
+
+
+## Local right-angle join bound preparation — 2026-10-30
+
+HLS-106 preparation extends the isolated stroke module with explicit local right-angle
+join envelopes and conservative separation checks. Raw adjacent-point triples, resolved
+join styles/widths, common drawing frames and provenance are required. Miter, bevel and
+round joins are enclosed locally; no connectivity or whole-path geometry is inferred.
+
+Only strictly disjoint enclosing bounds establish drawing separation. Touching or
+intersecting bounds remain unknown, never proof of collision or contact. Results retain
+local scope and conservative quality; caller-supplied provenance is not verification.
+The editor, current checker and saved report/schema contracts are unchanged. Arbitrary
+angles, full paths/caps, SVG/CSS resolution, curves and browser acceptance remain open.
+[Model, numerical limits and integration gates](STROKE_FOOTPRINT.md).
+
+
+## Single-cubic envelope preparation — 2026-10-30
+
+HLS-106 preparation adds an isolated conservative envelope for one narrowly supported
+regular cubic curve plus explicit endpoint caps. Caller-supplied control points, common
+frame, resolved style and provenance are required. A monotone nonconstant control axis
+and nonzero endpoint tangents justify the supported regularity profile. The control
+bounds are deliberately inflated conservatively, not treated as an exact curve outline.
+
+A new separation helper proves only strictly disjoint bounds. Touching/intersecting
+bounds and unsupported curves remain unknown. Adjacent joins, whole paths, door sweeps,
+SVG/CSS resolution, physical clearance and browser acceptance remain outside this scope.
+The editor and saved checker/schema contracts are unchanged; the module is not loaded
+at runtime. [Proof, supported profile and remaining gates](STROKE_FOOTPRINT.md).
+
+
+## Read-only source stroke coverage preparation — 2026-10-30
+
+HLS-106 preparation now inventories an already parsed SVG tree before adapting a narrow
+native-line/single-edge-path subset to the isolated stroke calculations. Original IDs,
+derived references, style provenance and every unsupported candidate remain accounted
+for; complete inventory and complete stroke support are separate results. No source
+sanitization, ID generation or mutation occurs.
+
+The closed declared-source style subset covers bounded normal cascade and inheritance.
+External/dynamic/unresolved CSS, ambiguity, transforms, clipping, dashes, missing styles
+and multi-edge path topology remain unknown. Endpoint caps are never copied onto every
+path edge. Ordinary sources can legitimately have all-unknown stroke coverage; changing
+a plan to force support is not acceptance. Real browser XML/CSS conformance, runtime
+integration and saved checker/schema changes remain separate gates. No new site workflow
+is activated. [Model, evidence and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Local unsupported dash attribution — 2026-10-30
+
+The isolated source adapter now retains completely parsed `stroke-dasharray` and
+`stroke-dashoffset` declarations as local hazard provenance. Matching owners and their
+descendants remain unknown, including after overriding declarations; unaffected siblings
+can retain existing support. No dash values or defaults are implemented. Other unknown
+properties, unparsed selectors/rules and external/ambient context remain global unknowns.
+Inventory and support completeness remain separate; runtime and saved checker contracts
+are unchanged. [Attribution model and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Explicit initial-value provenance — 2026-10-30
+
+Within the isolated closed-source model, absent own opacity/vector-effect declarations
+now produce explicit normative initial-value evidence (1/none), including specification
+URI and source node. Explicit unsupported values, malformed syntax and source/context
+hazards remain unknown. Ancestor opacity still gates support; inherited stroke paint,
+width, cap and stroke opacity remain required. No source attributes, runtime integration
+or saved checker/schema changes are introduced. [Evidence and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Inherited stroke-opacity initial provenance — 2026-10-30
+
+The isolated source adapter now records normative stroke-opacity1 only after parsing
+the entire supported ancestor chain and proving no explicit declaration exists. Evidence
+identifies root origin and inheritance to the owner. Nearest explicit declarations keep
+their provenance; unsupported winners and context/hazard failures remain unknown. No
+paint, width or cap defaults, source writes, runtime or saved checker changes are added.
+[Inheritance evidence and limitations](SOURCE_STROKE_COVERAGE.md).
+
+
+## Inherited line-cap initial provenance — 2026-10-31
+
+The isolated source adapter records normative butt-cap evidence only after full supported
+ancestor-chain absence. Root origin and inheritance remain explicit; nearest declared
+round/square/butt values retain precedence and actual footprint behavior. Unsupported
+winners and existing hazards remain unknown. No paint/width defaults, source mutations,
+runtime loading or checker/schema changes occur. [Evidence and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Causal source-style diagnostics — 2026-10-31
+
+The isolated source adapter adds diagnostic-only per-property resolution states and
+cause/symptom summaries. Proven declaration absence, blocked fallback, unparsed chains,
+explicit source declarations and already modeled initials remain distinct; excluded
+content is not evaluated. Blocked fallback emits no modeled value. Existing support
+statuses, identities, descriptors, evidence and legacy fields remain unchanged. No new
+defaults or runtime/checker/schema changes occur. [Contract and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Empty declared paint integrity — 2026-10-31
+
+The isolated adapter now rejects empty/whitespace resolved stroke declarations as
+unsupported paint. Explicit invalid values cannot skip validation through a truthiness
+check or fall back to an ancestor/default. Valid child declarations, supported opaque
+paints and documented explicit-none exclusions retain their behavior. Fabricated
+regressions preserve source/provenance; runtime and saved checker contracts are unchanged.
+
+
+## Manual semantic operation envelope foundation — 2026-10-31
+
+HLS-101/104 preparation adds a separate versioned manual request for exactly one numeric
+overlay adjustment, reusing the guarded site proposal/apply helpers. Project/state/
+revision/source/target guards, current lock/visibility policy and full reviewed snapshot
+are recomputed; only one detached replacement is returned. No project mutation or
+arbitrary replacement, batch, label or rotation operation is accepted through this envelope.
+
+Existing v1 correction imports/capabilities are unchanged. This isolated module is not
+runtime-loaded. Browser preview/Cancel/Apply/Undo, persistence rollback and project
+round-trip acceptance remain separate integration gates. No authenticated provider,
+remote access, deployment or new permissions are provided. [Version and trust boundary](AGENT_CONTRACT.md).

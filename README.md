@@ -157,3 +157,114 @@ Private JSON exports preserve per-item visibility/locks and stable source object
 Existing source shapes without IDs receive identities once, without moving geometry;
 that migration is recorded. Selection highlights and invisible hit targets are excluded
 from SVG exports. Correction authors should preserve all unmodified element IDs.
+
+
+## Version 0.9.0
+
+Saved consistency reviews now retain findings and coverage, compare runs and identify
+stale state. Private backups preserve the latest 50 runs. Furniture and markups support
+exact numeric Preview / Apply / Cancel controls, with reversible history and fresh checks.
+Manual correction files use a [provider-neutral contract](docs/AGENT_CONTRACT.md) bound
+to project/state identity, preventing same-revision undo branches from accepting stale
+changes. Older correction files require a fresh handoff; old project backups remain
+supported. Export/import concurrency and source-lock integrity have regression coverage.
+See [workflow inventory](docs/WORKFLOWS.md) and the [canonical backlog](docs/BACKLOG.md)
+for partial deliveries and deployment gates. No authenticated service is deployed.
+
+
+## Version 0.10.0
+
+Project assets now stores private records linked to selected layout items, with
+manufacturer/model notes, field provenance and read-only knowledge-source references.
+Import private asset JSON through a findings preview; edits/deletions/imports support
+undo and full project backups retain the records. No source is fetched automatically.
+See [asset format](docs/ASSET_RECORDS.md) for deliberate imports, maintenance/issues,
+foreign-project rejection and current limits.
+
+Consistency review now explains unsupported CSS/coordinate contexts and handles large
+finding sets with explicit incomplete coverage. Existing plans and checker records remain
+compatible. All authenticated hosting, connector and collaboration gates remain open.
+
+
+## Version 0.10.1
+
+Transactional edits, imports, undo/redo, drags, legacy identity migration, reset and saved
+reviews now stop cleanly when browser metadata storage fails. Prior state and history
+remain intact for retry; an unsaved indicator stays visible for lightweight view-setting
+writes until storage succeeds. A display refresh error after a successful save cannot
+roll in-memory state behind the saved project. Export remains available for recovery.
+
+
+## Version 0.11.0
+
+Measure source spans lets you associate a declared source dimension with two explicit
+segment endpoints, preview the measured/expected difference and save a project-specific
+review threshold. The association is reversible, survives private backups and manual
+handoffs, and becomes unknown after source changes until reviewed again. Provisional
+units/calibration never produce a verified pass. This checks selected endpoint spans,
+not dimension chains, rooms, door relationships or construction. See
+[measurement bindings](docs/MEASUREMENT_ANCHORS.md). Original geometry and labels are
+unchanged. Checker 1.2 retains older saved reports.
+
+### Selected dimension-chain totals
+
+Review dimension chains uses 2–8 saved endpoint bindings, selected in order, and a
+separate overall-total binding. The declared span values are summed and compared with
+the declared total after supported metric conversion. Contiguous monotonic horizontal
+or vertical geometry, current source identity, verified units/calibration and an explicit
+project threshold are required for pass/fail. Missing, stale, provisional or unsupported
+inputs remain unknown. Preview/save/cancel/remove, undo, private backup and manual
+handoffs preserve the selected relationship. This does not infer rooms, levels or
+physical accuracy. See [chain model](docs/MEASUREMENT_CHAINS.md).
+
+Asset forms also support local maintenance schedules/history and issue resolution.
+Activity controls edit a draft; Save asset records the change and Cancel draft discards
+it. These are owner-entered records, with undo and private backup/handoff preservation,
+not automatic reminders or proof that physical maintenance occurred.
+
+One selected furniture or box overlay can be scaled proportionally about its center.
+Enter a percentage, preview the new outline and pivot, then Apply or Cancel. The same
+project/item guards, locks, undo and review recording apply. This preserves aspect ratio
+and metadata; it does not rotate items or modify connected architecture.
+
+Multiple overlay selections can move together using explicit X/Y offsets. Preview shows
+every member; Apply records one undoable change. If any member is stale, hidden, locked
+or unsupported, the whole proposal is rejected. Architecture and photo/comment selections
+are excluded.
+
+One furniture or box overlay can also rotate about its center using an explicit angle
+from -360 to 360 degrees. Preview rotates the shape and label together, preserves local
+width/depth and records the angle only on Apply. JSON backups, agent handoffs and SVG
+exports retain rotation. Existing items without explicit rotation activation retain their appearance. Connected architectural transforms remain unavailable.
+
+A selected furniture or box overlay has a canvas handle for centered uniform scaling.
+Drag to prepare a preview, then use Apply changes; releasing the pointer alone does not
+commit. Numeric controls remain available. The handle preserves aspect ratio and rotation;
+architectural items and groups do not use this control.
+
+Select 2–100 furniture/box overlays to preview uniform scaling around one shared pivot.
+The pivot comes from the complete selection bounds, including active rotation. Each
+item keeps its angle and proportions while its size and distance from the pivot scale
+together. Apply saves the whole group in one reversible change; unsupported, hidden or
+locked members prevent scaling the selection. Arrows, paint and source architecture do
+not use group scaling.
+
+Furniture/box groups can also rotate by a relative angle about the current selection
+bounds center. Preview shows every affected footprint and label; Apply creates one
+undoable revision. Local dimensions stay unchanged. Items with inactive historical
+rotation metadata require an individually reviewed rotation activation first. Each new
+group operation derives its center again; use Undo to restore an arbitrary rotation
+exactly, since the opposite angle can use a different bounds center for irregular groups.
+
+Explicit [opening endpoint associations](docs/OPENING_BINDINGS.md) can now be authored
+in the editor. Choose an opening segment and two wall endpoints, preview all three,
+then save or cancel. Records and source-bound checker findings survive private backup,
+manual handoff and Undo. Changed or unsupported source geometry stays unknown; this
+operation does not snap/cut walls, attach doors or verify physical construction.
+
+Eligible furniture/box groups also have a canvas scaling handle at their combined
+lower-right footprint bounds. Dragging prepares a common-pivot preview; release does
+not save. Use Apply scale or Cancel scale. All selected members are guarded together,
+and numeric group controls remain available for exact input.
+
+Source review includes an impact preview of changed segment identities and explicitly linked measurement/opening records. Original and draft geometry are shown separately. Missing or renamed references stay unresolved; the preview does not move neighbors or refresh saved verification.
