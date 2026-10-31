@@ -116,3 +116,78 @@ turn the handoff format into an authenticated live-provider adapter.
 Manual handoff envelopes retain the detached `openingBindings` collection alongside
 source identities and current consistency evidence. These declarations do not authorize
 geometry corrections; stale source associations require explicit reviewed reconfirmation.
+
+## Separate manual single-overlay operation foundation (not runtime-enabled)
+
+`src/correction-operations.js` defines a separate namespace,
+`operationContractVersion:1`. It is **not loaded by the editor**. It neither extends
+version1 correction imports nor advertises new operations in existing handoffs.
+`CorrectionContract.VERSION`, its source-replacement parser, legacy handling and
+capability list remain unchanged. This is an offline shared-operation foundation for
+HLS-101/104, not an authenticated adapter or an enabled import/apply workflow.
+
+Exactly one existing overlay can receive one numeric patch:
+
+```json
+{
+  "operationContractVersion": 1,
+  "operation": "adjust-single-overlay",
+  "projectId": "synthetic-project",
+  "stateToken": "synthetic-state",
+  "baseRevision": "v3",
+  "baseSourceHash": "synthetic-source-hash",
+  "targetRef": "item:synthetic-overlay",
+  "patch": {"x": 12.125, "y": -3.5},
+  "provider": "Codex or Claude, informational only"
+}
+```
+
+All fields except `provider` are required. Requests accept no operation arrays, arbitrary
+replacement objects, hidden/locked overrides or implied batch operations. Patch fields
+are a deliberately narrow subset of the existing `ItemAdjustments.propose` API:
+furniture/box overlays allow `x/y/w/h`, arrows `x/y/x2/y2`, and paint `x/y`. Labels,
+rotation/activation, uniform/group transforms and architectural source edits are outside
+this envelope. Numeric bounds, positive dimensions, active rotation geometry and target
+eligibility are checked by the actual shared helper, not reimplemented as new authority.
+
+`CorrectionOperations.propose(request,current)` returns a detached review object with
+`operationContractVersion`, detached `request`, and the actual shared numeric `proposal`.
+`CorrectionOperations.applyProposal(request,review,current)` recomputes the complete
+review against current context, compares every field including full original target
+metadata, proposed geometry, patch and unit description, and then calls the actual
+`ItemAdjustments.applyProposal` guard. It returns **one detached replacement item**;
+neither API mutates the project, increments revision/history, saves, renders or resolves
+comments. The host must retain the original request and reviewed snapshot separately.
+
+The trusted caller supplies `current` with `projectId`, `stateToken`, `revision`,
+`sourceHash`, `items`, `objectSettings`, `layers`, and optional `calibration`. Context
+keys are explicit; layer policy requires boolean `furniture` and `markup` values,
+with other known layer booleans optional. Current item IDs must be distinct. Item flags
+are validated through `LayerItems.validate/flags`; locks and hidden flags are recomputed
+at preview and apply. Visibility also honors `layers.furniture` for furniture or
+`layers.markup` for other overlays. Envelope data cannot override this policy. A valid
+request's derived proposal/replacement is identical to the existing site operation for
+the same target, patch and trusted context. Provider labels do not alter these results.
+
+Project/state/revision/source and explicit target guards reject stale or foreign work.
+The source hash is an **opaque caller-supplied identity assertion**, not a hash computed
+by this module, authentication or evidence of measured/physical correctness. The caller
+must supply the actual latest state and source identity. Manual unsigned JSON does not
+authenticate authors or prove user approval. A privileged caller replacing both the
+retained request and review supplies a new request; this pure library cannot authenticate
+such intent or detect collusion. Explicit review remains mandatory at integration.
+
+Unknown fields and malformed/non-plain JSON objects reject. Validation runs before JSON
+copying so nonfinite numbers, undefined/function/symbol values, accessors, non-enumerable
+fields, sparse/extended arrays, cycles and custom objects cannot be silently normalized
+into a different target snapshot. The bounded JSON profile limits depth to64, visited
+values to500,000 and arrays to50,000 entries; overlay inventory remains capped at5,000.
+Returned review/output metadata is detached from request/context and other copies.
+
+Fabricated offline tests verify Codex/Claude label equivalence, shared-helper result
+parity, foreign/stale/unknown target rejection, strict allowed fields, current lock/hidden
+and layer changes, full-target metadata guards, tampered preview rejection, immutable
+inputs and single-request isolation. **Browser preview/Cancel/Apply/Undo, persistence
+failure rollback and full project round-trip acceptance are pending.** No app startup,
+HTML, runtime capability, saved project schema or checker contract changes are included;
+no remote access, provisioning or new access rights are created.

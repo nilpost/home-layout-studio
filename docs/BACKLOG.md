@@ -611,3 +611,17 @@ unsupported paint. Explicit invalid values cannot skip validation through a trut
 check or fall back to an ancestor/default. Valid child declarations, supported opaque
 paints and documented explicit-none exclusions retain their behavior. Fabricated
 regressions preserve source/provenance; runtime and saved checker contracts are unchanged.
+
+
+## Manual semantic operation envelope foundation — 2026-10-31
+
+HLS-101/104 preparation adds a separate versioned manual request for exactly one numeric
+overlay adjustment, reusing the guarded site proposal/apply helpers. Project/state/
+revision/source/target guards, current lock/visibility policy and full reviewed snapshot
+are recomputed; only one detached replacement is returned. No project mutation or
+arbitrary replacement, batch, label or rotation operation is accepted through this envelope.
+
+Existing v1 correction imports/capabilities are unchanged. This isolated module is not
+runtime-loaded. Browser preview/Cancel/Apply/Undo, persistence rollback and project
+round-trip acceptance remain separate integration gates. No authenticated provider,
+remote access, deployment or new permissions are provided. [Version and trust boundary](AGENT_CONTRACT.md).
