@@ -100,7 +100,7 @@ function inspect(input,context){
    for(const property of core){const value=resolve(entry,property,!record.reasons.length);if(value)record.styleEvidence[property]=value;}
    const evidence=record.styleEvidence,stroke=evidence.stroke?.value.toLowerCase();if(stroke==='none'&&!record.reasons.length){record.status='excluded';record.exclusion='explicit-stroke-none';continue;}
    for(const property of core)if(!evidence[property])record.reasons.push('missing-resolved-style:'+property);
-   if(stroke&&!/^(?:#[0-9a-f]{3}|#[0-9a-f]{6}|black|white)$/.test(stroke))record.reasons.push('unsupported-stroke-paint');
+   if(evidence.stroke&&!/^(?:#[0-9a-f]{3}|#[0-9a-f]{6}|black|white)$/.test(stroke))record.reasons.push('unsupported-stroke-paint');
    if(evidence['stroke-opacity']&&numeric(evidence['stroke-opacity'].value)!==1)record.reasons.push('opaque-stroke-required');
    if(evidence['vector-effect']?.value.toLowerCase()!=='none')record.reasons.push('own-vector-effect-none-required');
    if(!record.reasons.length){const descriptor={kind:'line',a:record.a,b:record.b,frame:{id:context.frameId,units:'drawing',transform:'none'},style:{resolved:true,width:numeric(evidence['stroke-width'].value),cap:evidence['stroke-linecap'].value.toLowerCase(),vectorEffect:'none'},provenance:{geometry:context.sourceId+':'+context.sourceHash+':'+originalId,style:'declared-source style evidence, node '+index}};const footprint=root.StrokeFootprint.line(descriptor);if(footprint.status==='supported'){record.status='supported';record.descriptor=descriptor;record.footprint=footprint;}else record.reasons.push('stroke-foundation:'+footprint.reason);}

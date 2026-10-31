@@ -80,7 +80,11 @@ ordering follows [W3C SVG2 styling](https://www.w3.org/TR/SVG2/styling.html#Pres
 
 Inherited properties are `stroke`, `stroke-width`, `stroke-linecap` and
 `stroke-opacity`. Stroke paint is restricted to opaque three/six-digit hex, black or
-white; explicit `stroke:none` can be a documented non-stroked exclusion. Width must be
+white; explicit `stroke:none` can be a documented non-stroked exclusion. An explicitly
+empty or ASCII-whitespace presentation paint value remains declared and unsupported, and
+keeps the owner unknown, including when inherited; it is never treated as absent,
+`none` or a reason to insert a default. A valid nearer declaration retains normal
+cascade/inheritance precedence. Width must be
 unitless and positive, cap must resolve to butt/square/round, and stroke opacity must resolve to 1.
 The candidate must resolve its own `vector-effect:none` value; it is not inherited.
 Every paint ancestor, including root/group/owner, additionally needs its own resolved

@@ -602,3 +602,12 @@ explicit source declarations and already modeled initials remain distinct; exclu
 content is not evaluated. Blocked fallback emits no modeled value. Existing support
 statuses, identities, descriptors, evidence and legacy fields remain unchanged. No new
 defaults or runtime/checker/schema changes occur. [Contract and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Empty declared paint integrity — 2026-10-31
+
+The isolated adapter now rejects empty/whitespace resolved stroke declarations as
+unsupported paint. Explicit invalid values cannot skip validation through a truthiness
+check or fall back to an ancestor/default. Valid child declarations, supported opaque
+paints and documented explicit-none exclusions retain their behavior. Fabricated
+regressions preserve source/provenance; runtime and saved checker contracts are unchanged.
