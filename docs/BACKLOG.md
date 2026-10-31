@@ -583,3 +583,12 @@ identifies root origin and inheritance to the owner. Nearest explicit declaratio
 their provenance; unsupported winners and context/hazard failures remain unknown. No
 paint, width or cap defaults, source writes, runtime or saved checker changes are added.
 [Inheritance evidence and limitations](SOURCE_STROKE_COVERAGE.md).
+
+
+## Inherited line-cap initial provenance — 2026-10-31
+
+The isolated source adapter records normative butt-cap evidence only after full supported
+ancestor-chain absence. Root origin and inheritance remain explicit; nearest declared
+round/square/butt values retain precedence and actual footprint behavior. Unsupported
+winners and existing hazards remain unknown. No paint/width defaults, source mutations,
+runtime loading or checker/schema changes occur. [Evidence and limits](SOURCE_STROKE_COVERAGE.md).

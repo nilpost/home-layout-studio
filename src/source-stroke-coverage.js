@@ -5,6 +5,7 @@ const SVG='http://www.w3.org/2000/svg',NUM='[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:
 const inherited=['stroke','stroke-width','stroke-linecap','stroke-opacity'];
 const core=[...inherited,'vector-effect','opacity'];
 const initialValues={opacity:{value:'1',specURI:'https://www.w3.org/TR/css-color-4/#transparency'},'vector-effect':{value:'none',specURI:'https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty'}};
+const inheritedInitialValues={'stroke-opacity':{value:'1',specURI:'https://www.w3.org/TR/SVG2/painting.html#StrokeOpacityProperty'},'stroke-linecap':{value:'butt',specURI:'https://www.w3.org/TR/SVG2/painting.html#StrokeLinecapProperty'}};
 // These fully parsed declarations are evidence of an unsupported inherited stroke
 // condition, never supported values or declarations that a later rule can erase.
 const localHazards=['stroke-dasharray','stroke-dashoffset'];
@@ -41,7 +42,7 @@ function geometry(node,a,id){
 }
 function inspect(input,context){
  const owners=[],globalFindings=[],identityFindings=[],nodes=[],ids=new Map(),rules=[];let inventoryComplete=true,rootNode=input?.nodeType===9?input.documentElement:input,order=0;
- const result=()=>{const counts={candidates:owners.length,supported:0,unknown:0,excluded:0};for(const o of owners)counts[o.status]++;return {status:'inspected',inventoryComplete,strokeSupportComplete:inventoryComplete&&globalFindings.length===0&&counts.unknown===0&&identityFindings.length===0,counts,source:{sourceId:context?.sourceId??null,sourceHash:context?.sourceHash??null,frameId:context?.frameId??null},owners,globalFindings:[...new Set(globalFindings)],identityFindings,limitations:['Declared closed XML source model only; not computed browser CSS or verified XML/CSS parsing.','Complete inventory is distinct from complete stroke support.','Only normative opacity/vector-effect and fully absent inherited stroke-opacity initial values are modeled with explicit evidence; no source attributes, IDs, geometry, permissions or physical facts are invented.']};};
+ const result=()=>{const counts={candidates:owners.length,supported:0,unknown:0,excluded:0};for(const o of owners)counts[o.status]++;return {status:'inspected',inventoryComplete,strokeSupportComplete:inventoryComplete&&globalFindings.length===0&&counts.unknown===0&&identityFindings.length===0,counts,source:{sourceId:context?.sourceId??null,sourceHash:context?.sourceHash??null,frameId:context?.frameId??null},owners,globalFindings:[...new Set(globalFindings)],identityFindings,limitations:['Declared closed XML source model only; not computed browser CSS or verified XML/CSS parsing.','Complete inventory is distinct from complete stroke support.','Only normative opacity/vector-effect and fully absent inherited stroke-opacity/linecap initial values are modeled with explicit evidence; no source attributes, IDs, geometry, permissions or physical facts are invented.']};};
  if(!rootNode||rootNode.nodeType!==1||rootNode.localName!=='svg'||rootNode.namespaceURI!==SVG){inventoryComplete=false;globalFindings.push('invalid-svg-root');return result();}
  if(!context||typeof context!=='object'||Array.isArray(context)||Reflect.ownKeys(context).length!==4||!['sourceId','sourceHash','frameId','closedSource'].every(k=>Object.hasOwn(context,k))||!text(context.sourceId)||!text(context.sourceHash)||!text(context.frameId)||context.closedSource!==true)globalFindings.push('missing-explicit-closed-source-frame');
  if(!root.StrokeFootprint?.line||!root.LayoutGeometry?.linearPath)globalFindings.push('missing-foundation-module');
@@ -78,11 +79,11 @@ function inspect(input,context){
   const chain=[entry,...entry.ancestors];
   // Parse the complete inheritance chain before any inherited initial evidence.
   // Per-node initial values here would incorrectly shadow an explicit ancestor.
-  if(property==='stroke-opacity'){
+  if(Object.hasOwn(inheritedInitialValues,property)){
    const declared=chain.map(candidate=>({candidate,value:ownStyle(candidate)[property]}));
    for(const {candidate,value}of declared)if(value)return {...value,inherited:candidate!==entry};
    const origin=chain[chain.length-1];
-   if(allowInitial&&!globalFindings.length&&origin.node===rootNode)return {source:'svg-initial-value',property,value:'1',specURI:'https://www.w3.org/TR/SVG2/painting.html#StrokeOpacityProperty',nodeIndex:origin.index,inherited:origin!==entry,inheritanceChain:chain.slice().reverse().map(candidate=>candidate.index)};
+   if(allowInitial&&!globalFindings.length&&origin.node===rootNode)return {source:'svg-initial-value',property,...inheritedInitialValues[property],nodeIndex:origin.index,inherited:origin!==entry,inheritanceChain:chain.slice().reverse().map(candidate=>candidate.index)};
    return null;
   }
   for(const candidate of chain){const value=ownStyle(candidate)[property];if(value)return {...value,inherited:candidate!==entry};if(!inherited.includes(property))break;}return null;
