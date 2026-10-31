@@ -189,6 +189,45 @@ instances remain unknown. A validated explicit non-stroked owner can be excluded
 `stroke:none`. Identity/context failures still remain unknown rather than disappearing
 behind an exclusion. No source item is deleted or declared physically verified.
 
+## Additive causal style diagnostics
+
+Diagnostics explain the existing result; they do not rerun acceptance, recover failed
+checks or change any prior field. New keys are only `owner.styleResolution`,
+`owner.diagnosticSummary` and result-level `diagnosticSummary`. Existing statuses,
+counts, source/segment IDs, descriptors, `styleEvidence`, footprints, exclusions,
+reasons and limitations retain their original values.
+
+`styleResolution` has one entry per core property with `state` and
+`checkedNodeIndices`. Relevant chains are the owner alone for non-inherited properties
+and owner-to-root for inherited properties. Every relevant node must parse before a
+source-declaration absence is claimed. The states are:
+
+| State | Meaning |
+| --- | --- |
+| `declared` | A declaration selected by the bounded local cascade/inheritance model is observed; `declaration` copies its provenance. Unresolved global styles can still override it. This claims neither a valid/supported nor a computed value. Invalid or CSS-wide explicit declarations stay declared. |
+| `initial-modeled` | Existing legacy `styleEvidence` contains initial evidence and no final primary blocker remains. `evidence` is an independent copy, including any inheritance chain. |
+| `declaration-absent` | The entire relevant chain parsed without a declaration for a property that has no modeled initial (paint/width). `absenceProven:true` refers only to the supported source model. |
+| `fallback-blocked` | A modeled initial cannot be claimed. `blockers` identifies prior geometry, context, style or final identity hazards, or incomplete legacy evaluation. No value/evidence is supplied. `absenceProven:true` requires a completely parsed local chain with no unresolved global findings; global uncertainty instead sets it false. |
+| `chain-unparsed` | Relevant parsing failed; `failedNodeIndex` and `error` identify the failure. This makes no absence or initial-value claim. |
+| `not-evaluated` | Definition content or a documented explicit non-stroked exclusion does not require stroke-style evaluation. Definitions are recognized by ancestry even when an identity hazard leaves their final status unknown. |
+
+Diagnostics run after final derived-ID shadow/ambiguity checks. A late identity hazard
+can therefore leave original earlier initial `styleEvidence` intact while the new
+state is `fallback-blocked` with no modeled-value claim. This preserves historical
+evaluation exactly and prevents diagnostic evidence from implying final support.
+Unresolved global stylesheet/context findings never prove absence, even when bounded
+local nodes parse. Unsupported inline/ancestor syntax stays `chain-unparsed` for the
+relevant chain. No declaration or default is inserted into the source.
+
+Owner summaries separate `primaryBlockers` from `downstreamSymptoms` (the unchanged
+legacy `missing-resolved-style:*` reasons). A genuinely parsed paint/width absence
+adds `style-declaration-absent:<property>` as a primary cause; failed parsing adds
+`style-chain-unparsed:<property>`. Missing-style symptoms alone are not proof of a
+missing source declaration. The result summary counts each code per owner and each
+property state. It is a diagnostic inventory, not a new checker capability or a
+physical finding. Mutating diagnostic arrays/evidence cannot modify legacy evidence,
+other diagnostics or the input source.
+
 ## Verification and remaining gates
 
 Run `node tests/source-stroke-coverage.mjs`. Tests use **fabricated DOM-shaped trees**;

@@ -40,9 +40,14 @@ function geometry(node,a,id){
  const start=[numeric(tokens[1]),numeric(tokens[2])];if(extracted.length!==1||extracted[0].id!==id+':0'||JSON.stringify(extracted[0].a)!==JSON.stringify(start)||JSON.stringify(extracted[0].b)!==JSON.stringify(end))return {reason:'extractor-proof-mismatch',...diagnostic};
  return {a:start,b:end,segmentIds,segmentProvenance:'strict-single-edge-and-actual-extractor-proof'};
 }
+function diagnosticSummary(owners){
+ const primary=new Map(),symptoms=new Map(),states={};
+ for(const owner of owners){for(const code of owner.diagnosticSummary?.primaryBlockers||[])primary.set(code,(primary.get(code)||0)+1);for(const code of owner.diagnosticSummary?.downstreamSymptoms||[])symptoms.set(code,(symptoms.get(code)||0)+1);for(const d of Object.values(owner.styleResolution||{}))states[d.state]=(states[d.state]||0)+1;}
+ return {primaryBlockers:Array.from(primary,([code,count])=>({code,count})),downstreamSymptoms:Array.from(symptoms,([code,count])=>({code,count})),styleResolutionStates:states};
+}
 function inspect(input,context){
  const owners=[],globalFindings=[],identityFindings=[],nodes=[],ids=new Map(),rules=[];let inventoryComplete=true,rootNode=input?.nodeType===9?input.documentElement:input,order=0;
- const result=()=>{const counts={candidates:owners.length,supported:0,unknown:0,excluded:0};for(const o of owners)counts[o.status]++;return {status:'inspected',inventoryComplete,strokeSupportComplete:inventoryComplete&&globalFindings.length===0&&counts.unknown===0&&identityFindings.length===0,counts,source:{sourceId:context?.sourceId??null,sourceHash:context?.sourceHash??null,frameId:context?.frameId??null},owners,globalFindings:[...new Set(globalFindings)],identityFindings,limitations:['Declared closed XML source model only; not computed browser CSS or verified XML/CSS parsing.','Complete inventory is distinct from complete stroke support.','Only normative opacity/vector-effect and fully absent inherited stroke-opacity/linecap initial values are modeled with explicit evidence; no source attributes, IDs, geometry, permissions or physical facts are invented.']};};
+ const result=()=>{const counts={candidates:owners.length,supported:0,unknown:0,excluded:0};for(const o of owners)counts[o.status]++;return {diagnosticSummary:diagnosticSummary(owners),status:'inspected',inventoryComplete,strokeSupportComplete:inventoryComplete&&globalFindings.length===0&&counts.unknown===0&&identityFindings.length===0,counts,source:{sourceId:context?.sourceId??null,sourceHash:context?.sourceHash??null,frameId:context?.frameId??null},owners,globalFindings:[...new Set(globalFindings)],identityFindings,limitations:['Declared closed XML source model only; not computed browser CSS or verified XML/CSS parsing.','Complete inventory is distinct from complete stroke support.','Only normative opacity/vector-effect and fully absent inherited stroke-opacity/linecap initial values are modeled with explicit evidence; no source attributes, IDs, geometry, permissions or physical facts are invented.']};};
  if(!rootNode||rootNode.nodeType!==1||rootNode.localName!=='svg'||rootNode.namespaceURI!==SVG){inventoryComplete=false;globalFindings.push('invalid-svg-root');return result();}
  if(!context||typeof context!=='object'||Array.isArray(context)||Reflect.ownKeys(context).length!==4||!['sourceId','sourceHash','frameId','closedSource'].every(k=>Object.hasOwn(context,k))||!text(context.sourceId)||!text(context.sourceHash)||!text(context.frameId)||context.closedSource!==true)globalFindings.push('missing-explicit-closed-source-frame');
  if(!root.StrokeFootprint?.line||!root.LayoutGeometry?.linearPath)globalFindings.push('missing-foundation-module');
@@ -106,6 +111,31 @@ function inspect(input,context){
  const claims=new Map();for(const owner of owners)for(const id of owner.segmentIds){if(!claims.has(id))claims.set(id,[]);claims.get(id).push(owner);if(id!==owner.originalId&&ids.has(id)){owner.reasons.push('derived-segment-id-shadowed-by-original-id');identityFindings.push({code:'derived-segment-id-shadowed-by-original-id',id,ownerNodeIndex:owner.nodeIndex,nodeIndices:ids.get(id).map(e=>e.index)});for(const other of owners)if(other.originalId===id)other.reasons.push('original-id-shadows-derived-segment');}}
  for(const list of claims.values())if(list.length>1)for(const owner of list)owner.reasons.push('ambiguous-segment-id-claim');
  for(const owner of owners){owner.reasons=[...new Set(owner.reasons)];if(owner.reasons.length){owner.status='unknown';delete owner.descriptor;delete owner.footprint;delete owner.exclusion;}}
+ // Additive causal diagnostics run only after all legacy evaluation/identity gates.
+ // They cannot recover a failed check, alter evidence or change an owner's status.
+ for(const owner of owners){
+  const entry=nodes[owner.nodeIndex],primary=owner.reasons.filter(code=>!code.startsWith('missing-resolved-style:')),symptoms=owner.reasons.filter(code=>code.startsWith('missing-resolved-style:'));
+  owner.styleResolution={};
+  const skipped=entry.ancestors.some(e=>definitions.has(e.node.localName)&&e.node.namespaceURI===SVG)?'definition-content-excluded-before-style-resolution':owner.exclusion==='explicit-stroke-none'?'explicit-stroke-none-no-stroke-evaluation-required':null;
+  for(const property of core){
+   if(skipped){owner.styleResolution[property]={state:'not-evaluated',checkedNodeIndices:[],reason:skipped};continue;}
+   const chain=inherited.includes(property)?[entry,...entry.ancestors]:[entry],checked=[],parsed=[];let failure;
+   for(const candidate of chain){checked.push(candidate.index);try{parsed.push({candidate,value:ownStyle(candidate)[property]});}catch(e){failure={state:'chain-unparsed',checkedNodeIndices:checked,failedNodeIndex:candidate.index,error:e.message};break;}}
+   if(failure){owner.styleResolution[property]=failure;continue;}
+   const declared=parsed.find(({value})=>value&&value.source!=='svg-initial-value');
+   if(declared){owner.styleResolution[property]={state:'declared',checkedNodeIndices:checked,declaration:{...declared.value,inherited:declared.candidate!==entry}};continue;}
+   // Unresolved global styles/context cannot prove declaration absence, even if
+   // the bounded local chain happens to parse. Never invent a modeled value here.
+   if(globalFindings.length){owner.styleResolution[property]={state:'fallback-blocked',checkedNodeIndices:checked,absenceProven:false,blockers:[...new Set([...globalFindings,...primary])]};continue;}
+   const prior=owner.styleEvidence[property],initialCapable=Object.hasOwn(initialValues,property)||Object.hasOwn(inheritedInitialValues,property);
+   if(initialCapable){
+    if(prior?.source==='svg-initial-value'&&!primary.length){owner.styleResolution[property]={state:'initial-modeled',checkedNodeIndices:checked,evidence:{...prior,...(prior.inheritanceChain?{inheritanceChain:[...prior.inheritanceChain]}:{})}};}
+    else owner.styleResolution[property]={state:'fallback-blocked',checkedNodeIndices:checked,absenceProven:true,blockers:primary.length?[...primary]:['legacy-style-resolution-not-completed']};
+   }else owner.styleResolution[property]={state:'declaration-absent',checkedNodeIndices:checked,absenceProven:true};
+  }
+  const causal=[...primary];for(const [property,d]of Object.entries(owner.styleResolution)){if(d.state==='declaration-absent')causal.push('style-declaration-absent:'+property);if(d.state==='chain-unparsed')causal.push('style-chain-unparsed:'+property);}
+  owner.diagnosticSummary={primaryBlockers:[...new Set(causal)],downstreamSymptoms:symptoms};
+ }
  return result();
 }
 root.SourceStrokeCoverage=Object.freeze({inspect});

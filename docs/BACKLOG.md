@@ -592,3 +592,13 @@ ancestor-chain absence. Root origin and inheritance remain explicit; nearest dec
 round/square/butt values retain precedence and actual footprint behavior. Unsupported
 winners and existing hazards remain unknown. No paint/width defaults, source mutations,
 runtime loading or checker/schema changes occur. [Evidence and limits](SOURCE_STROKE_COVERAGE.md).
+
+
+## Causal source-style diagnostics — 2026-10-31
+
+The isolated source adapter adds diagnostic-only per-property resolution states and
+cause/symptom summaries. Proven declaration absence, blocked fallback, unparsed chains,
+explicit source declarations and already modeled initials remain distinct; excluded
+content is not evaluated. Blocked fallback emits no modeled value. Existing support
+statuses, identities, descriptors, evidence and legacy fields remain unchanged. No new
+defaults or runtime/checker/schema changes occur. [Contract and limits](SOURCE_STROKE_COVERAGE.md).
