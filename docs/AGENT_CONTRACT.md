@@ -188,6 +188,39 @@ Fabricated offline tests verify Codex/Claude label equivalence, shared-helper re
 parity, foreign/stale/unknown target rejection, strict allowed fields, current lock/hidden
 and layer changes, full-target metadata guards, tampered preview rejection, immutable
 inputs and single-request isolation. **Browser preview/Cancel/Apply/Undo, persistence
-failure rollback and full project round-trip acceptance are pending.** No app startup,
+failure rollback through an actual browser import/review workflow and full project
+round-trip acceptance are pending.** No app startup,
 HTML, runtime capability, saved project schema or checker contract changes are included;
 no remote access, provisioning or new access rights are created.
+
+
+### Offline transaction composition acceptance
+
+`tests/correction-operation-transaction.mjs` composes the isolated operation with actual
+production `mutate`, `validProject`, `saveLocal`, `restoreSnapshot`, `recordChange`,
+source identity/lock guards, and Undo/Redo handler bodies. Every domain module and all
+fabricated project/request/review objects run in the same VM realm, preserving the
+strict plain-JSON checks. Asset, photo/original metadata, bindings and saved report
+validators are production code. The source is unchanged, so the actual source-lock
+guard takes its normal early return; no SVG parser or geometry extraction is tested.
+Synthetic raster/PDF fields are inert metadata markers, not decoded media acceptance.
+Storage, rendering and text-only DOM notices are environment adapters. Actual clocks
+and UUID generation run; provider comparisons normalize only newly generated state
+identity, audit identity and timestamp.
+
+Accepted offline cases cover one target plus one audit/Undo snapshot and revision/token
+advance, complete persistence and unrelated-state preservation, real Undo/Redo, stale
+requests after commit and a divergent same-revision/source/target branch, rechecked
+identity/target/lock/item/layer visibility guards, storage rollback with exactly-one
+retry, the real2,000-record audit limit, and render failure after successful persistence.
+Undo intentionally restores an earlier exact state token, so an original request may
+be valid again at that exact snapshot; a new branch receives a fresh token. Static
+checks retain the existing v1 capability list and verify neither operation nor room
+foundation is loaded by app startup.
+
+The commit composition exists only inside this test. It is **not an import handler,
+user approval mechanism, browser preview/Cancel/Apply acceptance, SVG/media decoder,
+provider execution or deployed integration**. Actual browser review controls, rendering,
+import authorization, persistence failure handling through that future UI, and complete
+private project/export round trips remain separate unfulfilled gates. No production
+adapter, runtime feature, saved schema or checker capability is introduced.

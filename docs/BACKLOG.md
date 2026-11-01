@@ -640,3 +640,17 @@ This isolated module does not change app loading, authoring/persistence, saved p
 fields or checker versions/coverage. Passing declared schematic rings does not verify
 physical enclosure, room inventory, calibrated area, adjacency or construction accuracy.
 Browser integration remains pending and HLS-106 remains partial. [Contract and bounds](ROOM_BOUNDARIES.md).
+
+
+## Offline semantic operation transaction acceptance — 2026-11-01
+
+HLS-101/104 integration verification composes the isolated operation foundation through
+actual application mutation, validation, persistence, audit and Undo/Redo functions in
+a test-only VM harness. It checks exact target/unrelated-state preservation, stale and
+policy rejection, storage/audit-limit rollback, retry and post-persistence rendering
+failure behavior. Production transaction adapters and runtime imports remain unchanged.
+
+The harness uses fabricated data and explicit browser-boundary substitutes. This is
+offline transaction composition acceptance, not browser review, actual import workflow,
+SVG parsing/rendering, provider integration or live household verification. Those gates
+remain open. [Evidence and limitations](AGENT_CONTRACT.md).
