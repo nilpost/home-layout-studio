@@ -625,3 +625,18 @@ Existing v1 correction imports/capabilities are unchanged. This isolated module 
 runtime-loaded. Browser preview/Cancel/Apply/Undo, persistence rollback and project
 round-trip acceptance remain separate integration gates. No authenticated provider,
 remote access, deployment or new permissions are provided. [Version and trust boundary](AGENT_CONTRACT.md).
+
+
+## Explicit schematic room-boundary foundation — 2026-11-01
+
+HLS-106 preparation adds coordinate-free declarations of ordered directed segment
+references and a pure review of bounded orthogonal enclosure rings. Explicit current
+source/frame/extraction evidence is required. Exact continuity, closure, contact,
+overlap and retracing checks do not snap, infer rooms or add closing edges. Missing,
+stale, ambiguous or unsupported evidence remains unknown; known numerical violations
+stay visible beneath that status. Empty declarations never establish room coverage.
+
+This isolated module does not change app loading, authoring/persistence, saved project
+fields or checker versions/coverage. Passing declared schematic rings does not verify
+physical enclosure, room inventory, calibrated area, adjacency or construction accuracy.
+Browser integration remains pending and HLS-106 remains partial. [Contract and bounds](ROOM_BOUNDARIES.md).
