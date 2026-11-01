@@ -654,3 +654,16 @@ The harness uses fabricated data and explicit browser-boundary substitutes. This
 offline transaction composition acceptance, not browser review, actual import workflow,
 SVG parsing/rendering, provider integration or live household verification. Those gates
 remain open. [Evidence and limitations](AGENT_CONTRACT.md).
+
+
+## Ordinary gesture cancellation integrity — 2026-11-01, v0.25.2
+
+Cancelled ordinary canvas gestures now restore overlay/original/photo previews and
+clear transient gesture state without committing. Cancelled paint/arrow/box/furniture
+creation adds no item and consumes no ID. Revision, state token, audit, Undo/Redo and
+storage remain unchanged. Ordinary pointerup commits and storage-failure rollback keep
+their existing behavior; scale cancellation is unchanged.
+
+Production-function VM regressions reproduce the prior defect and verify the repair.
+Actual browser pointer delivery, capture and visual restoration remain unverified;
+no live project reload or household edit is implied. [Reproduction and limits](GESTURE_CANCELLATION.md).
