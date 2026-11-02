@@ -117,14 +117,14 @@ Manual handoff envelopes retain the detached `openingBindings` collection alongs
 source identities and current consistency evidence. These declarations do not authorize
 geometry corrections; stale source associations require explicit reviewed reconfirmation.
 
-## Separate manual single-overlay operation foundation (not runtime-enabled)
+## Separate manual single-overlay operation import
 
 `src/correction-operations.js` defines a separate namespace,
-`operationContractVersion:1`. It is **not loaded by the editor**. It neither extends
-version1 correction imports nor advertises new operations in existing handoffs.
+`operationContractVersion:1`. The editor loads it for a separate reviewed overlay
+import. It does not change the version1 source-replacement parser or capability list.
 `CorrectionContract.VERSION`, its source-replacement parser, legacy handling and
 capability list remain unchanged. This is an offline shared-operation foundation for
-HLS-101/104, not an authenticated adapter or an enabled import/apply workflow.
+HLS-101/104. It is not an authenticated adapter. The runtime workflow is described below.
 
 Exactly one existing overlay can receive one numeric patch:
 
@@ -189,8 +189,7 @@ parity, foreign/stale/unknown target rejection, strict allowed fields, current l
 and layer changes, full-target metadata guards, tampered preview rejection, immutable
 inputs and single-request isolation. **Browser preview/Cancel/Apply/Undo, persistence
 failure rollback through an actual browser import/review workflow and full project
-round-trip acceptance are pending.** No app startup,
-HTML, runtime capability, saved project schema or checker contract changes are included;
+round-trip acceptance require separate evidence.** The saved project schema and checker contract are unchanged;
 no remote access, provisioning or new access rights are created.
 
 
@@ -215,12 +214,45 @@ identity/target/lock/item/layer visibility guards, storage rollback with exactly
 retry, the real2,000-record audit limit, and render failure after successful persistence.
 Undo intentionally restores an earlier exact state token, so an original request may
 be valid again at that exact snapshot; a new branch receives a fresh token. Static
-checks retain the existing v1 capability list and verify neither operation nor room
-foundation is loaded by app startup.
+checks retain the existing v1 capability list and verify the room foundation remains
+absent from runtime startup. The operation module is now a required startup component.
 
-The commit composition exists only inside this test. It is **not an import handler,
+The test-only commit composition predates runtime integration. It is **not evidence of an import handler,
 user approval mechanism, browser preview/Cancel/Apply acceptance, SVG/media decoder,
 provider execution or deployed integration**. Actual browser review controls, rendering,
 import authorization, persistence failure handling through that future UI, and complete
-private project/export round trips remain separate unfulfilled gates. No production
-adapter, runtime feature, saved schema or checker capability is introduced.
+private project/export round trips remain separate gates. The later runtime integration
+is documented below; this test itself introduces no production adapter or schema change.
+
+
+### In-site single-overlay review
+
+Use **Review agent correction** to choose either an existing version1 source correction
+or a separate operation request. An explicit `operationContractVersion` routes to the
+overlay validator; malformed or unsupported operation envelopes cannot fall back to
+source replacement. The handoff text explains both formats without altering version1
+capabilities. Provider names remain informational.
+
+A dedicated review retains the original request and derived proposal separately. It
+shows the target, readable numeric changes and unit limitations with a visible geometry preview.
+Opening the review does not modify saved geometry. Cancel, Escape and dialog close
+discard the preview. Apply recomputes current project/state/revision/source identity,
+full target snapshot and lock/visibility policy before using the existing transaction,
+audit and persistence path. Storage failure preserves geometry and history. Successful
+application offers Undo and reruns consistency review; it resolves no comments.
+
+Only the bounded numeric fields above are supported. Architectural edits, multi-item
+requests, labels, rotation and permissions remain outside this operation format.
+Fabricated workflow tests exercise the actual import/review handlers; native browser
+and private-project acceptance must be reported separately from these offline checks.
+
+
+Fabricated native-browser acceptance (2026-11-02) verified file import, visible
+current/proposed geometry and readable numeric changes, Cancel, native Escape, explicit
+Apply (one revision and audit), stale-request rejection, Undo, export and reload.
+Cancel's complete export matched its input apart from export metadata. Undo restored
+the exact original project state while retaining the newer saved consistency report,
+as intended by report history. A pre-existing generic test project was exported before
+testing and restored afterward. This does not establish current household-project
+round-trip/media acceptance or actual-browser storage-quota-failure acceptance; those
+remain separate from the verified fabricated workflow and VM rollback tests.

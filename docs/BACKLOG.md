@@ -667,3 +667,17 @@ their existing behavior; scale cancellation is unchanged.
 Production-function VM regressions reproduce the prior defect and verify the repair.
 Actual browser pointer delivery, capture and visual restoration remain unverified;
 no live project reload or household edit is implied. [Reproduction and limits](GESTURE_CANCELLATION.md).
+
+
+## Manual overlay correction review integration — 2026-11-02
+
+HLS-101/104 now routes separate single-overlay numeric operation requests from the
+existing correction importer into a dedicated preview/Apply/Cancel review. Retained
+request and proposal guards recheck current identity, target metadata and policy before
+the existing reversible transaction; no comment resolution or source rewrite occurs.
+Version1 source correction imports and their capability contract remain unchanged.
+
+This is a bounded local workflow, not provider authentication, connected architectural
+editing or acceptance of the full backlog. Fabricated handler and isolated browser
+checks are recorded separately; the current private household project must be freshly
+exported before any reload or edit. See [operation contract](AGENT_CONTRACT.md).
