@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const domains={LayoutGeometry:'geometry',ReviewHistory:'review-history',OriginalOverlay:'original-overlay',LayerItems:'layer-items',ConsistencyReview:'consistency-review',CorrectionContract:'correction-contract',CorrectionOperations:'correction-operations',OverlayFootprint:'overlay-footprint',ItemAdjustments:'item-adjustments',GeometryCoverage:'geometry-coverage',AssetRecords:'asset-records',MeasurementAnchors:'measurement-anchors',MeasurementChains:'measurement-chains',OpeningBindings:'opening-bindings'};
+const domains={LayoutGeometry:'geometry',ReviewHistory:'review-history',OriginalOverlay:'original-overlay',LayerItems:'layer-items',ConsistencyReview:'consistency-review',CorrectionContract:'correction-contract',CorrectionOperations:'correction-operations',OverlayFootprint:'overlay-footprint',ItemAdjustments:'item-adjustments',GeometryCoverage:'geometry-coverage',AssetRecords:'asset-records',MeasurementAnchors:'measurement-anchors',MeasurementChains:'measurement-chains',OpeningBindings:'opening-bindings',RoomBoundaries:'room-boundaries'};
 // Execute the complete app IIFE and actual domain validators. Substitute only the four
 // post-load browser boundaries so rejection must occur in the real startup control flow.
 let startup=app;
@@ -55,7 +55,12 @@ for(const name of Object.keys(domains)){
  const result=boot({missing:name,saved:validSaved});assertBlocked(result,validSaved,new RegExp(name));
  assert.equal(result.metrics.reads,0,'Missing components must block before reading project storage');
 }
+const syntheticRoom={id:'room-a',projectId:'synthetic-project',sourceHashAtCreation:'synthetic-source',frameId:'svg-root-user-space',intent:'enclosure',edges:['north','east','south','west'].map(segmentId=>({segmentId,startEndpoint:'a'}))};
 const invalidSaved=[
+ JSON.stringify(fixture({roomBoundaries:null})),
+ JSON.stringify(fixture({roomBoundaries:[{...syntheticRoom,projectId:'foreign-project'}]})),
+ JSON.stringify(fixture({roomBoundaries:[{...syntheticRoom,edges:syntheticRoom.edges.slice(0,3)}]})),
+ JSON.stringify(fixture({roomBoundaries:[syntheticRoom],projectId:undefined})),
  '',
  '{malformed synthetic JSON',
  JSON.stringify(fixture({schemaVersion:99})),
@@ -68,7 +73,8 @@ const invalidSaved=[
 ];
 for(const saved of invalidSaved){const result=boot({saved});assertBlocked(result,saved,/saved project|could not be opened|unavailable/i);assert.equal(result.metrics.reads,1);}
 assertBlocked(boot({saved:validSaved,readFailure:true}),validSaved,/storage read unavailable/i);
-for(const saved of [null,validSaved,validOpeningSaved]){
+const validRoomSaved=JSON.stringify(fixture({roomBoundaries:[syntheticRoom]}));
+for(const saved of [null,validSaved,validOpeningSaved,validRoomSaved]){
  const result=boot({saved});
  for(const metric of ['migrations','wires','tools','renders'])assert.equal(result.metrics[metric],1,'Healthy startup reaches '+metric);
  assert.equal(result.metrics.loadedName,saved?'Synthetic saved project':'Untitled home');

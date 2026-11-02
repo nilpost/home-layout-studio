@@ -1,10 +1,11 @@
 # Explicit schematic room-boundary foundation
 
-`RoomBoundaries` evaluates an explicitly declared ordered enclosure ring. It is isolated
-from the editor: no HTML/app loading, saved project schema, checker version/coverage or
-runtime capability changes. It never infers a room, edits a source, measures physical
-area, associates a label or chooses room intent. Browser authoring/persistence/report
-acceptance and all actual household declarations remain unverified.
+`RoomBoundaries` evaluates an explicitly declared ordered enclosure ring. The editor
+provides a separate authoring and review dialog using this existing evaluator. It never
+infers a room, edits a source, measures physical area, associates a label or chooses room
+intent. The existing consistency checker version and coverage contract are unchanged;
+this is a standalone review of supplied declarations. Actual household declarations
+remain a separate acceptance step.
 
 ## Declarations contain identity and intent, not coordinates
 
@@ -134,3 +135,53 @@ fabricated topology/provenance/unknown matrix. Tests include both windings, conc
 collinear continuations, exact tiny gaps, contact/overlap/retrace cases, mixed-frame
 rejection, retained violations under unknown, explicit limits and frozen isolation.
 No existing opening-binding epsilon, consistency checker or source contract is changed.
+
+
+## Site authoring and private persistence
+
+Open **Review declared boundaries** to choose a saved declaration or create a new one.
+Set the intended use, then choose each boundary segment and traversal direction in
+deliberate order. Preview shows the bounded directed-edge diagram and pass/fail/unknown
+findings. No edges are reordered, reversed, snapped or inserted automatically. An
+opening span can close a schematic outline without establishing physical enclosure.
+
+Preview is transient. Explicit Save/remove uses the existing project transaction,
+audit and Undo/Redo; source geometry and source dimension labels are unchanged. A
+reviewed draft is bound to current project identity, state and source. Replacing the
+source leaves saved declarations associated with their earlier hash; a fresh reviewed
+association must be explicit. Missing or changed references remain visible as unknown.
+
+Optional `roomBoundaries` metadata is validated using the existing module, retained
+in private project backup/import and copied into manual handoffs. Older projects without
+the field remain supported. No coordinates or computed physical areas are stored in
+declarations. The evaluator result is separate from saved consistencyReports and does
+not silently add coverage to the existing checker version.
+
+The site supplies current geometry through its guarded source extractor and additional
+source-shape provenance checks. It carries upstream unsupported evidence rather than
+assuming complete extraction; transformed, ambiguous, malformed or unsupported source
+geometry cannot become a supported root-frame edge merely by being selected.
+
+Fabricated production-function tests and browser acceptance must be distinguished
+from actual household review. Survey accuracy, physical enclosure, calibrated areas,
+room discovery, adjacency and complete architectural/code review remain outside this
+feature. Test data and screenshots use fabricated geometry only.
+
+
+### Verified local acceptance — 2026-11-02
+
+Forty production-function workflow cases plus independent probes cover guarded source
+extraction, legacy/foreign/malformed imports, handoff preservation, source/state/policy
+changes, Save/remove/Undo, storage rollback, delayed dialog events and visible limit/
+display failures. Additional source-proof failures conservatively suppress numerical
+coordinates for all extracted segments; this loses supported-subset detail deliberately
+rather than producing trusted evidence from an unproved source context.
+
+Native browser acceptance with fabricated native-line geometry verified explicit ordered
+selection, a passing ring diagram, Cancel, Save, handoff, export/import/reload, removal
+and Undo. Full exports prove Cancel/Undo exact preservation and Save changing only
+declarations/revision/state token/audit; source bytes and unrelated data are unchanged.
+A reversed edge fails, open-plan intent remains unknown, and changed-source declarations
+remain unknown with Save disabled until a fresh preview. Native Escape saves nothing.
+Previous generic browser test data was preserved and restored. No actual household room
+was declared or certified.

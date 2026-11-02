@@ -256,3 +256,17 @@ as intended by report history. A pre-existing generic test project was exported 
 testing and restored afterward. This does not establish current household-project
 round-trip/media acceptance or actual-browser storage-quota-failure acceptance; those
 remain separate from the verified fabricated workflow and VM rollback tests.
+
+
+Additional fabricated browser acceptance verified box width, arrow endpoint and paint
+position requests: each rendered current/proposed geometry and readable fields, applied
+one revision, and returned to the original revision with Undo. Furniture acceptance is
+recorded above. These checks cover supported overlay kinds, not connected architecture.
+
+
+Private handoff payloads now also retain optional coordinate-free `roomBoundaries`
+declarations (see [boundary contract](ROOM_BOUNDARIES.md)). Their inclusion neither
+adds a correction operation nor changes version1 capability/permission claims.
+Native fabricated browser capacity testing rejected an oversized metadata-only project
+import while preserving the previous full project. This verifies actual import storage
+rejection, separately from VM-tested operation-save quota rollback.

@@ -74,7 +74,7 @@ test('source correction v1 still opens existing source review with comment choic
 });
 test('runtime loading, file input and handoff guidance expose separate manual operation namespace',()=>{
  assert(html.indexOf('src/correction-operations.js')>html.indexOf('src/item-adjustments.js'));assert(html.indexOf('src/correction-operations.js')<html.indexOf('src/app.js'));
- assert(app.includes("$('correction-file').onchange=()=>fileText($('correction-file'),reviewImportedCorrection)"));assert(app.includes('function wire(){wireOverlayOperations();'));assert(code('handoff').includes('separate operationContractVersion 1 namespace'));assert(code('handoff').includes('furniture/rect x,y,w,h; arrow x,y,x2,y2; paint x,y'));
+ assert(app.includes("$('correction-file').onchange=()=>fileText($('correction-file'),reviewImportedCorrection)"));assert(code('wire').includes('wireOverlayOperations();'));assert(code('handoff').includes('separate operationContractVersion 1 namespace'));assert(code('handoff').includes('furniture/rect x,y,w,h; arrow x,y,x2,y2; paint x,y'));
  const h=harness();assert.deepEqual(plain(h.run('CorrectionContract.CAPABILITIES.operations')),['replace-base-svg','resolve-existing-comments']);assert.equal(h.run('CorrectionContract.VERSION'),1);
 });
 for(const [name,item,patch]of [

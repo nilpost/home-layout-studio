@@ -52,3 +52,9 @@ This is code-path acceptance only. Actual browser event dispatch, native pointer
 capture/release behavior, visual restoration and delivery to the currently open private
 project remain unverified. No browser reload or private-project edit is part of this
 repair; no new tool, permission, persisted schema or gesture workflow is introduced.
+
+
+A later attempt to test native touch cancellation through the supported in-app browser
+development capability reported that touch input dispatch is unavailable. No alternate
+access or bypass was used. Production-function cancellation tests remain accepted;
+native pointer-cancel delivery and visual restoration remain unverified.

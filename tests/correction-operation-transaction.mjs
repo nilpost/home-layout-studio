@@ -91,10 +91,10 @@ test('Codex and Claude labels produce equivalent project results and unchanged v
  assert.deepEqual(outcomes[0],outcomes[1]);
 });
 
-test('manual operations load at runtime while room foundation remains isolated',()=>{
+test('manual operations and room declarations load at runtime',()=>{
  const required=app.match(/requiredDomains=\[([^\]]+)\]/)?.[1];assert(required,'Missing runtime domain declaration');
  assert(html.includes('correction-operations.js'));assert(required.includes('CorrectionOperations'));
- assert(!html.includes('room-boundaries.js'));assert(!required.includes('RoomBoundaries'));assert(!app.includes('RoomBoundaries'));
+ assert(html.includes('room-boundaries.js'));assert(required.includes('RoomBoundaries'));assert(app.includes('RoomBoundaries'));
 });
 
 const failures=[];for(const {name,run}of testCases){try{run();}catch(error){failures.push(name);console.error('FAIL: '+name+'\n'+error.stack);}}assert.equal(failures.length,0,failures.length+' transaction acceptance failures: '+failures.join('; '));

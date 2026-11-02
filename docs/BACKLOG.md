@@ -681,3 +681,14 @@ This is a bounded local workflow, not provider authentication, connected archite
 editing or acceptance of the full backlog. Fabricated handler and isolated browser
 checks are recorded separately; the current private household project must be freshly
 exported before any reload or edit. See [operation contract](AGENT_CONTRACT.md).
+
+
+## Explicit boundary authoring and review — 2026-11-02
+
+HLS-106 now exposes deliberate ordered segment/direction declarations in a standalone
+site review, using the existing schematic topology evaluator. Preview precedes explicit
+Save/remove; project/source/state guards, reversible transactions and optional persisted
+metadata preserve source geometry and legacy project compatibility. Missing, stale or
+unsupported evidence remains unknown. This does not establish room discovery, measured
+area, physical enclosure, adjacency or complete architectural review; existing saved
+consistency checker capabilities remain unchanged. See [boundary review](ROOM_BOUNDARIES.md).
