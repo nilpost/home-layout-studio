@@ -692,3 +692,20 @@ metadata preserve source geometry and legacy project compatibility. Missing, sta
 unsupported evidence remains unknown. This does not establish room discovery, measured
 area, physical enclosure, adjacency or complete architectural review; existing saved
 consistency checker capabilities remain unchanged. See [boundary review](ROOM_BOUNDARIES.md).
+
+
+## Read-only saved-data recovery — 2026-11-02
+
+HLS-101 adds a separate same-origin backup page that can inspect and export saved
+project metadata and all referenced private media before loading editor startup or
+migrations. It never repairs, clears or rewrites saved data. Missing media, unsupported
+read-only database discovery, corrupt metadata and concurrent project changes prevent
+a complete backup. This is a local recovery workflow, not remote backup or authentication.
+See [recovery scope and verification](RECOVERY.md).
+
+
+Verified recovery acceptance includes native browser backup with referenced photo and
+original media, exact normal/recovery export comparison and cross-tab invalidation.
+Legacy startup retains optional-field absence instead of adding an empty declaration
+collection. This completes a bounded local recovery slice; the broader HLS-101 and
+remaining deployment/workflow requirements remain partial.

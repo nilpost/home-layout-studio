@@ -6,7 +6,7 @@ service. Private content remains on the current device until deliberate export/t
 | Workflow | Site controls | Boundary |
 | --- | --- | --- |
 | Start/open project | Reset demo / Import JSON | Export first; project import replaces the current document |
-| Preserve/restore | Export JSON / Import JSON | Embedded photos/originals are private; reports, identities and history travel with backup |
+| Preserve/restore | Export JSON / Import JSON; Back up saved browser data | Embedded photos/originals are private; reports, identities and history travel with backup |
 | Import plan/reference | Import architectural SVG / Add original PDF or image | SVG replacement clears annotations; original reference alignment is visual |
 | Photos/camera views | Add reference photos / Place and aim / numeric view controls | New photos are unplaced; physical position is supplied by the user |
 | Architecture | Wall/window coordinate proposal / source editor | Explicit source review; schematic checks; preserve dimensions and locks |

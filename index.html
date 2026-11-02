@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Home Layout Studio</title>
   <meta name="description" content="Local-first SVG floor-plan editor with comments, annotation layers, and review handoff." />
-  <link rel="stylesheet" href="src/styles.css?v=0.27.0" />
+  <link rel="stylesheet" href="src/styles.css?v=0.28.1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
-  <script src="src/geometry.js?v=0.27.0" defer></script>
-  <script src="src/review-history.js?v=0.27.0" defer></script>
-  <script src="src/original-overlay.js?v=0.27.0" defer></script>
-  <script src="src/layer-items.js?v=0.27.0" defer></script>
-  <script src="src/consistency-review.js?v=0.27.0" defer></script>
-  <script src="src/correction-contract.js?v=0.27.0" defer></script>
-  <script src="src/overlay-footprint.js?v=0.27.0" defer></script>
-  <script src="src/item-adjustments.js?v=0.27.0" defer></script>
-  <script src="src/correction-operations.js?v=0.27.0" defer></script>
-  <script src="src/geometry-coverage.js?v=0.27.0" defer></script>
-  <script src="src/asset-records.js?v=0.27.0" defer></script>
-  <script src="src/measurement-anchors.js?v=0.27.0" defer></script>
-  <script src="src/measurement-chains.js?v=0.27.0" defer></script>
-  <script src="src/opening-bindings.js?v=0.27.0" defer></script>
-  <script src="src/room-boundaries.js?v=0.27.0"></script>
-  <script src="src/app.js?v=0.27.0" defer></script>
+  <script src="src/geometry.js?v=0.28.1" defer></script>
+  <script src="src/review-history.js?v=0.28.1" defer></script>
+  <script src="src/original-overlay.js?v=0.28.1" defer></script>
+  <script src="src/layer-items.js?v=0.28.1" defer></script>
+  <script src="src/consistency-review.js?v=0.28.1" defer></script>
+  <script src="src/correction-contract.js?v=0.28.1" defer></script>
+  <script src="src/overlay-footprint.js?v=0.28.1" defer></script>
+  <script src="src/item-adjustments.js?v=0.28.1" defer></script>
+  <script src="src/correction-operations.js?v=0.28.1" defer></script>
+  <script src="src/geometry-coverage.js?v=0.28.1" defer></script>
+  <script src="src/asset-records.js?v=0.28.1" defer></script>
+  <script src="src/measurement-anchors.js?v=0.28.1" defer></script>
+  <script src="src/measurement-chains.js?v=0.28.1" defer></script>
+  <script src="src/opening-bindings.js?v=0.28.1" defer></script>
+  <script src="src/room-boundaries.js?v=0.28.1"></script>
+  <script src="src/app.js?v=0.28.1" defer></script>
 </head>
 <body>
 <div class="shell" data-panel="photos">
@@ -36,6 +36,7 @@
       <div class="section-label">PROJECT</div>
       <label for="project-name" class="form-label">Project title</label><input id="project-name" value="Untitled home" maxlength="120" />
       <div class="muted fine">All changes stay on this device unless you explicitly export or send them.</div>
+      <p class="fine"><a href="recovery.html" target="_blank" rel="noopener">Back up saved browser data</a></p>
       <div class="separator"></div>
       <button class="button full" id="manage-assets">Project assets</button><p class="fine muted">Private records, linked items and read-only knowledge references.</p>
       <div class="section-label">TOOLS</div>
