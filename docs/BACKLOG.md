@@ -762,3 +762,12 @@ HLS-101 removal feedback honors failed transactions: storage/lock/validation rej
 keeps the original, tool/history and error visible, rather than announcing success.
 Successful retry remains one reversible action. Production-function regressions pass;
 native acceptance remains separate. See [removal scope](ORIGINAL_REMOVAL.md).
+
+
+## Landmark alignment commit feedback — 2026-11-03
+
+HLS-101 landmark completion reports success only after transaction commit. Rejected
+alignment preserves the original/state/history and exposes its error in the landmark
+panel, keeping existing fit/cancellation/Undo behavior. Fabricated production workflows
+verify this scope; native input and physical accuracy remain separate. See
+[landmark workflow](LANDMARK_WORKFLOW.md).
