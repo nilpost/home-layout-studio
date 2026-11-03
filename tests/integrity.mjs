@@ -125,4 +125,42 @@ function deferred(){let resolve;const promise=new Promise(done=>resolve=done);re
  const c=sandbox({DOMParser:class{parseFromString(){return {querySelectorAll:selector=>selector.split(',').some(s=>s.trim()==='[data-dimension-value] text')?[{textContent:' 1200 '}]:[]};}}});load(c,'dimensionTexts');
  assert.deepEqual(Array.from(c.dimensionTexts('<svg><g data-dimension-value="1200"><text>1200</text></g></svg>')),['1200'],'Semantic dimension labels require the same preservation check as legacy labels');
 }
-console.log('PASS: export snapshot, stale imports, branch identities, project-isolated review retention, atomic history limits, lock dependencies and semantic dimension preservation.');
+
+// Imports preflight their shared item/comment allocator before reading or writing media.
+function allocatorContext(){
+ const writes={media:0,metadata:0},ui={replaceChildren(){}};
+ const c=sandbox({cancelLandmarkMatch(){},safeSVG:s=>s,DOMParser:class{parseFromString(){return {}; }},editableNodes:()=>[{id:'stable'}],XMLSerializer:class{serializeToString(s){return s;}},sourceWithIds:s=>s,parseVB:()=>[0,0,100,100],normalizedLayers:l=>l,selectedRefs:new Set(['item:before']),selected:'before',zoom:2,photoStore:async()=>{writes.media++;},saveLocal(){writes.metadata++;},photoPointerUp:()=>false,$:()=>ui,round:n=>n,tool:'rect'});
+ load(c,'validProject','importJSON','mutate','pointerUp');c.writes=writes;
+ return c;
+}
+function rectangle(id){return {id,kind:'rect',x:0,y:0,w:10,h:10};}
+function liveSnapshot(c){return JSON.stringify({state:c.state,history:c.history,future:c.future,selected:c.selected,selectedRefs:[...c.selectedRefs],zoom:c.zoom});}
+for(const counter of [9007199254740992,0,-1,1.5,9007199254740991,1e100,null,true,{},'1.5','1e3','Infinity','-1','']){
+ const c=allocatorContext(),before=liveSnapshot(c),input={...fixture(),nextId:counter,photos:[{id:'photo-a',name:'Fabricated',dataUrl:'data:image/png;base64,AAAA'}]};
+ await assert.rejects(c.importJSON(JSON.stringify(input)),/counter.*invalid|counter.*exhausted/i,'Invalid counter must reject: '+JSON.stringify(counter));
+ assert.equal(liveSnapshot(c),before,'Invalid counter must preserve live state and UI/history');
+ assert.deepEqual(c.writes,{media:0,metadata:0},'Invalid counter must reject before any media or metadata write');
+}
+for(const id of ['item-9007199254740990','item-9007199254740991','item-9007199254740992','item-'+('9'.repeat(400))]){
+ const c=allocatorContext(),before=liveSnapshot(c),input={...fixture(),nextId:1,items:[rectangle(id)],photos:[{id:'photo-a',name:'Fabricated',dataUrl:'data:image/png;base64,AAAA'}]};
+ await assert.rejects(c.importJSON(JSON.stringify(input)),/suffix.*invalid|suffix.*exhausted/i);
+ assert.equal(liveSnapshot(c),before,'Unusable suffix must preserve state, UI and history');assert.deepEqual(c.writes,{media:0,metadata:0});
+}
+for(const counter of [undefined,1,'0002',40]){
+ const c=allocatorContext(),input={...fixture(),...(counter===undefined?{}:{nextId:counter}),items:[rectangle('item-12')],comments:[{id:'comment-20',n:1,x:1,y:1,text:'Fabricated note'}],photos:[{id:'photo-999999999999999999999999',name:'Fabricated UUID namespace',dataUrl:'data:image/png;base64,AAAA'}]};
+ await c.importJSON(JSON.stringify(input));const first=Math.max(Number(counter)||1,21);assert.equal(c.state.nextId,first);
+ for(let i=0;i<2;i++){c.active={type:'draw',start:{x:20,y:20},p:{x:40,y:40},color:'#123456'};c.pointerUp({type:'pointerup'});}
+ assert.deepEqual(Array.from(c.state.items.slice(-2),o=>o.id),['item-'+first,'item-'+(first+1)],'Actual native pointer commits must allocate distinct IDs');
+ assert.equal(c.state.nextId,first+2);assert.equal(c.writes.metadata,3,'Import and two actual creations persist exactly once each');assert.equal(c.writes.media,1,'Photos use UUID namespace and do not change object allocator');
+}
+{
+ const c=allocatorContext();await c.importJSON(JSON.stringify({...fixture(),nextId:Number.MAX_SAFE_INTEGER-2}));
+ c.active={type:'draw',start:{x:20,y:20},p:{x:40,y:40},color:'#123456'};c.pointerUp({type:'pointerup'});
+ assert.equal(c.state.nextId,Number.MAX_SAFE_INTEGER-1);const before=liveSnapshot(c),writes=c.writes.metadata;
+ c.active={type:'draw',start:{x:20,y:20},p:{x:40,y:40},color:'#123456'};c.pointerUp({type:'pointerup'});
+ assert.equal(liveSnapshot(c),before,'An allocation reaching an exhausted counter must roll back rather than persist an unsafe counter or duplicate ID');assert.equal(c.writes.metadata,writes);assert.match(c.notices.at(-1),/counter.*exhausted/i);
+}
+for(const counter of [9007199254740991,9007199254740992,1.25,0]){
+ const c=allocatorContext(),before=liveSnapshot(c);assert.equal(c.mutate(()=>{c.state.nextId=counter;}),false);assert.equal(liveSnapshot(c),before);assert.equal(c.writes.metadata,0,'Mutation cannot persist an invalid or exhausted allocator');
+}
+console.log('PASS: export snapshot, stale imports, branch identities, project-isolated review retention, atomic history limits, lock dependencies, semantic dimension preservation and preflighted safe object ID allocation.');

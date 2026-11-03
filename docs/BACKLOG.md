@@ -719,3 +719,12 @@ frozen and importable. Narrow declared-ring results do not promote broader rooms
 areas, adjacency or physical verification into checked coverage. Missing/incomplete
 evidence remains unknown, and current-state/source guards still govern highlights.
 See [scope and compatibility](SAVED_BOUNDARY_REVIEW.md).
+
+
+## Import allocation integrity — 2026-11-03
+
+HLS-101 rejects unsafe/exhausted explicit object counters and unrepresentable suffix
+inference before imported media or saved state is written. Normal legacy inference and
+repeated item creation retain unique identifiers; mutation exhaustion rolls back.
+Fabricated production-function regressions reproduce the old2^53duplicate-ID defect.
+Native browser acceptance remains separate. See [import integrity](IMPORT_INTEGRITY.md).
