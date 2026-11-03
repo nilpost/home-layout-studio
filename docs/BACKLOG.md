@@ -803,3 +803,14 @@ Cumulative PR review found equal-JSON Undo/Redo could detach the original object
 by a pending page render. HLS-101 now requires the same current original object as well
 as unchanged snapshot before commit; stale rendering cannot report success on an
 unchanged page. See [PDF page workflow](PDF_PAGE_WORKFLOW.md).
+
+
+## Site-native asset reference authoring — 2026-11-03
+
+HLS-101/102 adds explicit label/kind/address entry and an inert draft preview inside
+Project assets. Save appends stable, unverified source references through the existing
+project/state guard and reversible transaction; Cancel discards draft additions.
+Existing source evidence and field authority remain intact. No source content, vault
+connector, attachment permission, fetch or write-back is added. Fabricated production
+workflow verification is separate from native/private browser acceptance. The broader
+HLS-101/102 requirements remain partial. See [asset references](ASSET_RECORDS.md).

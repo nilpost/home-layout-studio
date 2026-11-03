@@ -18,7 +18,7 @@ a string never establishes its truth. User-created form records default to user 
 Editing a field deliberately should mark that field user-authored while retaining other
 fields' provenance and source records. An authoritative source does not certify accuracy.
 
-`sources` are read-only references: `id`, `label`, `kind` (`vault-note`, `manual`, `other`),
+`sources` are read-only content references: `id`, `label`, `kind` (`vault-note`, `manual`, `other`),
 `uri`, optional `revision`/`contentHash`, `status`, and optional `importedAt` timestamp.
 Status is `unverified`, `available-at-import`, `unavailable` or `changed`.
 `available-at-import` requires its import time and means historical evidence only.
@@ -95,3 +95,32 @@ The evidence panel uses plain human-readable text for field authority, source id
 URI, revision/hash, recorded availability time and reference findings. Source links are
 not activated or fetched. Historical availability at import remains distinct from live
 verification; unavailable and changed references retain their recorded evidence.
+
+
+## Add a reference inside the editor
+
+In **Project assets**, enter a reference label, kind and address, then choose **Add
+reference to draft**. Review the plain-text preview and choose **Save asset** to keep it.
+**Cancel draft**, closing the editor or switching assets discards unsaved additions.
+Typed reference details must be added or cleared before saving, so they cannot be
+silently omitted. Unsaved text fields, item links, maintenance and issues are retained
+while references are added. Existing saved reference evidence is visible separately.
+
+Each addition receives a stable source ID and always starts `unverified`. Its address
+is stored as inert private metadata. Nothing is fetched, opened, embedded or written
+back, and no availability, attachment permission or field authority is inferred.
+Existing source IDs, recorded statuses, revision/hash metadata and provenance remain
+unchanged. This does not establish live vault integration or authenticated access.
+
+`AssetRecords.appendSource(current,{id,label,kind,uri})` returns a detached complete
+validated record. It appends one source and accepts no caller-supplied status, import
+time, revision or hash. Duplicate IDs, invalid kinds/addresses, credential-bearing
+addresses, unknown fields and collections exceeding 100 sources reject atomically.
+The ordinary `updateRecord` API still cannot replace sources. Schema version 1 remains
+compatible; backups, asset exports and provider-neutral handoffs retain saved references.
+
+Save uses the existing project/state guard and reversible transaction. Rejected stale
+or storage-failure saves do not persist the new references; the site reports the failure.
+A successful save creates one history entry and supports Undo/Redo. Fabricated
+production-function regression evidence is registered in `tests/asset-reference-workflow.mjs`.
+Native browser input/readability acceptance remains a separate check.
