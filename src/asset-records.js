@@ -80,6 +80,11 @@ function updateRecord(current,patch){
  }
  return record(out,{projectId:before.projectId});
 }
+// Manual references append only; their content and availability are never inferred.
+function appendSource(current,input){
+ const before=record(current);obj(input,'manual source');keys(input,['id','label','kind','uri'],'manual source');
+ return record({...before,sources:[...before.sources,{...input,status:'unverified'}]},{projectId:before.projectId});
+}
 // Activity edits remain local records; linked source facts and field authority are
 // preserved. Validate complete collections atomically before returning detached data.
 function updateActivity(current,patch){
@@ -109,5 +114,5 @@ function stageImport(payload,context){
  const assets=validate([...existing,...incoming],{projectId});
  return {assets,findings:findingsFor(assets,context)};
 }
-root.AssetRecords=Object.freeze({VERSION,MAX_ASSETS,validate,createRecord,updateRecord,updateActivity,stageImport,findings:findingsFor,inspectReferences:findingsFor});
+root.AssetRecords=Object.freeze({VERSION,MAX_ASSETS,validate,createRecord,updateRecord,appendSource,updateActivity,stageImport,findings:findingsFor,inspectReferences:findingsFor});
 })(typeof window==='undefined'?globalThis:window);

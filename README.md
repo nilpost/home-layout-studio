@@ -268,3 +268,9 @@ not save. Use Apply scale or Cancel scale. All selected members are guarded toge
 and numeric group controls remain available for exact input.
 
 Source review includes an impact preview of changed segment identities and explicitly linked measurement/opening records. Original and draft geometry are shown separately. Missing or renamed references stay unresolved; the preview does not move neighbors or refresh saved verification.
+
+
+Project assets supports adding manual or vault-note reference metadata directly in the
+site: enter a label, kind and address, add to the draft, review, then Save or Cancel.
+New references are unverified and remain plain text; no source is fetched or opened.
+See [local asset records](docs/ASSET_RECORDS.md) for scope and provenance guarantees.
