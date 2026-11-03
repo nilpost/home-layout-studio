@@ -75,7 +75,7 @@ function preview(c){choose(c);c.previewMeasurement();assert.ok(c.pendingMeasurem
  c.model.segments=[];c.populateMeasurementEditor(c.state.measurementAnchors[0].id);assert.match(c.$('measurement-preview').textContent,/unknown/i,'Missing source references remain visible');
 }
 {
- const c=context(),legacy=ConsistencyReview.createReport({projectId:'project-a',stateToken:'old-token',revision:'v0',sourceHash:'fabricated-source',runAt:'2026-01-01T00:00:00.000Z'});legacy.checkerVersion='schematic-1.1.0';legacy.coverage=legacy.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));legacy.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';
+ const c=context(),legacy=ConsistencyReview.createReport({projectId:'project-a',stateToken:'old-token',revision:'v0',sourceHash:'fabricated-source',runAt:'2026-01-01T00:00:00.000Z'});legacy.checkerVersion='schematic-1.1.0';delete legacy.boundaries;legacy.findings=legacy.findings.filter(f=>f.code!=='boundary-review-unavailable');legacy.coverage=legacy.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings','declared-boundary-rings'].includes(c.id));legacy.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';
  const incoming={...fixture(),consistencyReports:[legacy]};await c.importJSON(JSON.stringify(incoming));assert.deepEqual(clone(c.state.consistencyReports),[legacy],'Legacy review coverage remains inspectable without claiming newly implemented checks');
 }
 

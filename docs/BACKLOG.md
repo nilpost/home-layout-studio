@@ -709,3 +709,13 @@ original media, exact normal/recovery export comparison and cross-tab invalidati
 Legacy startup retains optional-field absence instead of adding an empty declaration
 collection. This completes a bounded local recovery slice; the broader HLS-101 and
 remaining deployment/workflow requirements remain partial.
+
+
+## Saved declared-boundary review — 2026-11-02
+
+HLS-106 adds a separately versioned1.5 checker contract for explicitly declared ring
+findings in saved consistency evidence. Historical1.0–1.4.1 report capabilities remain
+frozen and importable. Narrow declared-ring results do not promote broader rooms,
+areas, adjacency or physical verification into checked coverage. Missing/incomplete
+evidence remains unknown, and current-state/source guards still govern highlights.
+See [scope and compatibility](SAVED_BOUNDARY_REVIEW.md).

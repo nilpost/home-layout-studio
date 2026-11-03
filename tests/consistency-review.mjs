@@ -19,7 +19,7 @@ for(const id of ['anchored-dimension-chains','rooms-openings-doors','as-built-su
 const dim=first.findings.find(f=>f.code==='dimension-line:dimension-1');
 assert.equal(dim.measured,100);assert.equal(dim.expected,100);assert.equal(dim.unit,'mm');assert.deepEqual(dim.affectedIds,['dimension-1']);
 assert.deepEqual(R.validateReports(JSON.parse(JSON.stringify([first]))),[first]);
-const copy=R.validateReports([first]);copy[0].findings[0].expected=10;assert.equal(first.findings[0].expected,100,'validated imports are detached');
+const copy=R.validateReports([first]);copy[0].findings.find(f=>f.code===dim.code).expected=10;assert.equal(first.findings.find(f=>f.code===dim.code).expected,100,'validated imports are detached');
 assert.equal(R.isStale(first,options),false);
 assert.equal(R.isStale(first,{...options,revision:'v2'}),true);
 assert.equal(R.isStale(first,{...options,sourceHash:'other'}),true);
@@ -29,11 +29,11 @@ assert.equal(R.isStale(first,{revision:'v1',sourceHash:'fabricated-source'}),tru
 const changed=R.createReport({...options,geometryReport:G.validate({segments:square,calibration:{drawingUnits:1,realMillimetres:2,status:'verified'},dimensions:[dimension]})});
 assert.equal(changed.status,'fail');
 assert.equal(changed.findings.find(f=>f.id===dim.id).status,'fail','Dimension identity survives value changes');
-const priorChecker=structuredClone(first);priorChecker.checkerVersion='schematic-1.4.0';assert.deepEqual(R.validateReports([priorChecker]),[priorChecker]);assert.equal(R.isStale(priorChecker,options),true,'Checker upgrade requires rerun despite identical source state');assert.equal(R.isStale(first,options),false);
+const priorChecker=structuredClone(first);priorChecker.checkerVersion='schematic-1.4.0';delete priorChecker.boundaries;priorChecker.coverage.pop();priorChecker.findings=priorChecker.findings.filter(f=>f.code!=='boundary-review-unavailable');assert.deepEqual(R.validateReports([priorChecker]),[priorChecker]);assert.equal(R.isStale(priorChecker,options),true,'Checker upgrade requires rerun despite identical source state');assert.equal(R.isStale(first,options),false);
 const comparison=R.compareReports(first,changed);
 assert.deepEqual(comparison.changed,[dim.id]);assert.equal(comparison.added.length,1);assert.equal(comparison.removed.length,0);
 assert.deepEqual(R.compareReports(changed,first).removed,comparison.added);
-assert.deepEqual(R.compareReports(first,R.createReport({...options,runAt:'2026-01-02T00:00:00.000Z'})),{added:[],removed:[],changed:[],unchanged:[dim.id]});
+assert.deepEqual(R.compareReports(first,R.createReport({...options,runAt:'2026-01-02T00:00:00.000Z'})),{added:[],removed:[],changed:[],unchanged:first.findings.map(f=>f.id)});
 const reordered=JSON.parse(JSON.stringify(first));reordered.findings=reordered.findings.map(f=>Object.fromEntries(Object.entries(f).reverse()));
 assert.deepEqual(R.compareReports(first,reordered).changed,[],'Import key order is not a finding change');
 const missing=R.createReport({revision:'v1',sourceHash:'source',runAt:options.runAt});
@@ -82,11 +82,11 @@ assert.throws(()=>R.createReport({...options,measurementAudit:[geometryReport.di
 const manyIssues=Array.from({length:1100},(_,i)=>({code:'future-check',ids:['synthetic-'+i]}));
 const manyUnsupported=Array.from({length:1200},(_,i)=>'synthetic-unsupported-'+i);
 const expanded=R.createReport({...options,geometryReport:{...geometryReport,issues:manyIssues,unsupported:manyUnsupported}});
-assert.equal(expanded.findings.length,2301,'More than 1000 valid issue/unsupported inputs no longer abort');
+assert.equal(expanded.findings.length,2302,'More than 1000 valid issue/unsupported inputs no longer abort');
 assert.equal(expanded.findings.some(f=>f.code==='review-incomplete'),false);
 const largeOptions={...options,geometryReport:{...geometryReport,issues:Array.from({length:6000},(_,i)=>({code:'future-check',ids:['synthetic-'+i]})),unsupported:Array.from({length:6000},(_,i)=>'synthetic-unsupported-'+i)},measurementAudit:Array.from({length:1200},(_,i)=>({...geometryReport.dimensionAudit[0],id:'synthetic-dimension-'+i}))};
 const large=R.createReport(largeOptions);
-assert.equal(large.findings.length,4901);
+assert.equal(large.findings.length,4902);
 assert.equal(large.findings.find(f=>f.code==='review-incomplete').status,'unknown');
 assert.equal(large.coverage[0].status,'unknown');assert.equal(large.coverage[1].status,'unknown');assert.equal(large.status,'unknown');
 assert.deepEqual(R.createReport(largeOptions),large,'Capped selection and omission notices are deterministic');
@@ -96,12 +96,13 @@ assert.equal(shortened.findings.find(f=>f.code.startsWith('unsupported:')).evide
 assert.equal(shortened.findings.some(f=>f.code==='review-incomplete'),true);
 assert.equal(shortened.coverage[0].status,'unknown');assert.equal(shortened.coverage[1].status,'unknown');
 const invalidComplete=structuredClone(large);invalidComplete.coverage[1].status='pass';assert.throws(()=>R.validateReports([invalidComplete]));
-const previousVersion=structuredClone(first);previousVersion.checkerVersion='schematic-1.0.0';previousVersion.coverage=previousVersion.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));previousVersion.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';assert.deepEqual(R.validateReports([previousVersion]),[previousVersion]);
+function stripBoundary(r){delete r.boundaries;r.coverage=r.coverage.filter(c=>c.id!=='declared-boundary-rings');r.findings=r.findings.filter(f=>f.code!=='boundary-review-unavailable');return r;}
+const previousVersion=structuredClone(first);previousVersion.checkerVersion='schematic-1.0.0';stripBoundary(previousVersion);previousVersion.coverage=previousVersion.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));previousVersion.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';assert.deepEqual(R.validateReports([previousVersion]),[previousVersion]);
 const A=globalThis.MeasurementAnchors;
 const binding=A.createBinding({id:'synthetic-anchor',projectId:options.projectId,dimensionId:dimension.id,start:{segmentId:square[0].id,endpoint:'a'},end:{segmentId:square[0].id,endpoint:'b'},sourceHash:options.sourceHash});
 const anchoredInput={anchors:[binding],projectId:options.projectId,segments:square,dimensions:[dimension],calibration:{drawingUnits:1,realMillimetres:1,status:'verified'},tolerancePercent:1,sourceHash:options.sourceHash};
 const anchoredRaw=A.review(anchoredInput),anchored=R.createReport({...options,anchoredReview:anchoredRaw});
-assert.equal(anchored.checkerVersion,'schematic-1.4.1');
+assert.equal(anchored.checkerVersion,'schematic-1.5.0');
 assert.deepEqual(anchored.anchoredReview,{checked:1,total:1,status:'pass'});
 assert.equal(anchored.coverage[2].status,'pass');assert.match(anchored.coverage[2].detail,/endpoint spans only/);assert.match(anchored.coverage[2].detail,/chains.*not modeled/);
 assert.equal(anchored.status,'unknown','Passing endpoint spans do not certify the full project');
@@ -137,7 +138,7 @@ const legacyAnchored=structuredClone(anchored);legacyAnchored.checkerVersion='sc
 const chainFinding={chainId:'synthetic-chain',code:'chain-total-within-tolerance',status:'pass',severity:'info',affectedIds:['synthetic-chain','synthetic-anchor','synthetic-anchor-2','synthetic-total-dimension'],measured:200,expected:200,unit:'mm',errorPercent:0,evidence:{axis:'x',members:['synthetic-anchor','synthetic-anchor-2'],sourceHash:options.sourceHash,tolerancePercent:1,scope:'Explicit selected contiguous chain only'}};
 const chainRaw={findings:[chainFinding],total:1,checked:1,status:'pass'};
 const chainReport=R.createReport({...options,anchoredReview:anchoredRaw,chainReview:chainRaw});
-assert.equal(chainReport.checkerVersion,'schematic-1.4.1');assert.deepEqual(chainReport.chains,{total:1,checked:1,status:'pass'});
+assert.equal(chainReport.checkerVersion,'schematic-1.5.0');assert.deepEqual(chainReport.chains,{total:1,checked:1,status:'pass'});
 const chainRow=chainReport.coverage.find(c=>c.id==='dimension-chain-totals');assert.equal(chainRow.status,'pass');assert.match(chainRow.detail,/one explicit axis only/);assert.match(chainRow.detail,/rooms and levels are not modeled/);
 assert.equal(chainReport.coverage.find(c=>c.id==='anchored-dimension-chains').status,'pass','Endpoint coverage remains independently represented');
 assert.equal(chainReport.status,'unknown','A passing selected chain does not certify source-wide chains or physical accuracy');
@@ -147,7 +148,7 @@ assert.equal(mismatchChain.coverage.find(c=>c.id==='dimension-chain-totals').sta
 const unknownChain=R.createReport({...options,chainReview:{total:1,checked:0,status:'unknown',findings:[{...chainFinding,code:'stale-chain',status:'unknown',severity:'warning',measured:null,errorPercent:null,evidence:{reasons:['stale-chain'],axis:'x'}}]}});assert.equal(unknownChain.chains.status,'unknown');assert.equal(unknownChain.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');
 const emptyChains=R.createReport({...options,chainReview:{findings:[],total:0,checked:0,status:'unknown'}});assert.equal(emptyChains.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');
 assert.equal(first.coverage.find(c=>c.id==='dimension-chain-totals').status,'not-checked');
-const version12=structuredClone(anchored);version12.checkerVersion='schematic-1.2.0';version12.coverage=version12.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));assert.deepEqual(R.validateReports([version12]),[version12]);
+const version12=structuredClone(anchored);version12.checkerVersion='schematic-1.2.0';stripBoundary(version12);version12.coverage=version12.coverage.filter(c=>!['dimension-chain-totals','opening-jamb-bindings'].includes(c.id));assert.deepEqual(R.validateReports([version12]),[version12]);
 const legacyWithChains=structuredClone(chainReport);legacyWithChains.checkerVersion='schematic-1.2.0';assert.throws(()=>R.validateReports([legacyWithChains]));
 const manyChainFindings=Array.from({length:6000},(_,i)=>({...chainFinding,chainId:'synthetic-chain-'+i,affectedIds:['synthetic-chain-'+i]}));
 const manyChainInput={...largeOptions,chainReview:{findings:manyChainFindings,total:6000,checked:6000,status:'pass'}};
@@ -169,8 +170,8 @@ const sourceEvidence=sourceSaved.findings.find(f=>f.code==='chain:synthetic-sour
 for(const patch of [{calibration:{...sourceInput.calibration,status:'manual'}},{sourceHash:'synthetic-new-source'},{tolerancePercent:undefined},{segments:chainSegments.slice(0,1)}]){const report=R.createReport({...options,chainReview:C.review({...sourceInput,...patch})});assert.equal(report.chains.status,'unknown');assert.equal(report.coverage.find(c=>c.id==='dimension-chain-totals').status,'unknown');}
 // Persisted versions retain their exact historical coverage, independently of
 // the emitter version. Check valid histories as well as plausible matrix edits.
-const version13=structuredClone(chainReport);version13.checkerVersion='schematic-1.3.0';version13.coverage=version13.coverage.filter(c=>c.id!=='opening-jamb-bindings');
-const version140=structuredClone(chainReport);version140.checkerVersion='schematic-1.4.0';
+const version13=structuredClone(chainReport);version13.checkerVersion='schematic-1.3.0';stripBoundary(version13);version13.coverage=version13.coverage.filter(c=>c.id!=='opening-jamb-bindings');
+const version140=structuredClone(chainReport);version140.checkerVersion='schematic-1.4.0';stripBoundary(version140);
 const histories=[previousVersion,previousMinor,version12,version13,version140,chainReport];
 for(const historical of histories){
  const serialized=JSON.stringify(historical);
@@ -198,7 +199,7 @@ const fallbackSource=R.createReport({...options,geometryReport:{...geometryRepor
 assert.equal(fallbackSource.coverage[1].status,'unknown');
 const currentFallback=structuredClone(fallbackSource);currentFallback.coverage[1].status='not-checked';assert.throws(()=>R.validateReports([currentFallback]),'Current checker must not inherit the historical dimension fallback');
 for(const version of ['schematic-1.0.0','schematic-1.1.0','schematic-1.2.0']){
- const historical=structuredClone(fallbackSource);historical.checkerVersion=version;historical.coverage=historical.coverage.slice(0,7);historical.coverage[1].status='not-checked';
+ const historical=structuredClone(fallbackSource);historical.checkerVersion=version;stripBoundary(historical);historical.coverage=historical.coverage.slice(0,7);historical.coverage[1].status='not-checked';
  if(version!=='schematic-1.2.0')historical.coverage[2].detail='Anchored wall/opening dimensions, chains, totals, axes and levels are not modeled.';
  assert.deepEqual(R.validateReports([historical]),[historical],'Only explicit historical versions retain their dimension fallback');
 }
@@ -207,8 +208,8 @@ const openingSegments=[{id:'synthetic-left',kind:'wall',a:[0,0],b:[4,0]},{id:'sy
 const openingBinding=O.createBinding({id:'synthetic-binding',projectId:options.projectId,sourceHash:options.sourceHash,openingSegmentId:openingSegments[1].id,startJamb:{segmentId:openingSegments[0].id,endpoint:'b'},endJamb:{segmentId:openingSegments[2].id,endpoint:'a'}});
 const openingInput={records:[openingBinding],projectId:options.projectId,sourceHash:options.sourceHash,segments:openingSegments};
 const openingRaw=O.evaluate(openingInput),openingReport=R.createReport({...options,openingReview:openingRaw});
-assert.equal(openingReport.checkerVersion,'schematic-1.4.1');assert.deepEqual(openingReport.openings,{total:1,checked:1,status:'pass'});
-assert.equal(openingReport.status,'unknown');assert.equal(openingReport.coverage.length,9);assert.equal(openingReport.coverage[8].id,'opening-jamb-bindings');assert.equal(openingReport.coverage[8].status,'pass');
+assert.equal(openingReport.checkerVersion,'schematic-1.5.0');assert.deepEqual(openingReport.openings,{total:1,checked:1,status:'pass'});
+assert.equal(openingReport.status,'unknown');assert.equal(openingReport.coverage.length,10);assert.equal(openingReport.coverage[8].id,'opening-jamb-bindings');assert.equal(openingReport.coverage[8].status,'pass');
 assert.equal(openingReport.coverage[3].status,'not-checked');assert.match(openingReport.coverage[8].detail,/not physical verification/);
 const savedOpening=openingReport.findings.find(f=>f.code==='opening:synthetic-binding');assert.equal(savedOpening.measured,0);assert.equal(savedOpening.expected,0);assert.equal(savedOpening.unit,'drawing-units');assert.equal(savedOpening.errorPercent,null);
 assert.equal(JSON.parse(savedOpening.evidence[1]).openingSourceContext.bindingSourceHash,options.sourceHash);assert.equal(JSON.parse(savedOpening.evidence[2]).opening.segmentId,openingSegments[1].id);
@@ -222,14 +223,14 @@ assert.equal(openingConflict.openings.status,'fail');assert.equal(openingConflic
 const emptyOpening=R.createReport({...options,openingReview:O.evaluate({...openingInput,records:[]})});assert.equal(emptyOpening.openings.status,'unknown');assert.equal(emptyOpening.coverage[8].status,'unknown');assert.equal(first.coverage[8].status,'not-checked');
 for(const mutate of [
  r=>r.openings.checked=0,r=>r.openings.total=2,r=>r.openings.status='fail',r=>r.openings.extra=true,r=>delete r.openings,r=>r.findings=r.findings.filter(f=>!f.code.startsWith('opening:')),
- r=>r.coverage[8].detail='Physical opening certified',r=>r.coverage[8].status='unknown',r=>r.coverage[3].status='pass',r=>r.checkerVersion='schematic-1.5.0',
+ r=>r.coverage[8].detail='Physical opening certified',r=>r.coverage[8].status='unknown',r=>r.coverage[3].status='pass',r=>r.checkerVersion='schematic-1.6.0',
  r=>r.findings.find(f=>f.code===savedOpening.code).measured=1,
  r=>r.findings.find(f=>f.code===savedOpening.code).expected=1,
  r=>r.findings.find(f=>f.code===savedOpening.code).evidence=[],
  r=>{const f=r.findings.find(f=>f.code===savedOpening.code),e=JSON.parse(f.evidence[1]);e.openingSourceContext.epsilonDrawingUnits=1;f.evidence[1]=JSON.stringify(e);},
  r=>{const f=r.findings.find(f=>f.code===savedOpening.code),e=JSON.parse(f.evidence[1]);e.openingSourceContext.currentSourceHash='synthetic-other';f.evidence[1]=JSON.stringify(e);}
 ]){const bad=structuredClone(openingReport);mutate(bad);assert.throws(()=>R.validateReports([bad]),'Saved opening evidence/summary/coverage must remain coherent');}
-for(const old of histories.filter(r=>!['schematic-1.4.0','schematic-1.4.1'].includes(r.checkerVersion))){
+for(const old of histories.filter(r=>!['schematic-1.4.0','schematic-1.5.0'].includes(r.checkerVersion))){
  const bad=structuredClone(old);bad.openings={total:0,checked:0,status:'unknown'};assert.throws(()=>R.validateReports([bad]),'Historical checker cannot gain opening capabilities');
 }
 for(const raw of [{...openingRaw,checked:0},{...openingRaw,total:2},{...openingRaw,status:'unknown'},{...openingRaw,extra:1},{...openingRaw,findings:[{...openingRaw.findings[0],expected:1}]},{...openingRaw,findings:[{...openingRaw.findings[0],evidence:{}}]}])assert.throws(()=>R.createReport({...options,openingReview:raw}));
