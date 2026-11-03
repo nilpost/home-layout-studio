@@ -4,7 +4,7 @@ const fresh=()=>({sourceOperationContractVersion:1,operation:'move-explicit-line
 let cases=0;function test(name,fn){fn();cases++;}
 function reject(input){assert.throws(()=>SourceJunctions.validateRequest(input));}
 test('valid request retains ordered membership and detached normalized data',()=>{
- const input=fresh(),before=structuredClone(input),result=SourceJunctions.validateRequest(input);assert.deepEqual(result,before);assert.notEqual(result,input);assert.notEqual(result.members,input.members);assert.notEqual(result.members[0],input.members[0]);assert.notEqual(result.target,input.target);result.members[0].endpoint='a';result.target[0]=0;assert.deepEqual(input,before);assert.deepEqual(Object.keys(SourceJunctions),['VERSION','OPERATION','MAX_MEMBERS','MAX_COORDINATE','validateRequest']);
+ const input=fresh(),before=structuredClone(input),result=SourceJunctions.validateRequest(input);assert.deepEqual(result,before);assert.notEqual(result,input);assert.notEqual(result.members,input.members);assert.notEqual(result.members[0],input.members[0]);assert.notEqual(result.target,input.target);result.members[0].endpoint='a';result.target[0]=0;assert.deepEqual(input,before);assert.deepEqual(Object.keys(SourceJunctions),['VERSION','OPERATION','MAX_MEMBERS','MAX_COORDINATE','validateRequest','propose','revalidate']);
 });
 test('bounds accept 2 and 16 distinct members and finite represented drawing coordinates',()=>{
  for(const count of [2,16]){const input=fresh();input.members=Array.from({length:count},(_,i)=>({segmentId:'line-'+i,endpoint:i%2?'a':'b'}));input.target=[-1e9,1e9];assert.deepEqual(SourceJunctions.validateRequest(input),input);}
@@ -53,4 +53,22 @@ test('sparse, extended and hidden array slots reject without serialization',()=>
  let calls=0;const input=fresh();input.toJSON=()=>{calls++;throw Error('Serializer executed');};reject(input);assert.equal(calls,0);
  const member=fresh();member.members[0].toJSON=input.toJSON;reject(member);assert.equal(calls,0);
 });
-console.log('PASS: '+cases+' preparatory source-junction request validation cases; strict data-only namespace, bounded explicit membership/coordinates, detachment and getter/serializer rejection. No geometry, runtime route, proposal, policy or apply capability is provided.');
+function trusted(){return {projectId:'fabricated-project',stateToken:'fabricated-token',revision:'v3',sourceHash:'fabricated-source',policySnapshot:'policy-a',lines:[{segmentId:'north',kind:'wall',a:[0,0],b:[10,0],editable:true,reason:''},{segmentId:'east',kind:'window',a:[10,0],b:[10,10],editable:true,reason:''},{segmentId:'tee',kind:'wall',a:[10,0],b:[20,0],editable:false,reason:'Locked'}]};}
+function junction(){return {...fresh(),target:[11,1]};}
+test('proposal is detached with explicit stationary diagnostics and allows all endpoint orientations',()=>{
+ for(const a of ['a','b'])for(const b of ['a','b']){const current=trusted(),request=junction();if(a==='a')current.lines[0].a=[10,0],current.lines[0].b=[0,0];if(b==='b')current.lines[1].b=[10,0],current.lines[1].a=[10,10];request.members=[{segmentId:'north',endpoint:a},{segmentId:'east',endpoint:b}];const before=structuredClone(current),proposal=SourceJunctions.propose(request,current);assert.deepEqual(proposal.origin,[10,0]);assert.deepEqual(proposal.stationaryEndpoints,[{segmentId:'tee',endpoint:'a',point:[10,0]}]);assert.deepEqual(current,before);proposal.changes[0].before.a[0]=999;assert.deepEqual(current,before);}
+});
+test('proposal enforces current identity, exact coincidence, no-op/collapse and trusted policy',()=>{
+ for(const key of ['projectId','stateToken','revision','sourceHash']){const current=trusted();current[key]='changed';assert.throws(()=>SourceJunctions.propose(junction(),current));}
+ for(const change of [c=>c.lines[1].a=[10,1],c=>c.lines[0].editable=false,c=>c.lines[0].kind='opening',c=>c.lines.push({...c.lines[0]}),c=>c.lines[0].b=[0,0]]){const current=trusted();change(current);assert.throws(()=>SourceJunctions.propose(junction(),current));}
+ for(const target of [[10,0],[0,0],[10,10]])assert.throws(()=>SourceJunctions.propose({...junction(),target},trusted()));
+});
+test('16 explicit members remain bounded with no automatically included endpoint',()=>{const current=trusted();current.lines=Array.from({length:16},(_,i)=>({segmentId:'line-'+i,kind:'wall',a:[10,0],b:[i,10],editable:true,reason:''}));const request={...junction(),members:current.lines.map(line=>({segmentId:line.segmentId,endpoint:'a'}))};const proposal=SourceJunctions.propose(request,current);assert.equal(proposal.changes.length,16);assert.deepEqual(proposal.stationaryEndpoints,[]);});
+test('revalidate regenerates current proof and rejects tampering, policy drift and non-data proposals',()=>{
+ const current=trusted(),proposal=SourceJunctions.propose(junction(),current);assert.deepEqual(SourceJunctions.revalidate(proposal,current),proposal);
+ assert.throws(()=>SourceJunctions.revalidate(proposal,{...current,policySnapshot:'policy-b'}));
+ for(const change of [p=>p.changes[0].after.a=[1,2],p=>p.target=[1,2],p=>p.request.target=[1,2],p=>p.stationaryEndpoints=[],p=>p.extra=true]){const tampered=structuredClone(proposal);change(tampered);assert.throws(()=>SourceJunctions.revalidate(tampered,current));}
+ let calls=0;const getter=structuredClone(proposal);Object.defineProperty(getter.changes[0],'after',{enumerable:true,get(){calls++;throw Error('Getter executed');}});assert.throws(()=>SourceJunctions.revalidate(getter,current));assert.equal(calls,0);
+ const serial=structuredClone(proposal);serial.changes[0].toJSON=()=>{calls++;throw Error('Serializer executed');};assert.throws(()=>SourceJunctions.revalidate(serial,current));assert.equal(calls,0);
+});
+console.log('PASS: '+cases+' source-junction request/proposal cases; strict namespace/data, bounded explicit members, detached geometry, exact origin/no-op/collapse, stationary diagnostics, current-policy revalidation and tamper rejection. Native-source ownership and Apply require the separate trusted site adapter.');

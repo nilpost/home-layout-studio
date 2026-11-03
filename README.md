@@ -274,3 +274,11 @@ Project assets supports adding manual or vault-note reference metadata directly 
 site: enter a label, kind and address, add to the draft, review, then Save or Cancel.
 New references are unverified and remain plain text; no source is fetched or opened.
 See [local asset records](docs/ASSET_RECORDS.md) for scope and provenance guarantees.
+
+
+The source junction editor can move explicitly selected, already coincident endpoints of
+supported native wall/window lines together. Preview every change, then Apply once or
+Cancel; Undo restores the whole edit. The first profile excludes paths, stylesheets,
+styled/hidden/locked context and ambiguous ownership, and uses drawing units only.
+See [junction scope and limits](docs/JUNCTION_EDITING.md). The default demo uses paths
+and is not eligible for this native-line profile.

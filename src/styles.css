@@ -65,3 +65,5 @@
 .recovery-card{max-width:680px;margin:0 auto;padding:28px;background:white;border:1px solid #dce6e6;border-radius:14px;box-shadow:0 8px 28px #25343a0d}
 .recovery-card h1{font-size:1.7rem;line-height:1.2}.recovery-card p{line-height:1.55}.recovery-card .dialog-actions{flex-wrap:wrap}
 #recovery-summary,#recovery-status{white-space:pre-wrap;overflow-wrap:anywhere}
+
+#junction-dialog label{display:block;font-size:12px;margin:10px 0 5px}#junction-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#junction-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:#f7faf9;border:1px solid var(--stroke);border-radius:7px;padding:10px}
