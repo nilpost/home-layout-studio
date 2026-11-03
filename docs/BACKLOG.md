@@ -787,3 +787,11 @@ HLS-101 clears source-replacement selection only after commit. Storage/lock/vali
 rejection preserves the prior project and selection; successful replacement clears both
 selection representations and stays reversible. Existing source/binding/asset guards
 remain. Native acceptance is separate. See [SVG import workflow](SVG_IMPORT_WORKFLOW.md).
+
+
+## Project reset selection isolation — 2026-11-03
+
+HLS-101 successful demo reset clears reference selection and range anchor so reused
+source IDs cannot inherit previous-project selection. Cancelled/failed resets retain
+prior context. Existing reset/history semantics stay unchanged; native browser
+acceptance remains separate. See [project reset](PROJECT_RESET.md).
