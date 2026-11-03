@@ -737,3 +737,12 @@ media write, so a known incomplete later entry cannot leave earlier orphaned ima
 from a rejected backup. Valid complete imports retain the existing guarded flow.
 Storage-error/crash cleanup and native browser acceptance remain separate work. See
 [import integrity](IMPORT_INTEGRITY.md).
+
+
+## Media transaction settlement — 2026-11-03
+
+HLS-101 normal media reads/writes await transaction completion before returning or
+updating cache. Aborts and errors reject rather than hanging or falsely completing a
+backup. Event-controlled production helper/caller regressions reproduce prior failure
+paths; native browser and cross-store/crash recovery remain separate acceptance. See
+[media storage](MEDIA_STORAGE.md).
