@@ -270,3 +270,14 @@ adds a correction operation nor changes version1 capability/permission claims.
 Native fabricated browser capacity testing rejected an oversized metadata-only project
 import while preserving the previous full project. This verifies actual import storage
 rejection, separately from VM-tested operation-save quota rollback.
+
+
+## Explicit source-junction operation namespace
+
+The site's native-line junction workflow uses a distinct `sourceOperationContractVersion:1`
+request and `move-explicit-line-junction` operation. See [request syntax and trusted
+proposal boundary](JUNCTION_REQUEST_DRAFT.md). It does not widen overlay operation v1 or
+full-source replacement, and is not accepted by the current correction import router.
+A future provider adapter must use the same trusted current-source/policy resolution and
+reviewed atomic commit; a proposed request or geometry snapshot never authorizes an edit.
+No deployed source-operation provider interoperability is claimed.

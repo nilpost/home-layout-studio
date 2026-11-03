@@ -824,3 +824,16 @@ avoids cancellation/unsafe totals. Failed, stale, incomplete or fractional evide
 no totals. No physical conversion, inferred room, source edit, saved metric/report
 coverage change or calibration claim is introduced. HLS-106 remains partial. See
 [drawing metrics scope](DRAWING_METRICS.md).
+
+
+## Explicit native-line junction editing — 2026-11-03
+
+HLS-107 adds deliberate membership of 2–16 already-coincident native wall/window line
+endpoints, one drawing-unit target and complete reviewed before/after composition.
+A trusted current-source/policy adapter rejects ambiguous ownership, protected dimensions,
+hidden/locked context and unsupported styles/coordinates. Apply regenerates the reviewed
+draft and commits once with reversible history; unselected endpoints and prior binding
+hashes are preserved. No snapping, inferred adjacency, hosted-door relationship, path
+vertices or physical conversion is provided. The default path-based demo is unsupported
+by this profile. Native/private acceptance and complete HLS-107 remain separate. See
+[junction scope and guards](JUNCTION_EDITING.md).
