@@ -746,3 +746,11 @@ updating cache. Aborts and errors reject rather than hanging or falsely completi
 backup. Event-controlled production helper/caller regressions reproduce prior failure
 paths; native browser and cross-store/crash recovery remain separate acceptance. See
 [media storage](MEDIA_STORAGE.md).
+
+
+## Backup export/import aggregate alignment — 2026-11-03
+
+HLS-101 normal JSON export rejects complete serialized output exceeding the existing
+80Mcharacter import budget before download. Exact-limit output and full metadata/media
+remain intact. No truncation, deletion, raised import limit or large-project preservation
+support is implied; native browser acceptance remains separate. See [backup limits](BACKUP_LIMITS.md).
