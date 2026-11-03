@@ -67,3 +67,5 @@
 #recovery-summary,#recovery-status{white-space:pre-wrap;overflow-wrap:anywhere}
 
 #junction-dialog label{display:block;font-size:12px;margin:10px 0 5px}#junction-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#junction-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:#f7faf9;border:1px solid var(--stroke);border-radius:7px;padding:10px}
+
+#path-junction-dialog label{display:block;font-size:12px;margin:10px 0 5px}#path-junction-dialog select{width:100%;padding:8px;border:1px solid var(--stroke);border-radius:7px}#path-junction-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:#f7faf9;border:1px solid var(--stroke);border-radius:7px;padding:10px}
