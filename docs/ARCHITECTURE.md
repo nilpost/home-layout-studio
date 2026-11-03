@@ -6,7 +6,10 @@ This repository is deliberately generic. The editor owns its anonymous starting 
 
 ## 2. Private apartment data
 
-Store externally, e.g. local encrypted drive or an authenticated private backend. Authoritative project format: `{schemaVersion,name,revision,baseSvg,viewBox,items,comments,nextId,note}`.
+Store externally, e.g. local encrypted drive or an authenticated private backend. The private project JSON retains source, items, comments, photos/original references,
+object settings, calibration, reversible change records and saved consistency reports.
+`projectId` identifies a document; `stateToken` identifies a committed state independently
+of the display revision. Legacy imports receive identities without changing original files.
 
 The source PDF, site survey photos, dimensioned fixed-wall SVG, and annotated exports must not be added to this public codebase. One-time transfer to the ChatGPT Project can be done via user-uploaded files, subject to normal ChatGPT project/file limits.
 
@@ -18,7 +21,7 @@ Choose Work within that project for repo and architecture tasks. In ChatGPT-host
 
 ## 4. Authentication, future phase
 
-Use Sign in with ChatGPT (OIDC + PKCE), or supported connector OAuth, to map a verified user to a server-side project ID. OpenAI identity scopes do not grant access to chats or Projects. Server-owned data access and ACLs are mandatory. Do not hardcode usernames, emails, addresses, bearer tokens, project IDs, or API keys into frontend bundles.
+Select and verify an identity provider before implementation; none is configured. Map verified identity to server-side project membership. A product login must not imply access to provider chats or Projects. Server-owned data access and ACLs are mandatory. Do not hardcode usernames, emails, addresses, bearer tokens, project IDs, or API keys into frontend bundles.
 
 ## 5. Roadmap
 
@@ -110,3 +113,100 @@ completed only when its requested correction is implemented and checked; retain 
 or unresolved comments as open. Completed pins are gray. Existing completion history
 must survive backup/restore. Site-native review initiation and provider-neutral handoffs
 remain governed by HLS-101 and HLS-104; no notification service is deployed.
+
+## Reviewed operations and evidence
+
+See [AGENT_CONTRACT.md](AGENT_CONTRACT.md) for the versioned manual correction format
+and [WORKFLOWS.md](WORKFLOWS.md) for capability boundaries. All providers use the same
+source sanitization, stale identity checks, label/lock checks and explicit review.
+Identity metadata is a concurrency guard, not authentication or authorization.
+
+Single-overlay adjustment proposals are pure, detached before/after records. Preview
+uses only the transient SVG layer; Apply rechecks project/state/item, locks and effective
+visibility, then records one reversible change. Furniture/box scaling and rotation use
+a derived center pivot. Rotation is explicitly activated by `rotationVersion: 1`; raw
+unmarked historical angle metadata remains inert. Rotated corners are shared across
+rendering, highlights, bounds and guarded edits. Multi-overlay translation is atomic. Furniture/box group uniform scaling derives a
+common pivot from effective rotated bounds, scales relative centers and local dimensions
+together, and validates every member before one commit. Group rotation uses the same effective-bounds pivot, rotates relative centers and
+adds the reviewed delta to each effective angle without swapping local dimensions.
+Inactive historical rotation fields block group rotation pending individual activation.
+The pivot is derived for each proposal, so arbitrary opposite-angle commands on
+asymmetric selections need not invert; history Undo restores the original snapshot.
+Connected architectural topology remains unsupported.
+The unit display does not convert provisional drawing coordinates into verified survey
+measurements. Applying an adjustment reruns and saves schematic checks when possible;
+a failed rerun is reported separately from the committed edit.
+
+Consistency reports contain checker/schema versions, source hash, revision, project/state
+identities, timestamps, findings, measurements and explicit coverage. Latest 50 runs stay
+in private backups and survive same-project undo/redo; they never merge across projects.
+Standalone report download is `{report,staleAtExport}`. Report creation does not alter the
+geometry revision. Missing units/scale are unknown, not passing measurements. Source
+locks include root SVG attributes and global style/definition dependencies conservatively.
+
+Asynchronous JSON exports read one snapshot. Imports stage assets outside project state
+and reject a changed document before committing; staged unreferenced media may remain
+in IndexedDB after a rejected import. No automatic media deletion is performed because
+undo snapshots may retain references. History-producing edits validate before persistence;
+a full 2,000-record change log rejects the transaction instead of creating an unrestorable
+backup. Browser storage quotas and explicit long-term archival remain operational limits.
+
+
+## Local asset records
+
+`assets` defaults to an empty array for legacy projects and travels in private backups
+and handoffs. Nonempty collections require an enclosing `projectId`; ownership is never
+inferred from asset names or source filenames. [ASSET_RECORDS.md](ASSET_RECORDS.md)
+defines fields, per-field authority and read-only source evidence. Imports are append-only
+proposals; Apply checks the whole project's state identity again. Local ID guards do not
+implement remote permissions. Dangling references survive as findings rather than being
+deleted or rebound by guesswork. Entire SVG replacement is refused with architectural
+asset links; annotation counters remain monotonic across such replacement.
+
+The source checker now conservatively rejects raw-coordinate analysis when CSS geometry,
+root/ancestor transforms or nested viewports require coordinate mapping. Global styles
+are inspected once per extraction. Bounded review truncation records explicit incomplete
+coverage and preserves unknown status. Previous checker records remain readable. None
+of this performs architectural topology mapping or verifies physical measurements.
+
+
+Metadata persistence is checked before transactional history/redo changes commit. A failed
+write restores the previous project state, identity and stacks; staged media may remain
+unreferenced in IndexedDB. Item/photo drags use the shared mutation path after restoring
+their pre-drag state. Imports, history navigation, reset, migrations and report recording
+also check writes. Lightweight view settings remain in memory with a sticky unsaved
+indicator on failure. Rendering after a successful write is separate from rollback, so
+a refresh exception does not create contradictory in-memory and persisted versions.
+
+
+## Source-anchored endpoint spans
+
+Private `measurementAnchors` records reference a declared dimension and two stable
+segment endpoints, with project identity and a source hash at explicit association.
+`measurementTolerancePercent` is nullable until the user chooses a review threshold.
+Neither field changes geometry, printed dimensions, source units or calibration status.
+The [binding contract](MEASUREMENT_ANCHORS.md) defines validation and unknown states.
+
+The UI previews exact choices before a state-guarded, undoable save. Source changes make
+bindings unknown until re-confirmed; missing references persist as findings. Metadata
+with unverified units or provisional/manual calibration cannot produce pass/fail. The
+checker does not decide physical truth. Endpoint-only coverage is separate from unmodeled
+chains, rooms and hosted openings. Private backups and manual correction handoffs preserve
+bindings/tolerance; full source replacement is refused while bindings remain. Checker1.2
+retains older report formats, including their original unchecked coverage statements.
+
+MeasurementChains keeps explicit project-bound ordered anchor relationships separate from
+geometry. The pure module validates the relationship and compares declared values only
+after checking current endpoint topology and source authority. Removing an anchor leaves
+its chain reference visibly unresolved rather than silently selecting another binding.
+Saved reports, private backup and manual handoffs retain these relationships; full source
+replacement is blocked while chains exist. No geometry inference or remote access is added.
+
+OpeningBindings is a required startup domain and an optional empty legacy project
+collection. Nonempty records require enclosing project ownership. Explicit source hashes
+and three segment references are retained through guarded authoring, import, backup,
+manual handoff and Undo. Full source replacement is blocked while bindings remain;
+reviewed source edits retain declarations with stale evidence. Checker1.4 uses a new
+limited endpoint row and source-context evidence, preserving exact1.0–1.3 contracts.
+No endpoint snapping, wall cutting or hosted-door geometry is performed.

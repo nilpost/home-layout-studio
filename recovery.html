@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <title>Back up saved project — Home Layout Studio</title>
+  <link rel="stylesheet" href="src/styles.css?v=0.29.10" />
+  <script src="src/recovery.js?v=0.29.10" defer></script>
+</head>
+<body class="recovery-page">
+  <main class="recovery-card">
+    <h1>Back up saved project</h1>
+    <p>Save a private copy before opening or updating the editor. This page reads existing saved data only. It does not open the editor, change your project, repair data or send anything away.</p>
+    <p>Use the same browser and address, including the port, where your project was saved. A different address has separate browser storage.</p>
+    <p id="recovery-summary">Choose Inspect saved project to check whether a backup can be prepared.</p>
+    <div class="dialog-actions">
+      <button type="button" class="button" id="recovery-inspect">Inspect saved project</button>
+      <button type="button" class="button primary" id="recovery-export" disabled>Export complete private backup</button>
+    </div>
+    <p id="recovery-status" role="status" aria-live="polite">No saved data has been read or changed.</p>
+    <p class="fine muted">The export includes referenced photos and original-plan files when available. Missing or changed data blocks the export. This is a backup, not a check that the project or its media is valid. Keep the downloaded file private and verify it before making changes.</p>
+  </main>
+</body>
+</html>

@@ -9,11 +9,14 @@ function overlap(a,b){if(!on(b.a,{a:a.a,b:a.b},EPS)&&Math.abs(cross(a.a,a.b,b.a)
 function crossing(a,b){const c=[cross(a.a,a.b,b.a),cross(a.a,a.b,b.b),cross(b.a,b.b,a.a),cross(b.a,b.b,a.b)];return c[0]*c[1]<-EPS&&c[2]*c[3]<-EPS;}
 function hitsRect(s,r){let lo=0,hi=1;for(let k=0;k<2;k++){const min=(k?r.y:r.x)+EPS,max=min+(k?r.h:r.w)-2*EPS,d=s.b[k]-s.a[k];if(Math.abs(d)<EPS){if(s.a[k]<=min||s.a[k]>=max)return false;}else{const u=(min-s.a[k])/d,v=(max-s.a[k])/d;lo=Math.max(lo,Math.min(u,v));hi=Math.min(hi,Math.max(u,v));}}return hi>lo;}
 function linearPath(d,id,kind){
- const tokens=d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/gi)||[];
+ if(typeof d!=='string')throw Error('invalid path');
+ const tokens=[],token=/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/giy;let offset=0,lastNumber=false;
+ while(offset<d.length){while(offset<d.length&&/[ \t\r\n]/.test(d[offset]))offset++;if(offset===d.length)break;let comma=false;if(d[offset]===','){if(!lastNumber)throw Error('invalid path separator');comma=true;offset++;while(offset<d.length&&/[ \t\r\n]/.test(d[offset]))offset++;}token.lastIndex=offset;const match=token.exec(d);if(!match||comma&&/^[a-z]$/i.test(match[0]))throw Error('invalid or unmatched path text');tokens.push(match[0]);lastNumber=!/^[a-z]$/i.test(match[0]);offset=token.lastIndex;}
  if(tokens.some(t=>/^[a-z]$/i.test(t)&&!/[mlhvz]/i.test(t)))throw Error('curved or unsupported path');
+ if(tokens.length&&!/^[mM]$/.test(tokens[0]))throw Error('path must begin with moveto');
  const out=[];let i=0,cmd='',pt=[0,0],start=[0,0];
  const number=()=>{if(i>=tokens.length||/^[a-z]$/i.test(tokens[i]))throw Error('invalid path');const n=Number(tokens[i++]);if(!Number.isFinite(n))throw Error('invalid coordinate');return n;};
- while(i<tokens.length){if(/^[a-z]$/i.test(tokens[i]))cmd=tokens[i++];if(!cmd)throw Error('missing command');const rel=cmd===cmd.toLowerCase(),c=cmd.toUpperCase();if(c==='Z'){out.push({id:id+':'+out.length,kind,a:pt,b:start});pt=start;cmd='';continue;}let next;if(c==='H')next=[number()+(rel?pt[0]:0),pt[1]];else if(c==='V')next=[pt[0],number()+(rel?pt[1]:0)];else next=[number()+(rel?pt[0]:0),number()+(rel?pt[1]:0)];if(c==='M'){start=next;cmd=rel?'l':'L';}else out.push({id:id+':'+out.length,kind,a:pt,b:next});pt=next;}
+ while(i<tokens.length){if(/^[a-z]$/i.test(tokens[i]))cmd=tokens[i++];if(!cmd)throw Error('missing command');const rel=cmd===cmd.toLowerCase(),c=cmd.toUpperCase();if(c==='Z'){out.push({id:id+':'+out.length,kind,a:pt,b:start});pt=start;cmd='';continue;}let next;if(c==='H')next=[number()+(rel?pt[0]:0),pt[1]];else if(c==='V')next=[pt[0],number()+(rel?pt[1]:0)];else next=[number()+(rel?pt[0]:0),number()+(rel?pt[1]:0)];if(!next.every(Number.isFinite))throw Error('invalid coordinate');if(c==='M'){start=next;cmd=rel?'l':'L';}else out.push({id:id+':'+out.length,kind,a:pt,b:next});pt=next;}
  return out;
 }
 function validate(model){
