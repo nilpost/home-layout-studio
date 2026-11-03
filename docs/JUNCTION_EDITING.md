@@ -26,7 +26,9 @@ geometry or lock flags are never trusted. Ambiguous/missing IDs, derived segment
 unsupported coordinate contexts, protected dimensions, definitions/markers, hidden or
 locked members/ancestors must reject. The first profile rejects any source containing a stylesheet and any selected line
 with inline styles on the line or any ancestor; it does not attempt to evaluate CSS or
-strip styling. Presentation visibility values must be recognized explicitly; unresolved
+strip styling. Any clip-path, mask or filter effect on the member, ancestor or root is
+unsupported unless explicitly normalized to `none`; effects are never evaluated or
+removed to enable editing. Presentation visibility values must be recognized explicitly; unresolved
 CSS values are unsupported rather than assumed visible. Visibility
 that cannot be safely established stays unsupported. The default demo uses paths, so
 it has no eligible native-line members; no conversion or guessed ownership occurs.
