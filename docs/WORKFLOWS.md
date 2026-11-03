@@ -15,6 +15,7 @@ service. Private content remains on the current device until deliberate export/t
 | Layer management | Layer items, selection, hide/show, lock/unlock, reversible deletion | Locked/protected items cannot be adjusted; parent visibility still applies |
 | Source-anchored spans | Measure source spans; explicit dimension/endpoints; preview/save/cancel/remove | Selected endpoints only; user threshold; unknown until source units/calibration are verified |
 | Source dimension chains | Review dimension chains; ordered saved span bindings and separate overall total | Single horizontal/vertical chain; explicit existing tolerance; verified inputs required for pass/fail |
+| Declared-ring metrics | Boundary review transient area/perimeter preview | Supported current integer schematic rings only; drawing units, no physical conversion or saved metric coverage |
 | Consistency review | Review consistency, saved runs, rerun, comparisons, highlights | Stale runs cannot highlight; unknown/not-checked coverage is explicit |
 | Portable agent work | Review corrections handoff / Review agent correction | Deliberate private file/text transfer; version 1 contract; user reviews before Apply |
 | Undo/history | Undo, Redo, View change history | Same-project review evidence retained; history capacity rejects further audit-producing edits atomically |

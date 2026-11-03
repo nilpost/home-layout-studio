@@ -814,3 +814,13 @@ Existing source evidence and field authority remain intact. No source content, v
 connector, attachment permission, fetch or write-back is added. Fabricated production
 workflow verification is separate from native/private browser acceptance. The broader
 HLS-101/102 requirements remain partial. See [asset references](ASSET_RECORDS.md).
+
+
+## Transient declared-ring drawing metrics — 2026-11-03
+
+HLS-106 adds separate read-only area/perimeter previews in drawing units for explicit
+current passing enclosure rings with supported integer coordinates. Exact arithmetic
+avoids cancellation/unsafe totals. Failed, stale, incomplete or fractional evidence has
+no totals. No physical conversion, inferred room, source edit, saved metric/report
+coverage change or calibration claim is introduced. HLS-106 remains partial. See
+[drawing metrics scope](DRAWING_METRICS.md).
