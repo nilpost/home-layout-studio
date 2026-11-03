@@ -795,3 +795,11 @@ HLS-101 successful demo reset clears reference selection and range anchor so reu
 source IDs cannot inherit previous-project selection. Cancelled/failed resets retain
 prior context. Existing reset/history semantics stay unchanged; native browser
 acceptance remains separate. See [project reset](PROJECT_RESET.md).
+
+
+## Pending PDF page object identity — 2026-11-03
+
+Cumulative PR review found equal-JSON Undo/Redo could detach the original object captured
+by a pending page render. HLS-101 now requires the same current original object as well
+as unchanged snapshot before commit; stale rendering cannot report success on an
+unchanged page. See [PDF page workflow](PDF_PAGE_WORKFLOW.md).

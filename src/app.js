@@ -166,7 +166,7 @@ async function importOriginal(file){
 async function changeOriginalPage(){
  const o=state.original;if(!o||o.kind!=='pdf'||originalBusy)return;originalBusy=true;
  const expected=JSON.stringify(state),page=Number($('original-page').value),key=o.assetKey;notify('Rendering selected PDF page locally…');
- try{const data=await photoLoad(key);if(!data)throw Error('Original PDF missing. Re-import it.');const preview=await renderReference(data,'pdf',page),rasterKey=crypto.randomUUID();await photoStore(rasterKey,preview.dataUrl);if(JSON.stringify(state)!==expected)throw Error('Reference changed while rendering. Try again.');if(!mutate(()=>{o.page=page;o.rasterKey=rasterKey;}))return;notify('PDF page updated; review its alignment.');}catch(e){notify(e.message);}finally{originalBusy=false;renderOriginal();}
+ try{const data=await photoLoad(key);if(!data)throw Error('Original PDF missing. Re-import it.');const preview=await renderReference(data,'pdf',page),rasterKey=crypto.randomUUID();await photoStore(rasterKey,preview.dataUrl);if(state.original!==o||JSON.stringify(state)!==expected)throw Error('Reference changed while rendering. Try again.');if(!mutate(()=>{o.page=page;o.rasterKey=rasterKey;}))return;notify('PDF page updated; review its alignment.');}catch(e){notify(e.message);}finally{originalBusy=false;renderOriginal();}
 }
 function wireOriginal(){
  $('load-original').onclick=()=>$('original-file').click();$('original-file').onchange=()=>{const f=$('original-file').files?.[0];$('original-file').value='';importOriginal(f);};
