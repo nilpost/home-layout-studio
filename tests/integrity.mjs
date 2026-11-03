@@ -11,6 +11,7 @@ import '../src/asset-records.js';
 import '../src/measurement-anchors.js';
 import '../src/measurement-chains.js';
 import '../src/opening-bindings.js';
+import '../src/original-overlay.js';
 
 // Execute production function bodies with fabricated state and deferred browser I/O.
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
@@ -163,4 +164,51 @@ for(const counter of [undefined,1,'0002',40]){
 for(const counter of [9007199254740991,9007199254740992,1.25,0]){
  const c=allocatorContext(),before=liveSnapshot(c);assert.equal(c.mutate(()=>{c.state.nextId=counter;}),false);assert.equal(liveSnapshot(c),before);assert.equal(c.writes.metadata,0,'Mutation cannot persist an invalid or exhausted allocator');
 }
-console.log('PASS: export snapshot, stale imports, branch identities, project-isolated review retention, atomic history limits, lock dependencies, semantic dimension preservation and preflighted safe object ID allocation.');
+// Complete every embedded-media preflight before storing the first imported asset.
+function mediaFixture(){return {...fixture(),nextId:1,photos:[{id:'photo-a',assetKey:'old-photo-a',name:'Fabricated photo A',x:null,y:null,angle:0,fov:60,range:100,note:'Camera A',dataUrl:'data:image/png;base64,AAAA'},{id:'photo-b',assetKey:'old-photo-b',name:'Fabricated photo B',x:10,y:20,angle:90,fov:45,range:200,note:'Camera B',dataUrl:'data:image/jpeg;base64,BBBB'}],original:{name:'Fabricated original.pdf',kind:'pdf',assetKey:'old-source',rasterKey:'old-raster',page:1,pageCount:2,x:0,y:0,w:100,h:80,rotation:0,opacity:.5,dataUrl:'data:application/pdf;base64,CCCC',rasterDataUrl:'data:image/png;base64,DDDD'}};}
+function mediaContext(){
+ const c=allocatorContext(),media=new Map(),metadata=[];
+ c.OriginalOverlay=globalThis.OriginalOverlay;load(c,'validatePhotos');
+ c.photoStore=async(key,data)=>{c.writes.media++;media.set(key,data);};
+ c.saveLocal=()=>{c.writes.metadata++;metadata.push(clone(c.state));return true;};
+ c.media=media;c.metadata=metadata;return c;
+}
+for(const [name,change,error] of [
+ ['missing later photo',p=>delete p.photos[1].dataUrl,/photo.*missing/i],
+ ['oversize later photo',p=>p.photos[1].dataUrl='data:image/png;base64,'+'A'.repeat(8_000_000),/photo.*large/i],
+ ['missing original file',p=>delete p.original.dataUrl,/original.*missing/i],
+ ['missing original raster',p=>delete p.original.rasterDataUrl,/original.*missing/i],
+ ['invalid later photo MIME',p=>p.photos[1].dataUrl='data:text/html;base64,AAAA',/raster photos/i],
+ ['invalid original MIME',p=>p.original.dataUrl='data:text/html;base64,AAAA',/original file data/i],
+ ['oversize original file',p=>p.original.dataUrl='data:application/pdf;base64,'+'A'.repeat(28_000_000),/original file data/i],
+ ['oversize original raster',p=>p.original.rasterDataUrl='data:image/png;base64,'+'A'.repeat(18_000_000),/original preview data/i]
+]){
+ const c=mediaContext(),before=liveSnapshot(c),p=mediaFixture();change(p);
+ await assert.rejects(c.importJSON(JSON.stringify(p)),error,name+' must reject');
+ assert.equal(liveSnapshot(c),before,name+' preserves state, history and selection');
+ assert.deepEqual(c.writes,{media:0,metadata:0},name+' must reject before the first media or metadata write');
+ assert.equal(c.media.size,0,name+' cannot leave imported media records');
+}
+{
+ const c=mediaContext(),p=mediaFixture(),before=clone(c.state);await c.importJSON(JSON.stringify(p));
+ assert.deepEqual(c.writes,{media:4,metadata:1});assert.deepEqual(clone(c.history),[before]);assert.equal(c.future.length,0);
+ const keys=[...c.state.photos.map(p=>p.assetKey),c.state.original.assetKey,c.state.original.rasterKey];
+ assert.equal(new Set(keys).size,4);assert.ok(keys.every(k=>!k.startsWith('old-')),'Import generates distinct asset identities');
+ assert.deepEqual(keys.map(k=>c.media.get(k)),[p.photos[0].dataUrl,p.photos[1].dataUrl,p.original.dataUrl,p.original.rasterDataUrl]);
+ let exported;c.photoLoad=async key=>c.media.get(key);c.download=(_name,blob)=>exported=blob;load(c,'jsonExport');await c.jsonExport();
+ const output=JSON.parse(await exported.text());for(const [key,value] of Object.entries(p))if(!['photos','original'].includes(key))assert.deepEqual(output[key],value,'Complete import/export retains project field '+key);for(let i=0;i<2;i++){const {assetKey,...photo}=output.photos[i],{assetKey:oldKey,...expected}=p.photos[i];assert.deepEqual(photo,expected);}
+ const {assetKey,rasterKey,...original}=output.original,{assetKey:oldSource,rasterKey:oldRaster,...expectedOriginal}=p.original;
+ assert.deepEqual(original,expectedOriginal,'Full import/export retains original alignment, metadata and both media strings');
+ assert.deepEqual(c.metadata,[clone(c.state)],'Only the complete imported project is saved');
+}
+{
+ const c=mediaContext(),p=mediaFixture(),gate=deferred();let first=true;
+ const store=c.photoStore;c.photoStore=async(...args)=>{if(first){first=false;await gate.promise;}return store(...args);};
+ const importing=c.importJSON(JSON.stringify(p));c.state.note='Fabricated concurrent edit';const before=liveSnapshot(c);gate.resolve();
+ await assert.rejects(importing,/changed during import/i);assert.equal(liveSnapshot(c),before);assert.equal(c.writes.metadata,0,'Completeness preflight must retain the existing stale-state guard');
+}
+{
+ const c=mediaContext(),p=mediaFixture(),before=liveSnapshot(c);c.saveLocal=()=>false;
+ await assert.rejects(c.importJSON(JSON.stringify(p)),/storage unavailable/i);assert.equal(liveSnapshot(c),before,'Metadata failure still rolls imported state back');assert.equal(c.writes.metadata,0);
+}
+console.log('PASS: export snapshot, stale imports, branch identities, project-isolated review retention, atomic history limits, lock dependencies, semantic dimension preservation and preflighted safe object ID allocation and complete embedded-media preflight.');

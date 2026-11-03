@@ -728,3 +728,12 @@ inference before imported media or saved state is written. Normal legacy inferen
 repeated item creation retain unique identifiers; mutation exhaustion rolls back.
 Fabricated production-function regressions reproduce the old2^53duplicate-ID defect.
 Native browser acceptance remains separate. See [import integrity](IMPORT_INTEGRITY.md).
+
+
+## Imported media completeness — 2026-11-03
+
+HLS-101 prevalidates all embedded photo and original-reference data before the first
+media write, so a known incomplete later entry cannot leave earlier orphaned images
+from a rejected backup. Valid complete imports retain the existing guarded flow.
+Storage-error/crash cleanup and native browser acceptance remain separate work. See
+[import integrity](IMPORT_INTEGRITY.md).

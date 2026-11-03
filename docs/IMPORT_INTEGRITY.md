@@ -21,3 +21,15 @@ production-function adapters while native browser access was unavailable.
 Saved startup rejects explicitly malformed counters without clearing stored data;
 read-only recovery remains available. This change does not migrate legacy startup
 records missing a counter, repair already corrupt projects, or remove orphaned media.
+
+## Complete embedded media before writes
+
+Import checks every required photo and original-source/preview data field before the
+first media write. An incomplete later photo or original reference cancels without
+leaving earlier images from that rejected file in storage. Existing MIME/schema and
+size checks retain their bounds. No existing image is deleted or rewritten.
+
+This preflight is not a cross-store transaction or image-decoder certification. A later
+storage failure, concurrent-state rejection or crash can still leave unreferenced newly
+written media; the live project remains protected by its existing guards. Automatic
+cleanup and full media transaction handling require separate review.
