@@ -771,3 +771,11 @@ alignment preserves the original/state/history and exposes its error in the land
 panel, keeping existing fit/cancellation/Undo behavior. Fabricated production workflows
 verify this scope; native input and physical accuracy remain separate. See
 [landmark workflow](LANDMARK_WORKFLOW.md).
+
+
+## SVG export failure feedback — 2026-11-03
+
+HLS-101 SVG export catches read/serialization failures and reports them inside the
+site without a partial download or false success. Existing snapshot/missing-preview
+guards and successful clone cleanup remain. Production-function regressions verify
+this scope; native browser acceptance remains separate. See [SVG export](SVG_EXPORT.md).
