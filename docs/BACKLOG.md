@@ -754,3 +754,11 @@ HLS-101 normal JSON export rejects complete serialized output exceeding the exis
 80Mcharacter import budget before download. Exact-limit output and full metadata/media
 remain intact. No truncation, deletion, raised import limit or large-project preservation
 support is implied; native browser acceptance remains separate. See [backup limits](BACKUP_LIMITS.md).
+
+
+## Original removal result integrity — 2026-11-03
+
+HLS-101 removal feedback honors failed transactions: storage/lock/validation rejection
+keeps the original, tool/history and error visible, rather than announcing success.
+Successful retry remains one reversible action. Production-function regressions pass;
+native acceptance remains separate. See [removal scope](ORIGINAL_REMOVAL.md).

@@ -179,7 +179,7 @@ function wireOriginal(){
  for(const [id,factor]of [['original-smaller',.95],['original-larger',1.05]])$(id).onclick=()=>{if(!state.original)return;mutate(()=>{const o=state.original,dx=o.w*(factor-1),dy=o.h*(factor-1);o.x-=dx/2;o.y-=dy/2;o.w*=factor;o.h*=factor;});};
  $('original-fit').onclick=()=>{const o=state.original;if(!o)return;mutate(()=>Object.assign(o,OriginalOverlay.fit(state.viewBox,o.w,o.h)));};
  $('original-download').onclick=async()=>{try{const o=state.original;if(!o)return;const data=await photoLoad(o.assetKey);if(!data)throw Error('Original file unavailable.');const text=atob(data.split(',')[1]);download(o.name,new Blob([Uint8Array.from(text,c=>c.charCodeAt(0))],{type:data.slice(5,data.indexOf(';'))}));}catch(e){notify(e.message);}};
- $('original-remove').onclick=()=>{if(!state.original)return;mutate(()=>{state.original=null;});chooseTool('select');notify('Original reference removed. Undo restores it.');};
+ $('original-remove').onclick=()=>{if(!state.original)return;if(!mutate(()=>{state.original=null;}))return;chooseTool('select');notify('Original reference removed. Undo restores it.');};
 }
 
 let selectedRefs=new Set(),selectionAnchor=null,layerEntries=[],baseEntryCache=null,layerOpenGroups=new Set(),layerSelectionFromMap=false;

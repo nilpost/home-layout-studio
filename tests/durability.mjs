@@ -21,6 +21,7 @@ function context(){
  const ui=new Map(),get=id=>{if(!ui.has(id))ui.set(id,{textContent:'',replaceChildren(){},value:''});return ui.get(id);};
  const storage={fail:false,text:JSON.stringify(fixture()),writes:0,attempts:0};
  const c=vm.createContext({KEY:'fabricated-key',state:fixture(),history:[],future:[fixture({note:'Existing redo'})],clone,crypto:webcrypto,Blob,Date,Set,Map,storageWriteFailed:false,$:get,localStorage:{setItem(_key,text){storage.attempts++;if(storage.fail){const error=new Error('Fabricated storage quota exceeded');error.name='QuotaExceededError';throw error;}storage.text=text;storage.writes++;}},AssetRecords,MeasurementAnchors,MeasurementChains,OpeningBindings,OverlayFootprint,ItemAdjustments,LayerItems,ReviewHistory,ConsistencyReview,OriginalOverlay:{validate(){}},validatePhotos(){},assertSourceLocks(){},render(){},cancelLandmarkMatch(){},chooseTool(){},reviewOptions(){},photoMode:false,selected:'item-a',selectedRefs:new Set(['item:item-a']),zoom:2,active:null,round:n=>n,confirm:()=>true,DOMParser:class{parseFromString(){return {}; }},editableNodes:()=>[{id:'stable'}],safeSVG:s=>s,sourceWithIds:s=>s,XMLSerializer:class{serializeToString=s=>s;},parseVB:()=>[0,0,100,100],normalizedLayers:l=>l,photoStore:async()=>{},fresh:()=>fixture({projectId:'project-new',stateToken:'token-new',note:'new project'}),report:()=>({segments:0,walls:0,fixtures:0,issues:[],unsupported:[],dimensionAudit:[]})});
+ const removeBody=app.match(/\$\('original-remove'\)\.onclick=\(\)=>\{(.*?)\};/s)?.[1];assert.ok(removeBody,'Missing original remove handler');vm.runInContext('function removeOriginal(){'+removeBody+'}',c);
  c.recordChange=(...args)=>ReviewHistory.recordChange(c.state,...args);
  c.storage=storage;
  for(const name of ['notify','saveLocal','restoreSnapshot','remember','validProject','mutate','photoPointerUp','pointerUp','migrateObjectIds','sourceHash','reviewContext','runConsistencyReview','importJSON'])vm.runInContext(code(name),c);
@@ -88,6 +89,22 @@ test('failed project reset retains the current project and stacks',()=>{
 test('failed review recording keeps earlier runs and returns false; retry saves without geometry revision',()=>{
  const c=context(),before=snapshot(c);c.storage.fail=true;assert.equal(c.runConsistencyReview(),false);assert.equal(snapshot(c),before);assert.equal(c.storage.writes,0);
  c.storage.fail=false;assert.equal(c.runConsistencyReview(),true);assert.equal(c.state.consistencyReports.length,1);assert.equal(c.state.revision,'v0');assert.equal(c.state.stateToken,'token-a');assert.deepEqual(disk(c),clone(c.state));assert.equal(c.history.length,0);assert.equal(c.future.length,1);
+});
+
+function originalContext(){const c=context();c.state.original={name:'Fabricated source.pdf',kind:'pdf',assetKey:'fabricated-source',rasterKey:'fabricated-preview',x:1,y:2,w:100,h:80,rotation:0,opacity:.5,page:1,pageCount:1};c.storage.text=JSON.stringify(c.state);c.tool='original';c.chooseTool=value=>{c.tool=value;};return c;}
+test('failed original removal preserves error and tool; retry commits once and UndoRedo retain reference',()=>{
+ const c=originalContext(),before=snapshot(c),original=clone(c.state.original),diskBefore=c.storage.text;c.storage.fail=true;c.removeOriginal();
+ assert.equal(snapshot(c),before);assert.equal(c.storage.text,diskBefore);assert.equal(c.tool,'original');assert.equal(c.storage.writes,0);assert.match(c.$('message').textContent,/storage is unavailable/i);assert.match(c.$('save-status').textContent,/not saved/i);assert.doesNotMatch(c.$('message').textContent,/removed|Undo restores/i);
+ c.storage.fail=false;c.removeOriginal();assert.equal(c.state.original,null);assert.equal(c.tool,'select');assert.equal(c.storage.writes,1);assert.equal(c.history.length,1);assert.equal(c.future.length,0);assert.equal(c.state.revision,'v1');assert.deepEqual(disk(c),clone(c.state));assert.match(c.$('message').textContent,/reference removed/i);c.undo();assert.deepEqual(clone(c.state.original),original);c.redo();assert.equal(c.state.original,null);assert.equal(c.storage.writes,3);
+});
+test('locked original removal preserves rejection without success or tool switch',()=>{
+ const c=originalContext();c.state.objectSettings={'original:reference':{locked:true}};const before=snapshot(c);c.removeOriginal();assert.equal(snapshot(c),before);assert.equal(c.tool,'original');assert.equal(c.storage.attempts,0);assert.match(c.$('message').textContent,/Locked item/i);assert.doesNotMatch(c.$('message').textContent,/removed|Undo restores/i);
+});
+test('validation rejection in original removal retains message and state',()=>{
+ const c=originalContext(),before=snapshot(c);c.validProject=()=>{throw Error('Fabricated validation rejected removal');};c.removeOriginal();assert.equal(snapshot(c),before);assert.equal(c.tool,'original');assert.equal(c.storage.attempts,0);assert.match(c.$('message').textContent,/validation rejected/i);assert.doesNotMatch(c.$('message').textContent,/reference removed/i);
+});
+test('original removal without a reference is inert',()=>{
+ const c=context(),before=snapshot(c);let switched=false;c.chooseTool=()=>{switched=true;};c.removeOriginal();assert.equal(snapshot(c),before);assert.equal(c.storage.attempts,0);assert.equal(switched,false);assert.equal(c.$('message').textContent,'');
 });
 
 const failures=[];for(const {name,run}of cases){try{await run();}catch(error){failures.push(name);console.error('FAIL: '+name+'\n'+error.stack);}}
