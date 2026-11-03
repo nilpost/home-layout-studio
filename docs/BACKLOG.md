@@ -779,3 +779,11 @@ HLS-101 SVG export catches read/serialization failures and reports them inside t
 site without a partial download or false success. Existing snapshot/missing-preview
 guards and successful clone cleanup remain. Production-function regressions verify
 this scope; native browser acceptance remains separate. See [SVG export](SVG_EXPORT.md).
+
+
+## SVG replacement selection integrity — 2026-11-03
+
+HLS-101 clears source-replacement selection only after commit. Storage/lock/validation
+rejection preserves the prior project and selection; successful replacement clears both
+selection representations and stays reversible. Existing source/binding/asset guards
+remain. Native acceptance is separate. See [SVG import workflow](SVG_IMPORT_WORKFLOW.md).
