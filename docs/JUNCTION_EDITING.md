@@ -49,8 +49,8 @@ source hashes; changed source makes that evidence stale instead of rewriting it 
 ## Compatibility and acceptance
 
 The source-operation namespace remains separate from overlay operation v1 and full-source
-replacement. The site and a future deliberate import route must share validation, but no
-imported-operation route or live provider capability is claimed by this increment.
+replacement. The site and [deliberate source file review](SOURCE_OPERATION_IMPORT.md) share trusted
+validation and original request bindings. No live provider capability is claimed.
 Project, declaration and historical consistency-checker schemas remain unchanged.
 
 Fabricated production-function verification must cover explicit A/B membership, complete

@@ -850,3 +850,15 @@ membership, hosted doors and physical units remain unsupported. Existing line-v1
 frozen project/checker contracts remain unchanged; trusted app guards also reject
 unresolved clip/mask/filter effects. Native/private acceptance and complete HLS-107
 remain separate. See [open-path scope](OPEN_PATH_JUNCTIONS.md).
+
+
+## Deliberate source-operation file review — 2026-11-04
+
+HLS-104/107 adds strict early routing of standalone native-line v1 and open-path v2
+requests through the same trusted controllers as local edits. Imported original bindings
+are retained, controls are read-only and Apply is explicit. New file selection revokes all
+old approvals before reading; superseded/cancelled asynchronous results cannot replace
+newer intent. Mixed namespaces reject before permissive legacy parsing. Existing source
+and correction domains, JSON capability formats and project/checker schemas remain exact;
+separate-namespace instructions are prose only. Native chooser/XML/private acceptance and
+live-provider interoperability remain unverified. See [manual source import](SOURCE_OPERATION_IMPORT.md).
