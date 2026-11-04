@@ -296,7 +296,8 @@ overlay operations and historical checker/project contracts retain their exact f
 A newly selected correction file immediately revokes previous full-source, overlay and
 source-junction approvals. A correction-specific generation guard discards superseded or
 cancelled reads and errors. Only the latest deliberate file/manual review can create a
-new pending approval. Original source-operation project/state/revision/hash bindings
+new pending approval, including actual item/group numeric previews and eligible handle
+gestures. New file selection also revokes earlier inline and gesture approvals. Original source-operation project/state/revision/hash bindings
 must match actual trusted current state before staging and at Apply; imported controls
 are read-only. A local Preview never refreshes stale agent intent.
 

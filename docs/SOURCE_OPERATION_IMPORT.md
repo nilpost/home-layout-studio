@@ -27,14 +27,20 @@ form, proposal or composed draft remains subject to current source and policy ch
 
 ## File-read and approval lifetime
 
-Selecting a new file immediately revokes earlier full-source, overlay, native-line and
-path approvals, even while its text is still loading or if it later fails validation.
+Selecting a new file immediately revokes earlier full-source, overlay, native-line,
+path and inline item/group approvals, and aborts supported canvas-handle drafts, even
+while its text is still loading or if it later fails validation.
 An older Apply cannot write during the read. Review ownership also distinguishes delayed
 close events from older dialogs, so they cannot cancel a newer read or reopened review.
 Superseded/cancelled read successes and
 errors are discarded; the latest deliberate selection or manual review wins. Explicit
 Cancel revokes the incoming read/review. Opening a chooser then cancelling without a new
 file selection does not constitute a new import.
+
+A valid new item/group numeric preview or eligible canvas-handle gesture also supersedes
+an older pending read before retaining its new draft. Rendering, selection, hovering and
+panning alone do not count as new reviews. Typed targets are captured before cleanup;
+new local reviews remain usable and reversible.
 
 The change is scoped to correction-file reads. Unrelated project/SVG/photo file handling
 is unchanged. No new global raw-file cap is imposed that would reject a previously valid

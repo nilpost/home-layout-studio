@@ -862,3 +862,10 @@ newer intent. Mixed namespaces reject before permissive legacy parsing. Existing
 and correction domains, JSON capability formats and project/checker schemas remain exact;
 separate-namespace instructions are prose only. Native chooser/XML/private acceptance and
 live-provider interoperability remain unverified. See [manual source import](SOURCE_OPERATION_IMPORT.md).
+
+
+Cumulative integration maintenance (v0.34.1) includes actual numeric/group Preview and
+eligible canvas-handle intent in the same lifetime rules. New file selection cancels
+older inline/gesture approvals before reading; a newer valid local review supersedes
+an older read. Render/selection/hover/pan do not create review intent. This closes an
+independently reproduced interaction gap without changing saved schemas or domains.
