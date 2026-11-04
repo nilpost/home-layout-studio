@@ -837,3 +837,16 @@ hashes are preserved. No snapping, inferred adjacency, hosted-door relationship,
 vertices or physical conversion is provided. The default path-based demo is unsupported
 by this profile. Native/private acceptance and complete HLS-107 remain separate. See
 [junction scope and guards](JUNCTION_EDITING.md).
+
+
+## Explicit open-path terminal junctions — 2026-11-03
+
+HLS-107 adds a separate version2 profile for deliberately selected coincident terminals
+of open absolute-linear path subparts across distinct native owners. Whole-owner proof
+preserves all other vertices/subparts/closures and source attributes; only selected
+incident edges change. The fabricated default demo pair is usable without conversion.
+Closed/internal vertices, repeated-terminal loops, curves/relative syntax, automatic
+membership, hosted doors and physical units remain unsupported. Existing line-v1 and
+frozen project/checker contracts remain unchanged; trusted app guards also reject
+unresolved clip/mask/filter effects. Native/private acceptance and complete HLS-107
+remain separate. See [open-path scope](OPEN_PATH_JUNCTIONS.md).

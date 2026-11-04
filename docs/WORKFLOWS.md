@@ -10,6 +10,7 @@ service. Private content remains on the current device until deliberate export/t
 | Import plan/reference | Import architectural SVG / Add original PDF or image | SVG replacement clears annotations; original reference alignment is visual |
 | Photos/camera views | Add reference photos / Place and aim / numeric view controls | New photos are unplaced; physical position is supplied by the user |
 | Architecture | Wall/window coordinate proposal / source editor | Explicit source review; schematic checks; preserve dimensions and locks |
+| Open-path terminal junctions | Explicit path owner/subpart/start-or-end selection; Preview / Apply / Cancel | Open absolute-linear terminal slots across distinct owners only; whole-owner proof, no closed/internal vertices, snapping or physical conversion |
 | Explicit shared endpoints | Choose native line members and A/B endpoints; target in drawing units; Preview / Apply / Cancel | Already coincident wall/window lines only; strict source/policy proof, no snapping/doors/path vertices; stylesheet and inline-style sources unsupported |
 | Furniture/markups | Draw, select, precise Preview changes / Apply changes / Cancel changes | Furniture/boxes can scale and rotate about their center; overlay-only selections can translate as one reviewed group; furniture/box groups can scale or rotate around one common pivot; drawing units; no connected architectural transforms |
 | Comments | Pin, review, record completion, reopen | Completion is attributed to a recorded change; adding a comment does not notify an agent |

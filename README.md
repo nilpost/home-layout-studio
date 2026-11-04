@@ -282,3 +282,10 @@ Cancel; Undo restores the whole edit. The first profile excludes paths, styleshe
 styled/hidden/locked context and ambiguous ownership, and uses drawing units only.
 See [junction scope and limits](docs/JUNCTION_EDITING.md). The default demo uses paths
 and is not eligible for this native-line profile.
+
+
+A separate open-path junction control supports explicitly selected coincident start/end
+terminals on distinct supported path owners, including a fabricated default-demo pair.
+Preview and one guarded reversible Apply preserve all other vertex slots and subparts.
+Closed/internal vertices, arbitrary curves and physical-unit conversion are excluded.
+See [open-path scope and limitations](docs/OPEN_PATH_JUNCTIONS.md).

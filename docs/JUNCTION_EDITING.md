@@ -58,3 +58,7 @@ preservation, stale source and direct policy changes, protected dimensions, sour
 quota/history failure, cancel and exact Undo/Redo. Program-level verification is separate
 from native XML/input/readability acceptance and actual private-project acceptance.
 Before any household reload or edit, preserve a fresh complete current private UI export.
+
+
+Open absolute-linear path terminals have a separate version2 profile; see
+[open-path junctions](OPEN_PATH_JUNCTIONS.md). This does not widen native-line version1.

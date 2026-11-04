@@ -281,3 +281,10 @@ full-source replacement, and is not accepted by the current correction import ro
 A future provider adapter must use the same trusted current-source/policy resolution and
 reviewed atomic commit; a proposed request or geometry snapshot never authorizes an edit.
 No deployed source-operation provider interoperability is claimed.
+
+
+A separate `sourceOperationContractVersion:2` / `move-explicit-open-path-junction`
+request uses explicit `ownerId`, `subpathIndex` and start/end terminal membership.
+[Whole-owner mapping and guards](OPEN_PATH_JUNCTIONS.md) apply. The current imported
+correction router does not accept or advertise this profile. Native-line version1,
+overlay operations and historical checker/project contracts retain their exact formats.
