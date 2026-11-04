@@ -277,7 +277,8 @@ rejection, separately from VM-tested operation-save quota rollback.
 The site's native-line junction workflow uses a distinct `sourceOperationContractVersion:1`
 request and `move-explicit-line-junction` operation. See [request syntax and trusted
 proposal boundary](JUNCTION_REQUEST_DRAFT.md). It does not widen overlay operation v1 or
-full-source replacement, and is not accepted by the current correction import router.
+full-source replacement. The [deliberate source-file flow](SOURCE_OPERATION_IMPORT.md)
+accepts this as a separate standalone namespace, preserving original bindings.
 A future provider adapter must use the same trusted current-source/policy resolution and
 reviewed atomic commit; a proposed request or geometry snapshot never authorizes an edit.
 No deployed source-operation provider interoperability is claimed.
@@ -285,6 +286,22 @@ No deployed source-operation provider interoperability is claimed.
 
 A separate `sourceOperationContractVersion:2` / `move-explicit-open-path-junction`
 request uses explicit `ownerId`, `subpathIndex` and start/end terminal membership.
-[Whole-owner mapping and guards](OPEN_PATH_JUNCTIONS.md) apply. The current imported
-correction router does not accept or advertise this profile. Native-line version1,
+[Whole-owner mapping and guards](OPEN_PATH_JUNCTIONS.md) apply. The [manual source-file review](SOURCE_OPERATION_IMPORT.md) accepts this standalone
+profile through strict early dispatch; unknown/mixed namespaces never fall back. Native-line version1,
 overlay operations and historical checker/project contracts retain their exact formats.
+
+
+## Approval lifetime for imported files
+
+A newly selected correction file immediately revokes previous full-source, overlay and
+source-junction approvals. A correction-specific generation guard discards superseded or
+cancelled reads and errors. Only the latest deliberate file/manual review can create a
+new pending approval, including actual item/group numeric previews and eligible handle
+gestures. New file selection also revokes earlier inline and gesture approvals. Original source-operation project/state/revision/hash bindings
+must match actual trusted current state before staging and at Apply; imported controls
+are read-only. A local Preview never refreshes stale agent intent.
+
+Source-operation instructions are separate from the frozen legacy handoff JSON capability
+array. No provider label, replacement SVG, resolution, geometry proof or policy override
+is accepted as a source request field. Manual file review is not live provider access,
+authentication, automatic Project access or remote authorization.

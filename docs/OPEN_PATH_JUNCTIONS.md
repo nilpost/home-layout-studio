@@ -51,7 +51,8 @@ The request uses `sourceOperationContractVersion:2`, operation
 `endpoint` of `start` or `end`, plus current project/state/revision/source bindings and
 target. Caller-supplied geometry or policy does not authorize an edit. Native-line v1,
 overlay operations, project/declaration formats and historical checker evidence remain
-unchanged. The current imported correction router does not advertise this operation.
+unchanged. The [manual source request route](SOURCE_OPERATION_IMPORT.md) reviews this standalone
+namespace explicitly, with original bindings and no fallback to another format.
 
 Fabricated production-function and whole-owner preservation checks do not establish
 native XML/input/readability, actual household acceptance or physical accuracy. Preserve

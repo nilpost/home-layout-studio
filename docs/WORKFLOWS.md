@@ -19,7 +19,7 @@ service. Private content remains on the current device until deliberate export/t
 | Source dimension chains | Review dimension chains; ordered saved span bindings and separate overall total | Single horizontal/vertical chain; explicit existing tolerance; verified inputs required for pass/fail |
 | Declared-ring metrics | Boundary review transient area/perimeter preview | Supported current integer schematic rings only; drawing units, no physical conversion or saved metric coverage |
 | Consistency review | Review consistency, saved runs, rerun, comparisons, highlights | Stale runs cannot highlight; unknown/not-checked coverage is explicit |
-| Portable agent work | Review corrections handoff / Review agent correction | Deliberate private file/text transfer; version 1 contract; user reviews before Apply |
+| Portable agent work | Review corrections handoff / Review agent correction, including standalone line/path source requests | Deliberate private file/text transfer; version 1 contract; user reviews before Apply |
 | Undo/history | Undo, Redo, View change history | Same-project review evidence retained; history capacity rejects further audit-producing edits atomically |
 | Deliverable export | Export SVG / JSON / private consistency report | Exports include private content; they are not publication actions |
 | Private asset records | Project assets; edit/link selected items; draft maintenance/issues; add reference metadata with preview/Save/Cancel; review/import/export private asset JSON | Stable identity and field provenance; read-only source metadata, no automatic source access |

@@ -289,3 +289,10 @@ terminals on distinct supported path owners, including a fabricated default-demo
 Preview and one guarded reversible Apply preserve all other vertex slots and subparts.
 Closed/internal vertices, arbitrary curves and physical-unit conversion are excluded.
 See [open-path scope and limitations](docs/OPEN_PATH_JUNCTIONS.md).
+
+
+Review agent correction also accepts standalone native-line/open-path source request
+files. Review the original requested change in read-only controls, then Apply or Cancel;
+stale requests are not silently refreshed. New selected files cancel prior approvals,
+and late older reads cannot replace a newer review. See [manual source file review](docs/SOURCE_OPERATION_IMPORT.md).
+This does not connect to a provider or grant automatic project access.

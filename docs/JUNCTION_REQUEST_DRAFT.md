@@ -1,8 +1,9 @@
 # Source-junction request contract
 
 The site uses this separate namespace for explicit native-line junction proposals.
-It is not accepted by the imported overlay/full-source correction router. No live provider
-or imported-operation capability is advertised. Existing overlay, project and historical
+It is reviewed as a separate standalone source request through the deliberate correction
+file flow; it is not a wrapped overlay/full-source payload. No live provider capability
+is advertised. Existing overlay, project and historical
 checker contracts remain unchanged.
 
 `SourceJunctions.validateRequest(input)` validates and detaches only the following
@@ -35,7 +36,8 @@ Passing syntax validation establishes no current source identity, actual native-
 ownership, coincident endpoints, visibility, locks, protected-label exclusion, permission
 or physical accuracy. The site adapter resolves actual current native geometry and policy
 and uses the reviewed atomic transaction described in [junction editing](JUNCTION_EDITING.md).
-Do not route these requests through existing full-source replacement or overlay v1 paths.
+The [manual source import route](SOURCE_OPERATION_IMPORT.md) dispatches this namespace
+explicitly before existing full-source replacement or overlay v1 paths.
 
 `SourceJunctions.propose(request,trustedContext)` checks current project/state/revision/
 source bindings, exact common origin, edit eligibility, no-op/collapse and detached
